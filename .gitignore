@@ -1,0 +1,84 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs & Caches
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+.vercel/
+
+# Environment Files
+.env
+.env.*
+.env*.local
+!.env.example
+!.env*.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.so
+.Python
+env/
+.venv/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+!frontend-v2/src/lib/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Database & Uploads
+*.db
+*.sqlite
+*.sqlite3
+backend/emefast.db
+backend/uploads/
+backend/uploads/*
+!backend/uploads/voice/.gitkeep
+
+# Testing & Linting
+.pytest_cache/
+.coverage
+htmlcov/
+.eslintcache
+tests/e2e/screenshots/
+scratch/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# GitHub Workflows (Pushable via GitHub Web UI or PAT with 'workflow' scope)
+.github/workflows/
+
+# IDE & Editors
+.vscode/
+.idea/
+

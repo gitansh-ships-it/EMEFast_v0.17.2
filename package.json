@@ -1,0 +1,11 @@
+{
+  "name": "emefast-deploy",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend-v2 run build",
+    "dev": "npm --prefix frontend-v2 run dev",
+    "api": "npm --prefix backend run dev"
+  },
+  "engines": { "node": ">=20" }
+}
