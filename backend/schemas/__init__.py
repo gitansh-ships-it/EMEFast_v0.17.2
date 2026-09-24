@@ -51,6 +51,7 @@ class HospitalBase(BaseModel):
     trauma_capability: bool = True
     estimated_emergency_cost: int = 25000
     contact_phone: Optional[str] = "+91 141 2560291"
+    supported_insurance: List[str] = []  # List of insurance codes
 
 class HospitalUpdate(BaseModel):
     emergency_status: Optional[str] = None

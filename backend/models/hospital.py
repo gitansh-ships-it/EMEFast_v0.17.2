@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, JSON
 import datetime
 from models.base import Base
 
@@ -12,6 +12,7 @@ class Hospital(Base):
     longitude = Column(Float, nullable=False)
     verified = Column(Boolean, default=True)
     emergency_status = Column(String, default="ONLINE")  # ONLINE, BUSY, OFFLINE
+    supported_insurance = Column(JSON, nullable=False, default=list)  # List of insurance codes
     capabilities = Column(String, default="Emergency Stabilization, Trauma Care, Cardiac ICU")  # comma-separated list
     emergency_capacity = Column(Integer, default=50)
     available_beds = Column(Integer, default=30)
