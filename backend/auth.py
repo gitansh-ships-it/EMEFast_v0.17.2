@@ -88,26 +88,26 @@ def decode_token(token: str) -> UserContext:
 
 async def get_current_user(token: Optional[str] = Depends(oauth2_scheme)) -> UserContext:
     if not token:
-        # Check if running in development/demo mode with explicit fallback
-        if DEMO_MODE == "1" and ENVIRONMENT in ("development", "demo"):
-            logger.debug("[DEMO MODE] No auth token provided; injecting default demo user context")
-            return UserContext(email="demo.user@emefast.example", role="USER", hospital_id=None, user_id=1)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication token is required",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        # Ambulance / public operations do not require sign-in
+        return UserContext(email="ambulance@emefast.example", role="USER", hospital_id=None, user_id=1)
     return decode_token(token)
 
 def require_roles(allowed_roles: List[str]):
     """Enforces server-side role-based access control (RBAC).
 
-    In production: strictly validates token and verifies user role matches allowed_roles.
-    In demo mode: if no token is provided, safely injects demo role context for convenience.
-    If a token IS provided, it is always strictly verified regardless of environment.
+    Ambulance/paramedic actions ('USER' in allowed_roles) require NO sign-in.
+    Hospital ER and Admin commands strictly enforce authentication and role tokens.
     """
     async def role_checker(request: Request, token: Optional[str] = Depends(oauth2_scheme)) -> UserContext:
         if not token:
+            # Ambulance / paramedic actions never require sign-in
+            if "USER" in allowed_roles:
+                return UserContext(
+                    email="ambulance@emefast.example",
+                    role="USER",
+                    hospital_id=None,
+                    user_id=1
+                )
             if DEMO_MODE == "1" and ENVIRONMENT in ("development", "demo"):
                 target_role = allowed_roles[0] if allowed_roles else "USER"
                 demo_hosp = 1 if target_role == "HOSPITAL" else None

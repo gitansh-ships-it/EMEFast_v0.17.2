@@ -67,7 +67,14 @@ api.interceptors.response.use(
     if (typeof window !== 'undefined' && error?.response?.status === 401) {
       localStorage.removeItem('emefast_token');
       localStorage.removeItem('emefast_role');
-      if (window.location.pathname !== '/login') {
+      const pathname = window.location.pathname;
+      const isAmbulanceOrPublic = 
+        pathname.startsWith('/ambulance') || 
+        pathname.startsWith('/user') || 
+        pathname === '/' ||
+        pathname.startsWith('/hospital/view');
+      // Ambulance / paramedic / citizen workspaces NEVER require sign-in
+      if (!isAmbulanceOrPublic && pathname !== '/login') {
         window.location.href = '/login';
       }
     }

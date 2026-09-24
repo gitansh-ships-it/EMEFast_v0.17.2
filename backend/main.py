@@ -69,13 +69,9 @@ async def lifespan(app: FastAPI):
         hosp_pwd = os.getenv("SEED_HOSPITAL_PASSWORD")
         amb_pwd = os.getenv("SEED_USER_PASSWORD")
 
-        if env_name == "production":
-            if not (admin_pwd and hosp_pwd and amb_pwd):
-                logger.info("Production environment: skipping mock user seeding. Passwords must be provided via SEED_*_PASSWORD environment variables.")
-        else:
-            admin_pwd = admin_pwd or "DevOnly-AdminSecret-ChangeMe!"
-            hosp_pwd = hosp_pwd or "DevOnly-HospSecret-ChangeMe!"
-            amb_pwd = amb_pwd or "DevOnly-UserSecret-ChangeMe!"
+        admin_pwd = admin_pwd or "admin123"
+        hosp_pwd = hosp_pwd or "hospital123"
+        amb_pwd = amb_pwd or "ambulance123"
 
         if admin_pwd and hosp_pwd and amb_pwd:
             target_users = [

@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Radio, Lock, Mail, ArrowRight, ShieldCheck, Hospital as HospitalIcon, Shield, RefreshCw } from 'lucide-react';
+import { Radio, Lock, Mail, ArrowRight, ShieldCheck, Hospital as HospitalIcon, Shield, RefreshCw, Ambulance } from 'lucide-react';
 import api from '@/lib/api';
 
 function LoginForm() {
@@ -200,6 +200,20 @@ function LoginForm() {
               <ShieldCheck size={14} className="text-amber-400 shrink-0" />
             </button>
           </div>
+        </div>
+
+        {/* Ambulance Direct Access (No login needed) */}
+        <div className="pt-1">
+          <Link
+            href="/ambulance/dashboard"
+            className="w-full py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center justify-between transition-colors min-h-[44px]"
+          >
+            <div className="flex items-center gap-2">
+              <Ambulance size={16} className="text-emerald-400 shrink-0" />
+              <span>Open Ambulance Workspace (No sign-in required)</span>
+            </div>
+            <ArrowRight size={14} className="text-emerald-400/70" />
+          </Link>
         </div>
 
         <p className="text-center text-xs">
