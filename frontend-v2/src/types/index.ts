@@ -76,7 +76,9 @@ export interface RecommendedOption {
   score?: number;
   capability_match?: boolean;
   estimated_cost: number;
+  supported_insurance?: string[];
   flag?: string;
+
   requirement_unconfirmed?: boolean;
 }
 

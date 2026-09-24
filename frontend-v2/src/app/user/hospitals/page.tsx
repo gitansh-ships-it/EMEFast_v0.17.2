@@ -427,6 +427,9 @@ function HospitalDiscoveryInner() {
                     {(opt.score ?? 0) > 0 && (
                       <span className="match-badge">{Math.round(opt.score!)} SCORE</span>
                     )}
+                    {(opt as any).supported_insurance?.length > 0 && (
+              <span className="match-badge">INSURED</span>
+            )}
                   </div>
                   <p className="text-[#6e7681]">{opt.hospital_address} · {opt.distance_km} km</p>
                   {opt.hospital_capabilities && (

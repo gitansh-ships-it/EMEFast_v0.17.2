@@ -380,6 +380,7 @@ export default function CreateEmergencyPage() {
   const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
   const [voiceText, setVoiceText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [insurance, setInsurance] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -588,6 +589,7 @@ export default function CreateEmergencyPage() {
         longitude: lng,
         address,
         voice_transcript: voiceText.trim() || undefined,
+        insurance: insurance.trim() || undefined,
       });
 
       const caseId = res.data.id;
@@ -958,6 +960,20 @@ export default function CreateEmergencyPage() {
               }
             }}
           />
+          {/* Optional Insurance Field */}
+          <div className="space-y-1.5 pt-2">
+            <label className="text-xs font-mono font-bold text-[var(--text)] flex items-center justify-between">
+              <span><FileText size={12} className="inline mr-1" /> INSURANCE CODE (optional)</span>
+              <span className="text-[10px] text-[var(--muted)] font-normal">Alphanumeric code</span>
+            </label>
+            <input
+              type="text"
+              value={insurance}
+              onChange={(e) => setInsurance(e.target.value)}
+              placeholder="e.g. AET12345"
+              className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#ff3b30] transition-colors"
+            />
+          </div>
 
         </section>
       )}
