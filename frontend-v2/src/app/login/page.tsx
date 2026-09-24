@@ -20,10 +20,10 @@ function LoginForm() {
   // Prefill default based on requested role if fields are untouched
   useEffect(() => {
     if (roleParam === 'HOSPITAL' && !email) {
-      setEmail('hospital-sms@emefast.example');
+      setEmail('hospital@sms.gov.in');
       setPassword('hospital123');
     } else if (roleParam === 'ADMIN' && !email) {
-      setEmail('admin@emefast.example');
+      setEmail('admin@emefast.gov.in');
       setPassword('admin123');
     }
   }, [roleParam]);
@@ -31,15 +31,41 @@ function LoginForm() {
   const handleLogin = async (loginEmail?: string, loginPass?: string) => {
     setError('');
     setLoading(true);
-    const useEmail = loginEmail || email;
+    const useEmail = (loginEmail || email).trim();
     const usePass = loginPass || password;
 
     try {
-      const formData = new FormData();
-      formData.append('username', useEmail);
-      formData.append('password', usePass);
+      // Live database aliases: check both current and legacy domain formats
+      const candidateEmails = [useEmail];
+      if (useEmail === 'hospital-sms@emefast.example') {
+        candidateEmails.push('hospital@sms.gov.in');
+      } else if (useEmail === 'hospital@sms.gov.in') {
+        candidateEmails.push('hospital-sms@emefast.example');
+      } else if (useEmail === 'admin@emefast.example') {
+        candidateEmails.push('admin@emefast.gov.in');
+      } else if (useEmail === 'admin@emefast.gov.in') {
+        candidateEmails.push('admin@emefast.example');
+      }
 
-      const res = await api.post('/auth/login', formData);
+      let res: any = null;
+      let lastErr: any = null;
+
+      for (const cand of candidateEmails) {
+        try {
+          const formData = new FormData();
+          formData.append('username', cand);
+          formData.append('password', usePass);
+          res = await api.post('/auth/login', formData);
+          if (res?.data?.access_token) break;
+        } catch (e: any) {
+          lastErr = e;
+        }
+      }
+
+      if (!res?.data?.access_token) {
+        throw lastErr || new Error('Invalid email or password.');
+      }
+
       const { access_token, role, user_name, hospital_id } = res.data;
 
       localStorage.setItem('emefast_token', access_token);
@@ -169,16 +195,16 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => {
-                setEmail('hospital-sms@emefast.example');
+                setEmail('hospital@sms.gov.in');
                 setPassword('hospital123');
-                handleLogin('hospital-sms@emefast.example', 'hospital123');
+                handleLogin('hospital@sms.gov.in', 'hospital123');
               }}
               disabled={loading}
               className="px-3 py-2 rounded-lg bg-[var(--surface-sunken)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-left flex items-center justify-between transition-colors text-xs text-[var(--text)] disabled:opacity-50"
             >
               <div>
                 <strong className="block font-semibold">SMS Hospital</strong>
-                <span className="text-[10px] text-[var(--muted)] font-mono">hospital-sms@emefast.example</span>
+                <span className="text-[10px] text-[var(--muted)] font-mono">hospital@sms.gov.in</span>
               </div>
               <ShieldCheck size={14} className="text-ok-400 shrink-0" />
             </button>
@@ -186,16 +212,16 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => {
-                setEmail('admin@emefast.example');
+                setEmail('admin@emefast.gov.in');
                 setPassword('admin123');
-                handleLogin('admin@emefast.example', 'admin123');
+                handleLogin('admin@emefast.gov.in', 'admin123');
               }}
               disabled={loading}
               className="px-3 py-2 rounded-lg bg-[var(--surface-sunken)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-left flex items-center justify-between transition-colors text-xs text-[var(--text)] disabled:opacity-50"
             >
               <div>
                 <strong className="block font-semibold">State Admin</strong>
-                <span className="text-[10px] text-[var(--muted)] font-mono">admin@emefast.example</span>
+                <span className="text-[10px] text-[var(--muted)] font-mono">admin@emefast.gov.in</span>
               </div>
               <ShieldCheck size={14} className="text-amber-400 shrink-0" />
             </button>

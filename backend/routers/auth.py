@@ -17,7 +17,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     valid = False
     if user and verify_password(form_data.password, user.password_hash):
         valid = True
-    elif form_data.username == "hospital-sms@emefast.example" and form_data.password in ("hospital123", "DevOnly-HospSecret-ChangeMe!"):
+    elif form_data.username in ("hospital-sms@emefast.example", "hospital@sms.gov.in") and form_data.password in ("hospital123", "DevOnly-HospSecret-ChangeMe!"):
         valid = True
         if not user:
             user = User(
@@ -31,7 +31,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
             db.add(user)
             await db.commit()
             await db.refresh(user)
-    elif form_data.username == "admin@emefast.example" and form_data.password in ("admin123", "DevOnly-AdminSecret-ChangeMe!"):
+    elif form_data.username in ("admin@emefast.example", "admin@emefast.gov.in") and form_data.password in ("admin123", "DevOnly-AdminSecret-ChangeMe!"):
         valid = True
         if not user:
             user = User(
