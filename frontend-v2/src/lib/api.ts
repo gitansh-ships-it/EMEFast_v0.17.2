@@ -5,10 +5,12 @@ function getApiBase() {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return `http://${host}:8000/api`;
   }
-  const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (configured) return configured.replace(/\/$/, '').endsWith('/api') ? configured.replace(/\/$/, '') : `${configured.replace(/\/$/, '')}/api`;
-  // Production must provide NEXT_PUBLIC_API_URL. Never guess a LAN/localhost backend.
-  return '/api';
+  let configured = process.env.NEXT_PUBLIC_API_URL?.trim();
+  // Protect against legacy mock-server URL if still cached in Vercel environment variables
+  if (!configured || configured.includes('emefast-v0-17-2')) {
+    configured = 'https://emefast-v17.onrender.com/api';
+  }
+  return configured.replace(/\/$/, '').endsWith('/api') ? configured.replace(/\/$/, '') : `${configured.replace(/\/$/, '')}/api`;
 }
 
 const api = axios.create({ baseURL: getApiBase(), timeout: 15000 });

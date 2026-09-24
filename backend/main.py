@@ -78,58 +78,58 @@ async def lifespan(app: FastAPI):
             amb_pwd = amb_pwd or "DevOnly-UserSecret-ChangeMe!"
 
         if admin_pwd and hosp_pwd and amb_pwd:
-            user_existing = (await seed_db.execute(select(User).where(User.email == "admin@emefast.example"))).scalar_one_or_none()
-            if user_existing is None:
-                demo_users = [
-                    User(
-                        name="State Emergency Director",
-                        email="admin@emefast.example",
-                        phone="+91 141 2220000",
-                        password_hash=get_password_hash(admin_pwd),
-                        role="ADMIN",
-                        hospital_id=None
-                    ),
-                    User(
-                        name="SMS ER Desk Chief",
-                        email="hospital-sms@emefast.example",
-                        phone="+91 141 2560291",
-                        password_hash=get_password_hash(hosp_pwd),
-                        role="HOSPITAL",
-                        hospital_id=1
-                    ),
-                    User(
-                        name="Fortis ER Coordinator",
-                        email="hospital-fortis@emefast.example",
-                        phone="+91 141 2547000",
-                        password_hash=get_password_hash(hosp_pwd),
-                        role="HOSPITAL",
-                        hospital_id=2
-                    ),
-                    User(
-                        name="Ambulance Paramedic",
-                        email="ambulance@emefast.example",
-                        phone="+91 9829012345",
-                        password_hash=get_password_hash(amb_pwd),
-                        role="USER",
-                        hospital_id=None
-                    ),
-                ]
-                seed_db.add_all(demo_users)
-                await seed_db.commit()
-                logger.info("Initialized default role accounts.")
-            elif env_name != "production":
-                # In development/test, synchronize password hashes with current dev secrets
-                user_existing.password_hash = get_password_hash(admin_pwd)
-                h1_user = (await seed_db.execute(select(User).where(User.email == "hospital-sms@emefast.example"))).scalar_one_or_none()
-                if h1_user:
-                    h1_user.password_hash = get_password_hash(hosp_pwd)
-                h2_user = (await seed_db.execute(select(User).where(User.email == "hospital-fortis@emefast.example"))).scalar_one_or_none()
-                if h2_user:
-                    h2_user.password_hash = get_password_hash(hosp_pwd)
-                amb_user = (await seed_db.execute(select(User).where(User.email == "ambulance@emefast.example"))).scalar_one_or_none()
-                if amb_user:
-                    amb_user.password_hash = get_password_hash(amb_pwd)
-                await seed_db.commit()
+            target_users = [
+                {
+                    "email": "admin@emefast.example",
+                    "name": "State Emergency Director",
+                    "phone": "+91 141 2220000",
+                    "password": admin_pwd,
+                    "role": "ADMIN",
+                    "hospital_id": None,
+                },
+                {
+                    "email": "hospital-sms@emefast.example",
+                    "name": "SMS ER Desk Chief",
+                    "phone": "+91 141 2560291",
+                    "password": hosp_pwd,
+                    "role": "HOSPITAL",
+                    "hospital_id": 1,
+                },
+                {
+                    "email": "hospital-fortis@emefast.example",
+                    "name": "Fortis ER Coordinator",
+                    "phone": "+91 141 2547000",
+                    "password": hosp_pwd,
+                    "role": "HOSPITAL",
+                    "hospital_id": 2,
+                },
+                {
+                    "email": "ambulance@emefast.example",
+                    "name": "Ambulance Paramedic",
+                    "phone": "+91 9829012345",
+                    "password": amb_pwd,
+                    "role": "USER",
+                    "hospital_id": None,
+                },
+            ]
+            for u_data in target_users:
+                u_obj = (await seed_db.execute(select(User).where(User.email == u_data["email"]))).scalar_one_or_none()
+                if u_obj is None:
+                    u_obj = User(
+                        name=u_data["name"],
+                        email=u_data["email"],
+                        phone=u_data["phone"],
+                        password_hash=get_password_hash(u_data["password"]),
+                        role=u_data["role"],
+                        hospital_id=u_data["hospital_id"]
+                    )
+                    seed_db.add(u_obj)
+                else:
+                    u_obj.password_hash = get_password_hash(u_data["password"])
+                    u_obj.role = u_data["role"]
+                    u_obj.hospital_id = u_data["hospital_id"]
+            await seed_db.commit()
+            logger.info("Initialized and synchronized authorized role accounts.")
     yield
 
 app = FastAPI(
