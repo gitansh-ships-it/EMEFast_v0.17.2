@@ -96,6 +96,7 @@ async def evaluate_decision_engine(db: AsyncSession, case: EmergencyCase) -> Dic
                 partial_matches.append(opt)
         partial_matches.sort(key=lambda x: (-x['score'], x['eta'], x['estimated_cost']))
 
+    recommended = None
     if accepted:
         recommended = accepted[0]
         recommended['is_recommended'] = True
