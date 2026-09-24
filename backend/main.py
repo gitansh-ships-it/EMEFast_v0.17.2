@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, emergency, hospitals, admin, dashboard, analytics, health, resources, prearrival
+from routers import auth, emergency, hospitals, admin, dashboard, analytics, health, resources, prearrival, insurance
 from database import engine
 from models import Base
 from contextlib import asynccontextmanager
@@ -168,6 +168,7 @@ app.include_router(analytics.router)
 app.include_router(health.router)
 app.include_router(resources.router)
 app.include_router(prearrival.router)
+app.include_router(insurance.router)
 
 @app.get("/")
 def root():
