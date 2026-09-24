@@ -1,0 +1,5 @@
+.env
+emefast.db
+uploads/
+__pycache__/
+*.py[cod]
