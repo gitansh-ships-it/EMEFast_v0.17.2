@@ -622,9 +622,9 @@ export default function CreateEmergencyPage() {
   };
 
   return (
-    <main className="emergency-shell max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-32 sm:pb-36 space-y-6">
+    <main className="emergency-shell max-w-4xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-36 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-white/10 pb-3">
         <div>
           <div className="text-xs font-semibold red-mono-label flex items-center gap-1.5">
             <HeartPulse size={14} /> {isAmbulance ? "Paramedic Rapid Intake" : "EMEFast Emergency Coordination"}
@@ -690,7 +690,7 @@ export default function CreateEmergencyPage() {
       {/* Page-level alerts */}
       {error && (
         <div className="v2-card p-3.5 bg-red-500/10 border-red-500/30 text-red-300 text-xs flex items-center gap-2 rounded-2xl" role="alert">
-          <AlertCircle size={16} className="shrink-0 text-[#ff453a]" />
+          <AlertCircle size={16} className="shrink-0 text-[#ff3b30]" />
           <span>{error}</span>
         </div>
       )}
@@ -705,8 +705,8 @@ export default function CreateEmergencyPage() {
           STEP 1: LOCATION & TRANSPORT MODE
           ========================================================================= */}
       {currentStep === 1 && (
-        <section className="space-y-5 animate-in">
-          <div className="v2-card p-5 sm:p-6 space-y-4">
+        <section className="space-y-4 animate-in">
+          <div className="v2-card p-4 sm:p-5 space-y-3.5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-xs font-semibold red-mono-label flex items-center gap-1.5">
@@ -729,7 +729,7 @@ export default function CreateEmergencyPage() {
             </div>
 
             {/* Live Interactive Map */}
-            <div className="h-64 sm:h-72 rounded-2xl overflow-hidden border border-white/10 relative">
+            <div className="h-44 sm:h-50 rounded-2xl overflow-hidden border border-white/10 relative">
               {lat != null && lng != null ? (
                 <LiveMap
                   origin={{ lat, lng }}

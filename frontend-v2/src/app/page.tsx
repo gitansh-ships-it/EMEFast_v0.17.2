@@ -20,9 +20,9 @@ function HoldSOS({onComplete}:{onComplete:()=>void}){
     onContextMenu={e=>e.preventDefault()}
     className="homepage-sos-btn relative w-44 h-44 sm:w-52 sm:h-52 rounded-full select-none touch-none flex items-center justify-center bg-[#171719] border border-white/10 shadow-[0_20px_80px_rgba(255,59,48,.16)] cursor-pointer active:scale-95 transition-transform text-white"
   >
-    {holding&&<span className="absolute inset-[-14px] rounded-full border border-[#ff3b30]/50" style={{transform:`scale(${.85+progress/300})`,opacity:1-progress/100}}/>}
-    <span className="absolute inset-3 rounded-full bg-[#ff3b30] shadow-[inset_0_2px_12px_rgba(255,255,255,.2),0_12px_45px_rgba(255,59,48,.3)]" style={{background:`conic-gradient(#ff3b30 ${progress}%, #b52b25 ${progress}% 100%)`}}/>
-    <span className="relative z-10 flex flex-col items-center text-white"><Siren size={30}/><span className="mt-2 text-lg font-black tracking-[.16em] text-white">{holding?'HOLD…':'SOS'}</span><span className="text-[10px] uppercase tracking-widest text-white/90">{holding?`${Math.ceil((100-progress)/33)}s remaining`:'3-second hold'}</span></span>
+    {holding&&<span className="absolute inset-[-14px] rounded-full border border-[#ff3b30]/50 pointer-events-none" style={{transform:`scale(${.85+progress/300})`,opacity:1-progress/100}}/>}
+    <span className="absolute inset-3 rounded-full bg-[#ff3b30] shadow-[inset_0_2px_12px_rgba(255,255,255,.2),0_12px_45px_rgba(255,59,48,.3)] pointer-events-none" style={{background:`conic-gradient(#ff3b30 ${progress}%, #b52b25 ${progress}% 100%)`}}/>
+    <span className="relative z-10 flex flex-col items-center text-white pointer-events-none"><Siren size={30}/><span className="mt-2 text-lg font-black tracking-[.16em] text-white">{holding?'HOLD…':'SOS'}</span><span className="text-[10px] uppercase tracking-widest text-white/90">{holding?`${Math.ceil((100-progress)/33)}s remaining`:'3-second hold'}</span></span>
   </button>
 }
 
@@ -67,13 +67,16 @@ export default function Home(){
 
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       try {
-        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 4000,
-            maximumAge: 10000,
-          });
-        });
+        const pos = await Promise.race([
+          new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 2500,
+              maximumAge: 10000,
+            });
+          }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('GPS timeout')), 2500)),
+        ]);
         latitude = pos.coords.latitude;
         longitude = pos.coords.longitude;
         address = `Device GPS location (±${Math.round(pos.coords.accuracy)}m)`;
