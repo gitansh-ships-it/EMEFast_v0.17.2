@@ -54,6 +54,7 @@ export interface Hospital {
   emergency_status?: 'ONLINE' | 'OFFLINE' | string;
   trauma_level?: string;
   available_beds?: number;
+  supported_insurance?: string[];
   estimated_emergency_cost?: number;
 }
 
