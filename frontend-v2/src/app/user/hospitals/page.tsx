@@ -427,9 +427,20 @@ function HospitalDiscoveryInner() {
                     {(opt.score ?? 0) > 0 && (
                       <span className="match-badge">{Math.round(opt.score!)} SCORE</span>
                     )}
-                    {(opt as any).supported_insurance?.length > 0 && (
-              <span className="match-badge">INSURED</span>
-            )}
+                   {(opt as any).supported_insurance && (opt as any).supported_insurance.length > 0 ? (
+  <div className="flex flex-wrap gap-1 items-center">
+    {(opt as any).supported_insurance.slice(0, 3).map((ins: string, idx: number) => (
+      <span key={idx} className="match-badge">{ins}</span>
+    ))}
+    {(opt as any).supported_insurance.length > 3 && (
+      <span className="match-badge">+{(opt as any).supported_insurance.length - 3} more</span>
+    )}
+  </div>
+) : (
+  <span className="match-badge">Insurance information unavailable</span>
+)}
+              
+            
                   </div>
                   <p className="text-[#6e7681]">{opt.hospital_address} · {opt.distance_km} km</p>
                   {opt.hospital_capabilities && (
