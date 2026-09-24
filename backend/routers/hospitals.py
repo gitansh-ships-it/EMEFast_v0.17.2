@@ -205,14 +205,15 @@ async def update_hospital_resources(
         hosp.blood_units = res_in.blood_units
     if res_in.trauma_capability is not None:
         hosp.trauma_capability = res_in.trauma_capability
-        # New: handle supported_insurance field
-        if getattr(res_in, "supported_insurance", None) is not None:
-            from backend.constants.insurance import validate_insurance_codes
-            unknown = validate_insurance_codes(res_in.supported_insurance)
-            if unknown:
-                raise HTTPException(status_code=400, detail=f"Unknown insurance codes: {', '.join(unknown)}")
-            hosp.supported_insurance = res_in.supported_insurance
 
-        await db.commit()
-        await db.refresh(hosp)
-        return hosp
+    # New: handle supported_insurance field
+    if getattr(res_in, "supported_insurance", None) is not None:
+        from backend.constants.insurance import validate_insurance_codes
+        unknown = validate_insurance_codes(res_in.supported_insurance)
+        if unknown:
+            raise HTTPException(status_code=400, detail=f"Unknown insurance codes: {', '.join(unknown)}")
+        hosp.supported_insurance = res_in.supported_insurance
+
+    await db.commit()
+    await db.refresh(hosp)
+    return hosp
