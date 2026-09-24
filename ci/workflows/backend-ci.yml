@@ -1,0 +1,50 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'test_emefast_e2e.py'
+      - 'render.yaml'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'test_emefast_e2e.py'
+      - 'render.yaml'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install httpx
+
+      - name: Run Python syntax & compilation verification
+        run: |
+          python -m py_compile backend/main.py backend/database.py backend/auth.py backend/verify.py
+
+      - name: Run Backend Preflight Suite
+        run: |
+          python backend/verify.py
+
+      - name: Run EMEFast End-to-End Suite
+        run: |
+          python test_emefast_e2e.py

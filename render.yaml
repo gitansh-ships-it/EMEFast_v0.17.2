@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: emefast-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: DEMO_MODE
+        value: "0"
+      - key: CORS_ORIGINS
+        value: "https://frontend-v2-seven-chi.vercel.app"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: emefast-db
+          property: connectionString
+
+databases:
+  - name: emefast-db
+    databaseName: emefast
+    user: emefast_user
+    plan: free

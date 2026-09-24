@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: emefast-db
+    environment:
+      POSTGRES_USER: emefast_user
+      POSTGRES_PASSWORD: emefast_password
+      POSTGRES_DB: emefast
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emefast_user -d emefast"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: emefast-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://emefast_user:emefast_password@db:5432/emefast
+      - JWT_SECRET=emefast_local_docker_jwt_secret_key_32chars
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - DEMO_MODE=1
+      - ENVIRONMENT=development
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend-v2
+      dockerfile: Dockerfile
+    container_name: emefast-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
