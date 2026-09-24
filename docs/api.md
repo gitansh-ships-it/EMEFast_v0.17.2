@@ -32,7 +32,7 @@ Returns service status, version number, platform name, and coordination state.
 ### `POST /api/emergency/new`
 Creates an emergency incident, stores clinical requirements, discovers nearby verified hospitals, and broadcasts initial queries.
 
-- **Authentication**: Optional in demo mode; Bearer JWT in production.
+- **Authentication**: Public in demo API; Bearer JWT in reference FastAPI backend.
 - **Request Body**:
 ```json
 {
@@ -155,7 +155,7 @@ Lists all verified, active hospitals in the emergency network.
 ### `GET /api/hospitals/{id}/incoming`
 Queries pending emergency cases broadcast to the designated hospital. Used by hospital ER dashboards via REST polling.
 
-- **Authentication**: None in demo mode; Bearer JWT in production.
+- **Authentication**: Public in demo API; Bearer JWT in reference FastAPI backend.
 - **Response `200 OK`**:
 ```json
 [
@@ -177,7 +177,7 @@ Queries pending emergency cases broadcast to the designated hospital. Used by ho
 ### `POST /api/hospitals/{id}/respond/{case_id}`
 Hospital emergency department Accepts or Declines an incoming case.
 
-- **Authentication**: None in demo mode; Hospital Admin Bearer JWT in production.
+- **Authentication**: Public in demo API; Hospital Admin Bearer JWT in reference FastAPI backend.
 - **Request Body**:
 ```json
 {

@@ -17,18 +17,15 @@ Integrations such as Ayushman Bharat Digital Mission (ABDM) / Ayushman Bharat He
 - **Automated Generation**: Render generates a secure 32+ character random `JWT_SECRET` during initial deployment.
 
 ### 2.2 Authentication & Role-Based Access Control (RBAC)
-- **Authentication Implementation**: Implemented in `backend/auth.py` and `backend/routers/auth.py` using bcrypt password hashing and signed JWT tokens (`pyjwt`).
-- **Role Hierarchy & Enforcement**:
-  - `ADMIN`: Full access to operational metrics, system auditing, and hospital verification (`/api/admin/*`).
-  - `HOSPITAL`: Hospital emergency operations desk (`/api/hospitals/{id}/*`). Strictly enforces facility-matching ownership checks: a hospital operator cannot view incoming queues, accept, or release resources for a different facility ID.
-  - `USER`: Paramedi/bystander coordination for case creation, hospital selection, and resource reservation.
-- **Production vs. Development Enforcement**:
-  - In `ENVIRONMENT=production`: Every protected route strictly validates JWT bearer tokens, checks role claims, and enforces tenant isolation. Unauthenticated or mis-matched calls receive `401 Unauthorized` or `403 Forbidden`. Default development secrets and SQLite are explicitly rejected at startup.
-  - In `development` / `demo` mode (`DEMO_MODE=1`): If no Authorization header is supplied, the system logs a debug warning and provides an automated demo actor context to facilitate local hackathon evaluation. Invalid or malformed tokens continue to be strictly rejected.
+- **Demo API Scope**: The public demo API (`backend/mock-server.mjs`) is an unauthenticated coordination engine with mock credentials and synthetic data. It accepts any credentials, does not enforce authentication or RBAC, and does not conduct security testing.
+- **Reference Backend Implementation**: Role-based access control and token handling are defined in the reference FastAPI backend (`backend/auth.py` and `backend/routers/auth.py`) using bcrypt password hashing and signed JWT tokens (`pyjwt`).
+- **Role Hierarchy (Reference Architecture)**:
+  - `ADMIN`: Operational metrics, system auditing, and hospital verification (`/api/admin/*`).
+  - `HOSPITAL`: Hospital emergency operations desk (`/api/hospitals/{id}/*`) with facility-matching ownership checks.
+  - `USER`: Paramedic/bystander coordination for case creation, hospital selection, and resource reservation.
 
 ### 2.3 CORS Policies
-- In production (`ENVIRONMENT=production`), CORS origins are strictly restricted to the authorized Vercel domain (`https://frontend-v2-seven-chi.vercel.app`).
-- Wildcard `*` origins are automatically rejected in production by `backend/main.py`.
+- In the reference FastAPI backend (`backend/main.py`), CORS origins can be strictly restricted to the authorized domain, rejecting wildcard origins when configured for production.
 
 ### 2.4 Input Validation & Payload Safeguards
 - All incoming payloads are strictly validated using Pydantic v2 schemas (`backend/schemas/`).

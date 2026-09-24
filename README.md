@@ -66,8 +66,8 @@ flowchart TD
 
 > [!NOTE]
 > **Active API vs. Legacy/Reference Backend**  
-> - **Active Engine (`backend/mock-server.mjs`)**: Powers the production [Live Demo on Vercel](https://frontend-v2-seven-chi.vercel.app) and local development. It is an in-memory, deterministic coordination server with voice memo storage and capability matching.
-> - **Legacy / Reference Engine (`backend/main.py`)**: A production-grade Python FastAPI implementation with SQLAlchemy async models, PostgreSQL row-level reservation locking (`SELECT FOR UPDATE`), and JWT authentication. It is preserved for architecture evaluation and migration planning.
+> - **Active Engine (`backend/mock-server.mjs`)**: Powers the public [Live Demo on Vercel](https://frontend-v2-seven-chi.vercel.app) and local development. It is an in-memory, deterministic coordination server with voice memo storage and capability matching. The public demo API accepts any credentials, does not enforce authentication, and holds only synthetic data.
+> - **Legacy / Reference Engine (`backend/main.py`)**: A Python FastAPI reference implementation with SQLAlchemy async models, PostgreSQL row-level reservation locking (`SELECT FOR UPDATE`), and JWT/RBAC authentication. It is preserved for architecture evaluation and migration planning.
 
 ---
 
@@ -135,6 +135,9 @@ Navigate to `http://localhost:3001` in your browser. Switch roles via the top na
 
 ### Demo Accounts
 The seeded accounts (`admin@emefast.example`, `hospital-sms@emefast.example`, `ambulance@emefast.example`) are provided solely for public evaluation and demonstration. The live deployment holds no real patient records or personal healthcare data.
+
+### Demo API
+The public demo API (`backend/mock-server.mjs`) accepts any credentials, does not enforce authentication, and holds only synthetic data, while the FastAPI code (`backend/main.py`) serves as a reference backend with JWT/RBAC and relational row-level locking.
 
 ---
 

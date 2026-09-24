@@ -1,10 +1,10 @@
 # EMEFast Production Deployment Guide
 
-## 1. Production Architecture Overview
+## 1. Deployment Architecture Overview
 
-- **Frontend**: Next.js 15 PWA hosted on **Vercel** (`https://frontend-v2-seven-chi.vercel.app`).
-- **Backend**: FastAPI (Python 3.12) running under Uvicorn on **Render** (`https://emefast-v17.onrender.com`).
-- **Database**: Managed **Render PostgreSQL** (`emefast-db`) using `asyncpg`.
+- **Frontend (Live Demo)**: Next.js 15 PWA hosted on **Vercel** (`https://frontend-v2-seven-chi.vercel.app`).
+- **Active Demo API**: Zero-dependency coordination engine (`backend/mock-server.mjs`) serving synthetic data without authentication enforcement.
+- **Reference Backend Architecture**: FastAPI (Python 3.12) with managed PostgreSQL (`emefast-db`), async row locks, and JWT authentication automated via [`render.yaml`](../render.yaml).
 - **Domain & SSL**: Automatic TLS termination via Vercel Edge and Render reverse proxies.
 
 ---

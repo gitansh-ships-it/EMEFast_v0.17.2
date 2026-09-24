@@ -84,10 +84,9 @@ flowchart TD
   - `admin.py`: Hospital verification audits and aggregate coordination metrics.
   - `auth.py`: JWT issuance and bcrypt credential management.
   - `health.py` & `main.py`: Health checks (`/health`, `/api/health`).
-- **Database Driver**: SQLAlchemy 2.0 with asynchronous `asyncpg` engine (`create_async_engine`).
-- **Dual-Backend Separation**:
-  - **Production Backend**: FastAPI (`backend/main.py`) running on Render with PostgreSQL.
-  - **Local Prototyping Mock Server**: `backend/mock-server.mjs` (Node.js) is strictly maintained as an offline, single-file mock server for frontend developers without a Python runtime.
+- **Backend Architecture Separation**:
+  - **Active Coordination Engine**: `backend/mock-server.mjs` (Node.js) powers the live public demo and local development. It operates as an unauthenticated in-memory coordination service with synthetic data.
+  - **Reference Backend**: FastAPI (`backend/main.py`) provides the reference architecture with PostgreSQL, async SQLAlchemy row-level locks, and JWT/RBAC.
 
 ---
 

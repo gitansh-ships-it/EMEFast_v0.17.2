@@ -36,7 +36,8 @@ ALL PREFLIGHT CHECKS PASSED SUCCESSFULLY!
 
 ---
 
-### 2.2 End-to-End Test Suite
+### 2.2 Reference Backend Test Suite (FastAPI)
+The automated test suite verifies the reference FastAPI implementation:
 ```bash
 python test_emefast_e2e.py
 ```
