@@ -19,13 +19,7 @@ function LoginForm() {
 
   // Prefill default based on requested role if fields are untouched
   useEffect(() => {
-    if (roleParam === 'HOSPITAL' && !email) {
-      setEmail('hospital@sms.gov.in');
-      setPassword('hospital123');
-    } else if (roleParam === 'ADMIN' && !email) {
-      setEmail('admin@emefast.gov.in');
-      setPassword('admin123');
-    }
+
   }, [roleParam]);
 
   const handleLogin = async (loginEmail?: string, loginPass?: string) => {

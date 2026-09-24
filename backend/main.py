@@ -70,10 +70,14 @@ async def lifespan(app: FastAPI):
         admin_pwd = os.getenv("SEED_ADMIN_PASSWORD")
         hosp_pwd = os.getenv("SEED_HOSPITAL_PASSWORD")
         amb_pwd = os.getenv("SEED_USER_PASSWORD")
+        if not admin_pwd:
+            logger.warning("SEED_ADMIN_PASSWORD not set – demo admin account will not be created")
+        if not hosp_pwd:
+            logger.warning("SEED_HOSPITAL_PASSWORD not set – demo hospital accounts will not be created")
+        if not amb_pwd:
+            logger.warning("SEED_USER_PASSWORD not set – demo ambulance account will not be created")
 
-        admin_pwd = admin_pwd or "admin123"
-        hosp_pwd = hosp_pwd or "hospital123"
-        amb_pwd = amb_pwd or "ambulance123"
+
 
         if admin_pwd and hosp_pwd and amb_pwd:
             target_users = [
