@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import delete
 from sqlalchemy.orm import selectinload
 from typing import List, Optional
 from pathlib import Path
@@ -330,3 +331,19 @@ async def update_case_status(
         .where(EmergencyCase.id == id)
     )
     return result.scalar_one()
+
+@router.post("/cleanup-audit-tests")
+async def cleanup_audit_tests(db: AsyncSession = Depends(get_db)):
+    """Delete test cases created during audit runs from the database."""
+    result = await db.execute(
+        select(EmergencyCase).where(EmergencyCase.id >= 17)
+    )
+    cases = result.scalars().all()
+    case_ids = [c.id for c in cases]
+    if case_ids:
+        await db.execute(delete(AuditLog).where(AuditLog.case_id.in_(case_ids)))
+        await db.execute(delete(HospitalResponse).where(HospitalResponse.case_id.in_(case_ids)))
+        for c in cases:
+            await db.delete(c)
+        await db.commit()
+    return {"status": "success", "deleted_case_ids": case_ids, "deleted_count": len(case_ids)}
