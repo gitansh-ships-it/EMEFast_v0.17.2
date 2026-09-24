@@ -1303,6 +1303,7 @@ html.theme-light .transport-segment button.selected { background:rgba(10,132,255
 .v2-card-hover { transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
 .v2-card-hover:hover { transform:translateY(-2px); }
 @media(max-width:640px){.detail-grid{grid-template-columns:1fr}.settings-row{grid-template-columns:1fr}.settings-row input{width:100%}}
+.v2-input { width: 100%; display: block; }
 
 /* No generic GitHub grey rectangles in the audited workspaces. */
 html.theme-light .hospital-app .v2-card,html.theme-light .admin-app .v2-card { color:#1c1c1e; }

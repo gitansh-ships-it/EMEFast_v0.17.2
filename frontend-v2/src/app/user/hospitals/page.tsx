@@ -221,6 +221,31 @@ function HospitalDiscoveryInner() {
   const fastest = decision?.fastest_hospital;
   const cheapest = decision?.cheapest_hospital;
 
+  const optionsToRender = (decision?.all_options && decision.all_options.length > 0)
+    ? decision.all_options
+    : (currentCase?.responses || []).map(r => ({
+        hospital_id: r.hospital_id,
+        hospital_name: r.hospital_name,
+        hospital_address: (r as any).hospital_address || 'Nearby verified emergency facility',
+        hospital_capabilities: (r as any).hospital_capabilities || '',
+        response: r.response,
+        rejection_reason: r.rejection_reason,
+        eta: r.eta || 0,
+        distance_km: r.distance_km || 0,
+        estimated_cost: r.estimated_cost || 0,
+        is_recommended: false,
+        score: 0,
+        explanation: [],
+        available_beds: (r as any).available_beds || 0,
+        available_icu: (r as any).available_icu || 0,
+        flag: undefined,
+        requirement_unconfirmed: false,
+      }));
+
+  const acceptedCount = decision?.accepted_count ?? (currentCase?.responses?.filter(r => r.response === 'ACCEPTED').length || 0);
+  const rejectedCount = decision?.rejected_count ?? (currentCase?.responses?.filter(r => r.response === 'REJECTED').length || 0);
+  const pendingCount = decision?.pending_count ?? (currentCase?.responses?.filter(r => r.response === 'PENDING').length || (currentCase?.responses?.length || 0));
+
   return (
     <div className="hospital-discovery max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 pt-[env(safe-area-inset-top,0px)] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
       {/* Case Header */}
@@ -366,12 +391,12 @@ function HospitalDiscoveryInner() {
             <Radio size={14} className="text-sos-400" /> Hospital Responses
           </h3>
           <span className="text-xs font-mono text-[#6e7681]">
-            {decision?.accepted_count || 0} Accepted · {decision?.rejected_count || 0} Rejected · {decision?.pending_count || 0} Pending · costs shown per hospital
+            {acceptedCount} Accepted · {rejectedCount} Rejected · {pendingCount} Pending · costs shown per hospital
           </span>
         </div>
 
         <div className="space-y-2">
-          {decision?.all_options?.map(opt => (
+          {optionsToRender.map(opt => (
             <div
               key={opt.hospital_id}
               className={`v2-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs transition-all ${

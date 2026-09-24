@@ -122,7 +122,7 @@ function LoginForm() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[var(--muted)]">Email Address</label>
-            <div className="relative">
+            <div className="relative w-full">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)]" size={16} />
               <input
                 type="email"
@@ -130,14 +130,14 @@ function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="v2-input pl-10 min-h-[44px] text-base sm:text-sm"
+                className="w-full block pl-10 pr-4 min-h-[44px] rounded-xl bg-white/[0.05] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-sos-400 focus:ring-1 focus:ring-sos-400 text-base sm:text-sm transition-colors"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[var(--muted)]">Password</label>
-            <div className="relative">
+            <div className="relative w-full">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)]" size={16} />
               <input
                 type="password"
@@ -145,7 +145,7 @@ function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="v2-input pl-10 min-h-[44px] text-base sm:text-sm"
+                className="w-full block pl-10 pr-4 min-h-[44px] rounded-xl bg-white/[0.05] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-sos-400 focus:ring-1 focus:ring-sos-400 text-base sm:text-sm transition-colors"
               />
             </div>
           </div>
