@@ -240,6 +240,7 @@ function HospitalDiscoveryInner() {
         available_icu: (r as any).available_icu || 0,
         flag: undefined,
         requirement_unconfirmed: false,
+        supported_insurance: (r as any).supported_insurance || [],
       }));
 
   const acceptedCount = decision?.accepted_count ?? (currentCase?.responses?.filter(r => r.response === 'ACCEPTED').length || 0);
