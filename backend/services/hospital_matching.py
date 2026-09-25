@@ -74,7 +74,7 @@ async def evaluate_decision_engine(db: AsyncSession, case: EmergencyCase) -> Dic
         elif hosp.emergency_status!='ONLINE': explanation.append('Not feasible: ER currently offline')
         elif not hosp.verified: explanation.append('Not feasible: hospital not verified')
         elif (hosp.available_beds or 0)<=0: explanation.append('Not feasible: no emergency beds available')
-        opt={'hospital_id':hosp.id,'hospital_name':hosp.name,'latitude':hosp.latitude,'longitude':hosp.longitude,'hospital_address':hosp.address,'hospital_capabilities':hosp.capabilities or '', 'response':resp.response,'rejection_reason':resp.rejection_reason,'eta':eta,'distance_km':dist,'available_icu':hosp.available_icu or 0,'available_beds':hosp.available_beds or 0,'estimated_cost':cost,'is_recommended':False,'score':score,'explanation':explanation,'capability_match':feasible}
+        opt={'hospital_id':hosp.id,'hospital_name':hosp.name,'latitude':hosp.latitude,'longitude':hosp.longitude,'hospital_address':hosp.address,'hospital_capabilities':hosp.capabilities or '', 'response':resp.response,'rejection_reason':resp.rejection_reason,'eta':eta,'distance_km':dist,'available_icu':hosp.available_icu or 0,'available_beds':hosp.available_beds or 0,'estimated_cost':cost,'is_recommended':False,'score':score,'explanation':explanation,'capability_match':feasible,'supported_insurance':hosp.supported_insurance or []}
         all_options.append(opt)
         if resp.response=='ACCEPTED' and feasible: accepted.append(opt)
 

@@ -167,6 +167,8 @@ class RecommendedOption(BaseModel):
     is_recommended: bool
     score: float
     capability_match: bool = False
+    # New: expose supported insurance codes for the hospital
+    supported_insurance: List[str] = Field(default_factory=list)
     rejection_reason: Optional[str] = None
     explanation: List[str]
     flag: Optional[str] = None
