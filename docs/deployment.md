@@ -59,10 +59,7 @@ Vercel automatically configures the Next.js App Router using [`vercel.json`](../
 
 ```json
 {
-  "buildCommand": "npm --prefix frontend-v2 run build",
-  "installCommand": "npm --prefix frontend-v2 install --no-audit --no-fund",
-  "framework": "nextjs",
-  "outputDirectory": "frontend-v2/.next"
+  "framework": "nextjs"
 }
 ```
 
