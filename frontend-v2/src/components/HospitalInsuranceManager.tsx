@@ -20,12 +20,70 @@ interface HospitalInsuranceManagerProps {
   onSaved?: (insurances: string[]) => void;
 }
 
+const FALLBACK_MASTER_LIST: InsuranceGroup[] = [
+  {
+    group: "GOVERNMENT / PUBLIC SCHEMES",
+    items: [
+      { code: "RGHS", name: "Rajasthan Government Health Scheme (RGHS)" },
+      { code: "PMJAY", name: "Ayushman Bharat PM-JAY" },
+      { code: "CGHS", name: "Central Government Health Scheme (CGHS)" },
+      { code: "ECHS", name: "Ex-Servicemen Contributory Health Scheme" },
+      { code: "ESIC", name: "Employees' State Insurance (ESIC)" },
+      { code: "CAPF", name: "Central Armed Police Forces Health Scheme" },
+      { code: "RELHS", name: "Railway Employees Liberalized Health Scheme" },
+      { code: "MAA_YOJANA", name: "Mukhyamantri Amrutum (MAA) Yojana" },
+    ],
+  },
+  {
+    group: "PUBLIC SECTOR GENERAL INSURERS",
+    items: [
+      { code: "NEW_INDIA", name: "The New India Assurance Co. Ltd." },
+      { code: "UNITED_INDIA", name: "United India Insurance Company" },
+      { code: "NATIONAL", name: "National Insurance Company" },
+      { code: "ORIENTAL", name: "The Oriental Insurance Company" },
+    ],
+  },
+  {
+    group: "PRIVATE HEALTH INSURERS",
+    items: [
+      { code: "STAR_HEALTH", name: "Star Health & Allied Insurance" },
+      { code: "HDFC_ERGO", name: "HDFC ERGO General Insurance" },
+      { code: "ICICI_LOMBARD", name: "ICICI Lombard General Insurance" },
+      { code: "CARE_HEALTH", name: "Care Health Insurance (Religare)" },
+      { code: "NIVA_BUPA", name: "Niva Bupa Health Insurance (Max Bupa)" },
+      { code: "BAJAJ_ALLIANZ", name: "Bajaj Allianz General Insurance" },
+      { code: "TATA_AIG", name: "Tata AIG General Insurance" },
+      { code: "ADITYA_BIRLA", name: "Aditya Birla Health Insurance" },
+      { code: "MANIPAL_CIGNA", name: "ManipalCigna Health Insurance" },
+      { code: "SBI_GENERAL", name: "SBI General Insurance" },
+    ],
+  },
+  {
+    group: "THIRD PARTY ADMINISTRATORS (TPAS)",
+    items: [
+      { code: "MEDI_ASSIST", name: "Medi Assist Insurance TPA" },
+      { code: "PARAMOUNT", name: "Paramount Health Services TPA" },
+      { code: "MDINDIA", name: "MDIndia Health Insurance TPA" },
+      { code: "HERITAGE", name: "Heritage Health TPA" },
+      { code: "FAMILY_HEALTH", name: "Family Health Plan Insurance TPA" },
+      { code: "VIDAL", name: "Vidal Health Insurance TPA" },
+    ],
+  },
+  {
+    group: "DIRECT / CORPORATE / CASH",
+    items: [
+      { code: "CORPORATE_TIEUP", name: "Direct Corporate Cashless Tie-up" },
+      { code: "CASH_ONLY", name: "Self-Pay / Cash / UPI Only" },
+    ],
+  },
+];
+
 export default function HospitalInsuranceManager({
   hospitalId,
   initialInsurances = [],
   onSaved,
 }: HospitalInsuranceManagerProps) {
-  const [masterList, setMasterList] = useState<InsuranceGroup[]>([]);
+  const [masterList, setMasterList] = useState<InsuranceGroup[]>(FALLBACK_MASTER_LIST);
   const [selected, setSelected] = useState<Set<string>>(new Set(initialInsurances));
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -39,22 +97,31 @@ export default function HospitalInsuranceManager({
     const loadData = async () => {
       setLoading(true);
       setError(null);
-      try {
-        const [masterRes, hospRes] = await Promise.all([
-          api.get('/insurance/master-list'),
-          api.get(`/hospitals/${hospitalId}/insurances`),
-        ]);
+      let master = FALLBACK_MASTER_LIST;
+      let currentCodes: string[] = initialInsurances || [];
 
-        if (cancelled) return;
-        setMasterList(masterRes.data || []);
-        const currentCodes: string[] = hospRes.data?.supported_insurance || initialInsurances || [];
-        setSelected(new Set(currentCodes));
-      } catch (err: any) {
-        if (!cancelled) {
-          setError(err.response?.data?.detail || 'Failed to load insurance master list');
+      try {
+        const masterRes = await api.get('/insurance/master-list');
+        if (masterRes.data && masterRes.data.length > 0) {
+          master = masterRes.data;
         }
-      } finally {
-        if (!cancelled) setLoading(false);
+      } catch {
+        // Fallback gracefully to embedded master list
+      }
+
+      try {
+        const hospRes = await api.get(`/hospitals/${hospitalId}/insurances`);
+        if (hospRes.data?.supported_insurance) {
+          currentCodes = hospRes.data.supported_insurance;
+        }
+      } catch {
+        // Fallback to initial
+      }
+
+      if (!cancelled) {
+        setMasterList(master);
+        setSelected(new Set(currentCodes));
+        setLoading(false);
       }
     };
 
