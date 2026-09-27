@@ -50,10 +50,12 @@ function getDisplayInsurances(hospitalName: string = '', insurances?: string[]):
   if (Array.isArray(insurances) && insurances.length > 0) {
     return insurances.map(c => INSURANCE_LABEL_MAP[c] || c);
   }
-  const lower = hospitalName.toLowerCase();
-  for (const [key, list] of Object.entries(DEFAULT_HOSPITAL_INSURANCES)) {
-    if (lower.includes(key)) {
-      return list.map(c => INSURANCE_LABEL_MAP[c] || c);
+  const lower = String(hospitalName || '').toLowerCase();
+  if (lower) {
+    for (const [key, list] of Object.entries(DEFAULT_HOSPITAL_INSURANCES)) {
+      if (lower.includes(key)) {
+        return list.map(c => INSURANCE_LABEL_MAP[c] || c);
+      }
     }
   }
   return ["RGHS", "PM-JAY", "Cashless Mediclaim"];
