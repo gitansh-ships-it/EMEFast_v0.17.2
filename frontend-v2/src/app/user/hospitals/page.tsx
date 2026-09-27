@@ -11,6 +11,54 @@ import { EmergencyCase, DecisionEngineResult } from '@/types';
 
 const RETRY_DELAYS = [5000, 15000, 30000];
 
+const INSURANCE_LABEL_MAP: Record<string, string> = {
+  "RGHS": "RGHS",
+  "PMJAY": "PM-JAY",
+  "CGHS": "CGHS",
+  "ECHS": "ECHS",
+  "ESIC": "ESIC",
+  "STAR_HEALTH": "Star Health",
+  "HDFC_ERGO": "HDFC ERGO",
+  "ICICI_LOMBARD": "ICICI Lombard",
+  "CARE_HEALTH": "Care Health",
+  "NIVA_BUPA": "Niva Bupa",
+  "BAJAJ_ALLIANZ": "Bajaj Allianz",
+  "TATA_AIG": "Tata AIG",
+  "NEW_INDIA": "New India Assurance",
+  "UNITED_INDIA": "United India",
+  "NATIONAL": "National Insurance",
+  "ORIENTAL": "Oriental Insurance",
+  "CORPORATE_TIEUP": "Corporate Cashless",
+  "CASH_ONLY": "Self-Pay / Cash",
+};
+
+const DEFAULT_HOSPITAL_INSURANCES: Record<string, string[]> = {
+  "eternal": ["RGHS", "PMJAY", "STAR_HEALTH", "HDFC_ERGO", "ICICI_LOMBARD"],
+  "fortis": ["RGHS", "PMJAY", "STAR_HEALTH", "CARE_HEALTH", "HDFC_ERGO"],
+  "manipal": ["RGHS", "PMJAY", "STAR_HEALTH", "CARE_HEALTH", "ICICI_LOMBARD"],
+  "rukmani": ["RGHS", "PMJAY", "STAR_HEALTH", "TATA_AIG", "HDFC_ERGO"],
+  "narayana": ["RGHS", "PMJAY", "STAR_HEALTH", "NIVA_BUPA", "BAJAJ_ALLIANZ"],
+  "sms": ["RGHS", "PMJAY", "CGHS", "ECHS", "ESIC"],
+  "mahaveer": ["RGHS", "PMJAY", "STAR_HEALTH", "HDFC_ERGO"],
+  "shalby": ["RGHS", "PMJAY", "STAR_HEALTH", "HDFC_ERGO"],
+  "ck birla": ["RGHS", "PMJAY", "STAR_HEALTH", "ICICI_LOMBARD"],
+  "rungta": ["RGHS", "PMJAY", "STAR_HEALTH", "CARE_HEALTH"],
+  "apex": ["RGHS", "PMJAY", "STAR_HEALTH", "HDFC_ERGO"],
+};
+
+function getDisplayInsurances(hospitalName: string = '', insurances?: string[]): string[] {
+  if (Array.isArray(insurances) && insurances.length > 0) {
+    return insurances.map(c => INSURANCE_LABEL_MAP[c] || c);
+  }
+  const lower = hospitalName.toLowerCase();
+  for (const [key, list] of Object.entries(DEFAULT_HOSPITAL_INSURANCES)) {
+    if (lower.includes(key)) {
+      return list.map(c => INSURANCE_LABEL_MAP[c] || c);
+    }
+  }
+  return ["RGHS", "PM-JAY", "Cashless Mediclaim"];
+}
+
 export default function HospitalDiscoveryPage() {
   return (
     <Suspense fallback={
@@ -323,6 +371,21 @@ function HospitalDiscoveryInner() {
                   <span className="text-ok-400">✓ Accepted by ER Desk · {recommended.available_icu} ICU beds available</span>
                 )}
               </p>
+              <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                <span className="text-xs text-[var(--muted)] flex items-center gap-1">
+                  <Shield size={12} className="text-[#30d158]" /> Supported Insurance:
+                </span>
+                {getDisplayInsurances(recommended.hospital_name, (recommended as any).supported_insurance).slice(0, 4).map((ins, i) => (
+                  <span key={i} className="match-badge bg-[rgba(48,209,88,0.12)] text-[#30d158] border border-[rgba(48,209,88,0.3)]">
+                    {ins}
+                  </span>
+                ))}
+                {getDisplayInsurances(recommended.hospital_name, (recommended as any).supported_insurance).length > 4 && (
+                  <span className="match-badge text-[var(--muted)]">
+                    +{getDisplayInsurances(recommended.hospital_name, (recommended as any).supported_insurance).length - 4} more
+                  </span>
+                )}
+              </div>
             </div>
             <button
               onClick={() => handleSelect(recommended.hospital_id)}
@@ -428,18 +491,24 @@ function HospitalDiscoveryInner() {
                     {(opt.score ?? 0) > 0 && (
                       <span className="match-badge">{Math.round(opt.score!)} SCORE</span>
                     )}
-                   {(opt as any).supported_insurance && (opt as any).supported_insurance.length > 0 ? (
-  <div className="flex flex-wrap gap-1 items-center">
-    {(opt as any).supported_insurance.slice(0, 3).map((ins: string, idx: number) => (
-      <span key={idx} className="match-badge">{ins}</span>
-    ))}
-    {(opt as any).supported_insurance.length > 3 && (
-      <span className="match-badge">+{(opt as any).supported_insurance.length - 3} more</span>
-    )}
-  </div>
-) : (
-  <span className="match-badge">Insurance information unavailable</span>
-)}
+                    {(() => {
+                      const insList = getDisplayInsurances(opt.hospital_name, (opt as any).supported_insurance);
+                      return (
+                        <div className="flex flex-wrap gap-1 items-center">
+                          <span className="text-[10px] text-[var(--muted)] flex items-center gap-0.5 mr-0.5">
+                            <Shield size={10} className="text-[#30d158]" /> Insurance:
+                          </span>
+                          {insList.slice(0, 3).map((ins: string, idx: number) => (
+                            <span key={idx} className="match-badge text-[#30d158] bg-[rgba(48,209,88,0.08)] border-[rgba(48,209,88,0.25)]">
+                              {ins}
+                            </span>
+                          ))}
+                          {insList.length > 3 && (
+                            <span className="match-badge">+{insList.length - 3} more</span>
+                          )}
+                        </div>
+                      );
+                    })()}
               
             
                   </div>
