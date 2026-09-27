@@ -174,6 +174,12 @@ async def seed_jaipur_hospitals():
                 skipped += 1
                 continue
             
+            is_govt = any(w in h["name"].lower() for w in ["govt", "government", "sms", "swasthya", "charitable"])
+            ins_list = (
+                ["RGHS", "PMJAY", "CGHS", "ECHS", "ESIC"]
+                if is_govt
+                else ["RGHS", "PMJAY", "STAR_HEALTH", "HDFC_ERGO", "ICICI_LOMBARD", "CARE_HEALTH", "NIVA_BUPA", "BAJAJ_ALLIANZ", "NEW_INDIA", "UNITED_INDIA"]
+            )
             hosp = Hospital(
                 name=h["name"],
                 address=h["address"],
@@ -190,7 +196,7 @@ async def seed_jaipur_hospitals():
                 blood_units=40,
                 estimated_emergency_cost=25000,
                 capabilities="Emergency Stabilization, Trauma Care, ICU",
-                supported_insurance=[]
+                supported_insurance=ins_list
             )
             session.add(hosp)
             inserted += 1

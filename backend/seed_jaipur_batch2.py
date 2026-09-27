@@ -105,6 +105,12 @@ async def seed_batch_2():
             phone = row.get("phone", "").strip() or "+91 141 2560291"
             address = row.get("address", "").strip()
 
+            is_govt = any(w in name.lower() for w in ["govt", "government", "sms", "swasthya", "charitable", "state"])
+            ins_list = (
+                ["RGHS", "PMJAY", "CGHS", "ECHS", "ESIC"]
+                if is_govt
+                else ["RGHS", "PMJAY", "STAR_HEALTH", "HDFC_ERGO", "ICICI_LOMBARD", "CARE_HEALTH", "NIVA_BUPA", "BAJAJ_ALLIANZ", "NEW_INDIA", "UNITED_INDIA"]
+            )
             hosp = Hospital(
                 name=name,
                 address=address,
@@ -121,7 +127,7 @@ async def seed_batch_2():
                 blood_units=40,
                 estimated_emergency_cost=25000,
                 capabilities="Emergency Stabilization, Trauma Care, ICU",
-                supported_insurance=[]
+                supported_insurance=ins_list
             )
             session.add(hosp)
             existing_names.add(name)

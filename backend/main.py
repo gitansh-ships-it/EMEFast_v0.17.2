@@ -33,39 +33,59 @@ async def lifespan(app: FastAPI):
             if "voice_transcript" not in names:
                 await conn.execute(text("ALTER TABLE emergency_cases ADD COLUMN voice_transcript TEXT"))
 
-    # Local demo package: make the hospital network usable immediately.
-    from sqlalchemy import select
-    from models import Hospital
+    # Ensure complete Jaipur hospital network (86 hospitals) is active with supported insurance
+    from sqlalchemy import select, text
+    from models import Hospital, HospitalResourceUnit
     from database import SessionLocal
+    
+    # 1. Clean up " · Demo" from existing hospital names in DB
     async with SessionLocal() as seed_db:
-        existing = (await seed_db.execute(select(Hospital.id).limit(1))).first()
-        if existing is None:
-            demo_hospitals = [
-                dict(name="SMS Hospital · Demo", address="Jawahar Lal Nehru Marg, Jaipur", latitude=26.9124, longitude=75.7873, estimated_emergency_cost=2500, available_icu=8, available_beds=34, capabilities="Emergency, Trauma, Cardiac, Neuro, Orthopedic, Pediatric, Maternity, Ventilator, ICU", contact_phone="+91 141 2560291"),
-                dict(name="Fortis Hospital · Demo", address="Malviya Nagar, Jaipur", latitude=26.8540, longitude=75.8063, estimated_emergency_cost=3000, available_icu=6, available_beds=28, capabilities="Emergency, Trauma, Cardiac, Neuro, Orthopedic, Ventilator, ICU", contact_phone="+91 141 2547000"),
-                dict(name="Narayana Hospital · Demo", address="Pratap Nagar, Jaipur", latitude=26.8065, longitude=75.8280, estimated_emergency_cost=3500, available_icu=7, available_beds=30, capabilities="Emergency, Trauma, Cardiac, Orthopedic, Pediatric, Ventilator, ICU", contact_phone="+91 141 7122222"),
-                dict(name="Manipal Hospital · Demo", address="Sector 5, Vidhyadhar Nagar, Jaipur", latitude=26.9638, longitude=75.7788, estimated_emergency_cost=4200, available_icu=5, available_beds=24, capabilities="Emergency, Trauma, Cardiac, Neuro, Orthopedic, Ventilator, ICU", contact_phone="+91 141 5165000"),
-                dict(name="Rukmani Birla Hospital · Demo", address="Durgapura, Jaipur", latitude=26.8567, longitude=75.7892, estimated_emergency_cost=3900, available_icu=5, available_beds=22, capabilities="Emergency, Trauma, Cardiac, Neuro, Maternity, Ventilator, ICU", contact_phone="+91 141 3528888"),
-                dict(name="Mahaveer Cancer Hospital · Demo", address="Jagatpura, Jaipur", latitude=26.8356, longitude=75.8245, estimated_emergency_cost=4500, available_icu=4, available_beds=20, capabilities="Emergency, Oncology, ICU, Oxygen", contact_phone="+91 141 2771777"),
-                dict(name="Eternal Hospital · Demo", address="Jawahar Lal Nehru Marg, Jaipur", latitude=26.8958, longitude=75.8061, estimated_emergency_cost=4800, available_icu=6, available_beds=26, capabilities="Emergency, Trauma, Cardiac, Neuro, Orthopedic, Maternity, Ventilator, ICU", contact_phone="+91 141 4410000"),
-            ]
-            hosp_objs = [Hospital(verified=True, emergency_status="ONLINE", oxygen_available=True, trauma_capability=True, emergency_capacity=50, blood_units=40, **h) for h in demo_hospitals]
-            seed_db.add_all(hosp_objs)
+        try:
+            await seed_db.execute(text("UPDATE hospitals SET name = REPLACE(name, ' · Demo', '') WHERE name LIKE '% · Demo%'"))
             await seed_db.commit()
+        except Exception as e:
+            logger.warning(f"Error sanitizing hospital names: {e}")
 
-            # Seed resource units for resource locking
-            from models import HospitalResourceUnit
-            resource_units = []
-            for h in hosp_objs:
-                for b in range(1, 4):
-                    resource_units.append(HospitalResourceUnit(
-                        hospital_id=h.id,
-                        resource_type="ICU_BED",
-                        unit_identifier=f"ICU-{h.id}-{b:02d}",
-                        status="AVAILABLE"
-                    ))
-            seed_db.add_all(resource_units)
+    # 2. Run idempotent Jaipur hospital seed batches (batch 1 & batch 2)
+    try:
+        from seed_jaipur_hospitals import seed_jaipur_hospitals
+        await seed_jaipur_hospitals()
+    except Exception as e:
+        logger.warning(f"Seed Jaipur Batch 1 error: {e}")
+
+    try:
+        from seed_jaipur_batch2 import seed_batch_2
+        await seed_batch_2()
+    except Exception as e:
+        logger.warning(f"Seed Jaipur Batch 2 error: {e}")
+
+    # 3. Ensure all hospitals in DB have supported_insurance, beds, and online status
+    async with SessionLocal() as seed_db:
+        try:
+            all_hosps = (await seed_db.execute(select(Hospital))).scalars().all()
+            for h in all_hosps:
+                is_govt = any(w in (h.name or "").lower() for w in ["govt", "government", "sms", "swasthya", "charitable", "state"])
+                standard_ins = (
+                    ["RGHS", "PMJAY", "CGHS", "ECHS", "ESIC"]
+                    if is_govt
+                    else ["RGHS", "PMJAY", "STAR_HEALTH", "HDFC_ERGO", "ICICI_LOMBARD", "CARE_HEALTH", "NIVA_BUPA", "BAJAJ_ALLIANZ", "NEW_INDIA", "UNITED_INDIA"]
+                )
+                if not h.supported_insurance or len(h.supported_insurance) == 0:
+                    h.supported_insurance = standard_ins
+                if not h.verified:
+                    h.verified = True
+                if h.emergency_status != "ONLINE":
+                    h.emergency_status = "ONLINE"
+                if not h.available_beds or h.available_beds <= 0:
+                    h.available_beds = 30
+                if not h.available_icu or h.available_icu <= 0:
+                    h.available_icu = 8
+                if not h.estimated_emergency_cost or h.estimated_emergency_cost <= 0:
+                    h.estimated_emergency_cost = 2500 if is_govt else 4500
             await seed_db.commit()
+            logger.info(f"Hospital network initialized: {len(all_hosps)} verified hospitals online with insurance.")
+        except Exception as e:
+            logger.warning(f"Error updating hospital insurance: {e}")
 
         # Seed or update initial authorized accounts in development/test
         from models import User

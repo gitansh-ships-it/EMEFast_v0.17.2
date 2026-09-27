@@ -128,12 +128,11 @@ async def create_emergency_case(
         dist = calculate_haversine_distance(new_case.latitude, new_case.longitude, hosp.latitude, hosp.longitude)
         eta = estimate_eta_minutes(dist)
         response_state = "PENDING"
-        if demo_mode and index == 0:
-            response_state = "ACCEPTED"
-        elif demo_mode and index == 1:
-            response_state = "ACCEPTED"
-        elif demo_mode and index == 2:
-            response_state = "REJECTED"
+        if demo_mode:
+            if index in (0, 1, 3, 4):
+                response_state = "ACCEPTED"
+            elif index in (2, 5):
+                response_state = "REJECTED"
         resp = HospitalResponse(
             case_id=new_case.id,
             hospital_id=hosp.id,

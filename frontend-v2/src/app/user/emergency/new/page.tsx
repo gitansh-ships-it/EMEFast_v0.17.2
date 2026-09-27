@@ -955,7 +955,7 @@ export default function CreateEmergencyPage() {
             onRecording={setVoiceBlob}
             onTranscript={(text) => {
               setVoiceText(text);
-              if (!condition || condition === "Severe chest pain radiating to left arm") {
+              if (text && (!condition || condition === "Severe chest pain radiating to left arm") && selectedSymptoms.length === 0) {
                 setCondition(text);
               }
             }}

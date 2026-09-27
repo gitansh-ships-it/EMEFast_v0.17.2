@@ -317,6 +317,9 @@ function HospitalDiscoveryInner() {
               if (cond.toLowerCase().startsWith(pName.toLowerCase())) {
                 cond = cond.slice(pName.length).replace(/^[\s—–-]+/, "");
               }
+              if (currentCase.voice_transcript && cond.trim() === currentCase.voice_transcript.trim()) {
+                cond = currentCase.requirements || "Emergency Stabilization";
+              }
               return (
                 <>
                   {pName} — <span className="text-sos-300">{cond || "Emergency"}</span>

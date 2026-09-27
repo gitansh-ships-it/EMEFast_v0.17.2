@@ -257,7 +257,7 @@ export default function HospitalDashboard() {
   };
 
   return (
-    <div className="hospital-shell space-y-6">
+    <div className="hospital-shell pt-2 sm:pt-4 space-y-6">
       {/* =========================================================================
           1. OPERATIONAL HUD / STAT SUMMARY BAR (Matte Scope-Locked Design)
           ========================================================================= */}
@@ -651,7 +651,12 @@ export default function HospitalDashboard() {
                         {c.patient_name} {c.patient_age ? `· ${c.patient_age}y` : ""}
                       </div>
                       <p className="text-xs text-[var(--muted)] leading-relaxed font-medium m-0">
-                        {c.condition || "Emergency trauma presentation"}
+                        {(() => {
+                          const hasClinicalCondition = c.condition && c.condition.trim() && c.condition !== c.voice_transcript;
+                          if (hasClinicalCondition) return c.condition;
+                          if (c.requirements) return `Requirement: ${c.requirements}`;
+                          return "Emergency trauma presentation";
+                        })()}
                       </p>
                     </div>
 
@@ -900,7 +905,11 @@ export default function HospitalDashboard() {
                       <span className="text-[10px] font-mono font-bold uppercase text-[var(--muted)]">
                         Condition & Requirements
                       </span>
-                      <p className="font-semibold text-white mt-1 m-0">{c.condition}</p>
+                      <p className="font-semibold text-white mt-1 m-0">
+                        {c.condition && c.condition.trim() && c.condition !== c.voice_transcript
+                          ? c.condition
+                          : (c.requirements ? `Clinical need: ${c.requirements}` : "Emergency presentation")}
+                      </p>
                       <p className="text-[11px] text-[var(--muted)] mt-0.5 m-0">
                         Needs: {c.requirements || "Emergency stabilization"}
                       </p>
@@ -991,7 +1000,11 @@ export default function HospitalDashboard() {
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-bold text-[#ff817a]">{caseItem.case_code}</span>
                     <span className="text-white font-semibold">{caseItem.patient_name}</span>
-                    <span className="text-[var(--muted)] text-[11px]">· {caseItem.condition}</span>
+                    <span className="text-[var(--muted)] text-[11px]">
+                      · {caseItem.condition && caseItem.condition !== caseItem.voice_transcript
+                          ? caseItem.condition
+                          : (caseItem.requirements ? `Need: ${caseItem.requirements}` : "Emergency presentation")}
+                    </span>
                   </div>
 
                   <div className="text-[11px] font-mono text-red-400 font-semibold flex items-center gap-1.5">
