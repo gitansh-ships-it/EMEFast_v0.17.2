@@ -324,7 +324,7 @@ function HospitalDiscoveryInner() {
   const pendingCount = decision?.pending_count ?? (currentCase?.responses?.filter(r => r.response === 'PENDING').length || (currentCase?.responses?.length || 0));
 
   return (
-    <div className="hospital-discovery max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 pt-[env(safe-area-inset-top,0px)] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
+    <div className="hospital-discovery max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
       {/* Case Header */}
       <div className="v2-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">

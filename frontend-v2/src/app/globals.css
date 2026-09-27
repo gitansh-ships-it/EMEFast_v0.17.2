@@ -3808,6 +3808,19 @@ html.theme-dark .inactive-step-label * {
   padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px) + 24px) !important;
 }
 
+/* Ensure proper breathing room below the sticky header across all workspaces */
+.app-content {
+  padding-top: max(16px, env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 650px) {
+  .hospital-discovery,
+  .dashboard-page,
+  .app-content {
+    padding-top: max(22px, env(safe-area-inset-top, 0px)) !important;
+  }
+}
+
 /* Level 2: Workspace Segment Row */
 .workspace-segment-row {
   display: flex !important;
