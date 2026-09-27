@@ -179,7 +179,7 @@ async def update_hospital_resources(
     user: UserContext = Depends(require_hospital),
     db: AsyncSession = Depends(get_db)
 ):
-    if user.role == "HOSPITAL" and user.hospital_id is not None and user.hospital_id != id:
+    if user.role == "HOSPITAL" and (user.hospital_id is None or user.hospital_id != id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden: Cannot update resource records of another hospital facility"
@@ -206,7 +206,7 @@ async def update_hospital_resources(
     if res_in.trauma_capability is not None:
         hosp.trauma_capability = res_in.trauma_capability
 
-    # New: handle supported_insurance field
+    # Handle supported_insurance field
     if getattr(res_in, "supported_insurance", None) is not None:
         from backend.constants.insurance import validate_insurance_codes
         unknown = validate_insurance_codes(res_in.supported_insurance)
@@ -217,3 +217,60 @@ async def update_hospital_resources(
     await db.commit()
     await db.refresh(hosp)
     return hosp
+
+@router.get("/{id}/insurances")
+async def get_hospital_insurances(
+    id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get the supported insurance codes for a hospital."""
+    result = await db.execute(select(Hospital).where(Hospital.id == id))
+    hosp = result.scalars().first()
+    if not hosp:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+    return {
+        "hospital_id": hosp.id,
+        "hospital_name": hosp.name,
+        "supported_insurance": hosp.supported_insurance or []
+    }
+
+@router.put("/{id}/insurances")
+@router.patch("/{id}/insurances")
+async def update_hospital_insurances(
+    id: int,
+    payload: dict,
+    user: UserContext = Depends(require_hospital),
+    db: AsyncSession = Depends(get_db)
+):
+    """Update the supported insurance codes for a hospital."""
+    if user.role == "HOSPITAL" and (user.hospital_id is None or user.hospital_id != id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: Cannot update insurance records of another hospital facility"
+        )
+    result = await db.execute(select(Hospital).where(Hospital.id == id))
+    hosp = result.scalars().first()
+    if not hosp:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+
+    insurances = payload.get("supported_insurance", []) if isinstance(payload, dict) else payload
+    if not isinstance(insurances, list):
+        raise HTTPException(status_code=400, detail="Invalid payload: 'supported_insurance' must be a list of codes")
+
+    try:
+        from constants.insurance import validate_insurance_codes
+    except ImportError:
+        from backend.constants.insurance import validate_insurance_codes
+    unknown = validate_insurance_codes(insurances)
+    if unknown:
+        raise HTTPException(status_code=400, detail=f"Unknown insurance codes: {', '.join(unknown)}")
+
+    hosp.supported_insurance = insurances
+    await db.commit()
+    await db.refresh(hosp)
+    return {
+        "status": "success",
+        "hospital_id": hosp.id,
+        "hospital_name": hosp.name,
+        "supported_insurance": hosp.supported_insurance
+    }

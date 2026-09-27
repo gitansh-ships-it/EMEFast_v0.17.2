@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 import datetime
-from models.base import Base
+from .base import Base
 
 class HospitalResponse(Base):
     __tablename__ = "hospital_responses"

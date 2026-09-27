@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, JSON
 import datetime
-from models.base import Base
+from .base import Base
 
 class PatientHealthProfile(Base):
     __tablename__ = "patient_health_profiles"

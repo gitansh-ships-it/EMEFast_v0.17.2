@@ -3,7 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Dict
 
-from backend.constants.insurance import MASTER_INSURANCE_LIST
+try:
+    from constants.insurance import MASTER_INSURANCE_LIST
+except ImportError:
+    from backend.constants.insurance import MASTER_INSURANCE_LIST
 
 router = APIRouter(prefix="/api/insurance", tags=["insurance"])
 

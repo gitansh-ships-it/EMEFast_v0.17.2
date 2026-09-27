@@ -310,8 +310,13 @@ html.theme-light .toast-floating {
 .live-map-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #30d158; box-shadow: 0 0 0 3px rgba(48,209,88,.2); }
 .live-map-status.error .live-map-status-dot { background: #d7261e; box-shadow: 0 0 0 3px rgba(215,38,30,.2); }
 .live-map-error { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 500; padding: 10px 12px; border-radius: 12px; background: #240a0a !important; border: 1px solid rgba(239,68,68,.4) !important; color: #fecaca !important; font-size: 11px; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.live-map-traffic-btn { position: absolute; top: 14px; right: 14px; z-index: 500; display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; background: #141418 !important; border: 1px solid rgba(255,255,255,.18) !important; color: #94a3b8 !important; font-size: 11px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,.35); transition: all 0.2s ease; user-select: none; }
+.live-map-traffic-btn:hover { background: #1e2025 !important; border-color: rgba(255,255,255,.3) !important; color: #f8fafc !important; }
+.live-map-traffic-btn.active { background: rgba(255,59,48,.16) !important; border-color: rgba(255,59,48,.45) !important; color: #ff6961 !important; }
+.live-map-traffic-dot { width: 7px; height: 7px; border-radius: 50%; background: #64748b; transition: all 0.2s ease; }
+.live-map-traffic-dot.active { background: #ff3b30; box-shadow: 0 0 0 3px rgba(255,59,48,.3); }
 @keyframes emefast-map-pulse { 0% { transform: scale(.55); opacity: .85; } 75%,100% { transform: scale(1.5); opacity: 0; } }
-@media (max-width: 640px) { .live-map-shell, .live-map { min-height: 340px; height: 340px; } .live-map-status { max-width: calc(100% - 28px); } }
+@media (max-width: 640px) { .live-map-shell, .live-map { min-height: 340px; height: 340px; } .live-map-status { max-width: calc(100% - 28px); } .live-map-traffic-btn { top: 50px; right: 10px; font-size: 10px; padding: 5px 10px; } }
 
 /* ---------- EMEFast adaptive theme layer ---------- */
 html.theme-dark { color-scheme: dark; }

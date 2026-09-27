@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
 import datetime
-from models.base import Base
+from .base import Base
 
 class PreArrivalAlert(Base):
     __tablename__ = "prearrival_alerts"

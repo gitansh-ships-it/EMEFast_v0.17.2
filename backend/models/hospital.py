@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, JSON
 import datetime
-from models.base import Base
+from .base import Base
 
 class Hospital(Base):
     __tablename__ = "hospitals"

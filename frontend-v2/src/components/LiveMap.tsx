@@ -58,6 +58,11 @@ export default function LiveMap({ origin, destination, destinationLabel = "Hospi
   const [message, setMessage] = useState("Loading live map…");
   const [livePosition, setLivePosition] = useState<Point>(origin);
   const livePositionRef = useRef<Point>(origin);
+  const [showTraffic, setShowTraffic] = useState(false);
+  const trafficLayerRef = useRef<any>(null);
+
+  const tomtomApiKey = (process.env.NEXT_PUBLIC_TOMTOM_API_KEY || "").trim();
+  const hasValidKey = Boolean(tomtomApiKey && tomtomApiKey !== "YOUR_TOMTOM_API_KEY_HERE");
 
   useEffect(() => {
     if (!validPoint(origin)) {
@@ -173,6 +178,10 @@ export default function LiveMap({ origin, destination, destinationLabel = "Hospi
       if (watchRef.current != null && navigator.geolocation) navigator.geolocation.clearWatch(watchRef.current);
       watchRef.current = null;
       (localMap as any)?.__emefastResizeObserver?.disconnect?.();
+      if (trafficLayerRef.current) {
+        trafficLayerRef.current.remove();
+        trafficLayerRef.current = null;
+      }
       localMap?.remove();
       leafletMapRef.current = null;
       originMarkerRef.current = null;
@@ -214,7 +223,44 @@ export default function LiveMap({ origin, destination, destinationLabel = "Hospi
     return () => controller.abort();
   }, [livePosition.lat, livePosition.lng, destination?.lat, destination?.lng, onRouteInfo]);
 
-    const refreshGPS = () => {
+  useEffect(() => {
+    const map = leafletMapRef.current;
+    if (!map) return;
+    const L = (window as any).L;
+    if (!L) return;
+
+    if (showTraffic && hasValidKey) {
+      if (!trafficLayerRef.current) {
+        trafficLayerRef.current = L.tileLayer(
+          `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${tomtomApiKey}`,
+          {
+            maxZoom: 19,
+            opacity: 0.8,
+            attribution: '&copy; <a href="https://www.tomtom.com" target="_blank" rel="noopener noreferrer">TomTom</a>',
+          }
+        );
+      }
+      if (!map.hasLayer(trafficLayerRef.current)) {
+        trafficLayerRef.current.addTo(map);
+      }
+    } else {
+      if (trafficLayerRef.current && map.hasLayer(trafficLayerRef.current)) {
+        map.removeLayer(trafficLayerRef.current);
+      }
+    }
+  }, [showTraffic, hasValidKey, tomtomApiKey]);
+
+  const toggleTraffic = () => {
+    if (!hasValidKey) {
+      setMessage("Add your free TomTom API key to .env.local to enable live traffic");
+      return;
+    }
+    const next = !showTraffic;
+    setShowTraffic(next);
+    setMessage(next ? "Live traffic overlay enabled (TomTom)" : "Live traffic overlay disabled");
+  };
+
+  const refreshGPS = () => {
     if (!navigator.geolocation) return;
     setMessage("Refreshing device GPS…");
     navigator.geolocation.getCurrentPosition(
@@ -250,6 +296,24 @@ export default function LiveMap({ origin, destination, destinationLabel = "Hospi
           ↻
         </button>
       </div>
+
+      <button
+        type="button"
+        onClick={toggleTraffic}
+        className={`live-map-traffic-btn ${showTraffic ? "active" : ""}`}
+        title={
+          !hasValidKey
+            ? "Add your free TomTom API key in .env.local to activate traffic layer"
+            : showTraffic
+            ? "Hide live traffic flow"
+            : "Show TomTom live traffic flow"
+        }
+        aria-label="Toggle live traffic layer"
+      >
+        <span className={`live-map-traffic-dot ${showTraffic ? "active" : ""}`} />
+        <span>Traffic {showTraffic ? "ON" : "OFF"}</span>
+      </button>
+
       {status === "error" && <div className="live-map-error">Check your internet connection and GPS permission, then refresh the page.</div>}
     </div>
   );

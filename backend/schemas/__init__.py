@@ -63,6 +63,7 @@ class HospitalUpdate(BaseModel):
     blood_units: Optional[int] = None
     trauma_capability: Optional[bool] = None
     estimated_emergency_cost: Optional[int] = None
+    supported_insurance: Optional[List[str]] = None
 
 class HospitalOut(HospitalBase):
     id: int

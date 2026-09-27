@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 import datetime
-from models.base import Base
+from .base import Base
 
 class HospitalResourceUnit(Base):
     __tablename__ = "hospital_resource_units"

@@ -5,6 +5,7 @@ import { Hospital as HospitalIcon, Activity, Shield, Heart, Minus, Plus, XCircle
 import api from '@/lib/api';
 import { Hospital } from '@/types';
 import { getAuthSession } from '@/lib/auth';
+import HospitalInsuranceManager from '@/components/HospitalInsuranceManager';
 
 const RETRY_DELAYS = [5000, 15000, 30000];
 
@@ -14,11 +15,6 @@ export default function ResourcesPage() {
   const [error, setError] = useState<string | null>(null);
   const [isWaking, setIsWaking] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
-
-  // ----- Insurance UI state -----
-  const [masterList, setMasterList] = useState<Array<{ group: string; items: Array<{ code: string; name: string }> }>>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedInsurance, setSelectedInsurance] = useState<Set<string>>(new Set());
 
   const fetchInfo = async (isManualRetry = false, attempt = 0) => {
     if (isManualRetry) {
@@ -42,18 +38,12 @@ export default function ResourcesPage() {
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     try {
-      const [hospRes, insuranceRes] = await Promise.all([
-        api.get(`/hospitals/${targetId}`, { signal: controller.signal }),
-        api.get('/insurance/master-list', { signal: controller.signal }),
-      ]);
+      const hospRes = await api.get(`/hospitals/${targetId}`, { signal: controller.signal });
       clearTimeout(timeoutId);
       setError(null);
       setIsWaking(false);
       setRetryAttempt(0);
       setInfo(hospRes.data);
-      setMasterList(insuranceRes.data);
-      // pre‑select existing insurance codes
-      setSelectedInsurance(new Set(hospRes.data.supported_insurance ?? []));
     } catch (err: any) {
       clearTimeout(timeoutId);
       const status = err.response?.status;
@@ -110,35 +100,6 @@ export default function ResourcesPage() {
     }
   };
 
-  // ----- Insurance UI handlers -----
-  const toggleInsurance = (code: string) => {
-    setSelectedInsurance((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(code)) newSet.delete(code);
-      else newSet.add(code);
-      return newSet;
-    });
-  };
-
-  const selectAllInGroup = (codes: string[]) => {
-    setSelectedInsurance((prev) => {
-      const newSet = new Set(prev);
-      codes.forEach((c) => newSet.add(c));
-      return newSet;
-    });
-  };
-
-  const clearAllInGroup = (codes: string[]) => {
-    setSelectedInsurance((prev) => {
-      const newSet = new Set(prev);
-      codes.forEach((c) => newSet.delete(c));
-      return newSet;
-    });
-  };
-
-  const saveInsurance = async () => {
-    await updateResource({ supported_insurance: Array.from(selectedInsurance) });
-  };
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6 pb-[calc(76px+env(safe-area-inset-bottom,0px)+24px)]">
@@ -260,65 +221,13 @@ export default function ResourcesPage() {
           )}
 
           {/* ----- Supported Insurance Section ----- */}
-          <div className="v2-card p-6 space-y-4">
-            <h3 className="text-lg font-bold text-white">Supported Insurance</h3>
-            <p className="text-sm text-neutral-300">Self-declared by hospital. Confirm coverage at admission.</p>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Search insurance…"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="flex-1 rounded border border-neutral-600 bg-neutral-800/30 px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-            <div className="space-y-4 max-h-[400px] overflow-y-auto">
-              {masterList.filter(g => g.items.some(it => it.name.toLowerCase().includes(searchTerm.toLowerCase()) || it.code.toLowerCase().includes(searchTerm.toLowerCase()))).map(group => (
-                <div key={group.group} className="border-b border-neutral-700 pb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-white">{group.group}</h4>
-                    <button
-                      type="button"
-                      className="text-xs text-primary-400 underline"
-                      onClick={() => {
-                        const codes = group.items.map(it => it.code);
-                        const allSelected = codes.every(c => selectedInsurance.has(c));
-                        allSelected ? clearAllInGroup(codes) : selectAllInGroup(codes);
-                      }}
-                    >
-                      {group.items.map(it => it.code).every(c => selectedInsurance.has(c)) ? 'Clear all' : 'Select all'}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {group.items
-                      .filter(it => it.name.toLowerCase().includes(searchTerm.toLowerCase()) || it.code.toLowerCase().includes(searchTerm.toLowerCase()))
-                      .map(it => (
-                        <label key={it.code} className="inline-flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedInsurance.has(it.code)}
-                            onChange={() => toggleInsurance(it.code)}
-                            className="form-checkbox h-4 w-4 rounded text-primary-600 bg-neutral-700 border-neutral-600 focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-white">{it.name} ({it.code})</span>
-                        </label>
-                      ))}
-                  </div>
-                  <div className="mt-1 text-xs text-neutral-400">{group.items.filter(it => selectedInsurance.has(it.code)).length} selected</div>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-sm text-neutral-400">Total selected: {selectedInsurance.size}</span>
-              <button
-                onClick={saveInsurance}
-                className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded disabled:opacity-50"
-                disabled={loading}
-              >
-                Save Insurance
-              </button>
-            </div>
-          </div>
+          {info && (
+            <HospitalInsuranceManager
+              hospitalId={info.id}
+              initialInsurances={info.supported_insurance}
+              onSaved={(updated) => setInfo({ ...info, supported_insurance: updated })}
+            />
+          )}
         </>
       )}
     </div>

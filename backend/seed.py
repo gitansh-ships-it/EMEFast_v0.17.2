@@ -161,6 +161,15 @@ async def seed_database():
             await session.commit()
             hosp_objs = existing_hospitals
 
+        # Seed Jaipur hospitals (idempotent, skipping duplicates)
+        try:
+            from seed_jaipur_hospitals import seed_jaipur_hospitals
+            from seed_jaipur_batch2 import seed_batch_2
+            await seed_jaipur_hospitals()
+            await seed_batch_2()
+        except Exception as e:
+            print(f"[EMEFast] Jaipur seeding note: {e}")
+
         # Check existing resource units
         existing_units = (await session.execute(select(HospitalResourceUnit))).scalars().all()
         if not existing_units:
