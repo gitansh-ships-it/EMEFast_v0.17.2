@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -84,6 +84,9 @@ class HospitalResponseOut(BaseModel):
     hospital_name: Optional[str] = None
     hospital_address: Optional[str] = None
     hospital_capabilities: Optional[str] = None
+    supported_insurance: List[str] = Field(default_factory=list)
+    available_beds: Optional[int] = None
+    available_icu: Optional[int] = None
     response: str # PENDING, ACCEPTED, REJECTED, SELECTED
     rejection_reason: Optional[str] = None
     eta: Optional[float] = None
@@ -93,6 +96,30 @@ class HospitalResponseOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_hospital_relationship(cls, data: Any) -> Any:
+        if hasattr(data, "hospital") and data.hospital is not None:
+            h = data.hospital
+            return {
+                "id": getattr(data, "id", None),
+                "case_id": getattr(data, "case_id", None),
+                "hospital_id": getattr(data, "hospital_id", None),
+                "hospital_name": getattr(h, "name", None),
+                "hospital_address": getattr(h, "address", None),
+                "hospital_capabilities": getattr(h, "capabilities", None),
+                "supported_insurance": getattr(h, "supported_insurance", []) or [],
+                "available_beds": getattr(h, "available_beds", None),
+                "available_icu": getattr(h, "available_icu", None),
+                "response": getattr(data, "response", "PENDING"),
+                "rejection_reason": getattr(data, "rejection_reason", None),
+                "eta": getattr(data, "eta", None),
+                "distance_km": getattr(data, "distance_km", None),
+                "estimated_cost": getattr(data, "estimated_cost", None),
+                "responded_at": getattr(data, "responded_at", None),
+            }
+        return data
 
 class HospitalRespondRequest(BaseModel):
     response: str # ACCEPTED, REJECTED

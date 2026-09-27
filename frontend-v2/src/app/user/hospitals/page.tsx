@@ -84,11 +84,22 @@ function HospitalDiscoveryInner() {
   const caseIdParam = searchParams.get('case_id');
   const [currentCase, setCurrentCase] = useState<EmergencyCase | null>(null);
   const [decision, setDecision] = useState<DecisionEngineResult | null>(null);
+  const [hospitalMap, setHospitalMap] = useState<Record<number, any>>({});
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isWaking, setIsWaking] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
+
+  useEffect(() => {
+    api.get('/hospitals').then(res => {
+      const map: Record<number, any> = {};
+      for (const h of (res.data || [])) {
+        map[h.id] = h;
+      }
+      setHospitalMap(map);
+    }).catch(() => {});
+  }, []);
 
   const fetchData = async (isManualRetry = false, attempt = 0) => {
     if (isManualRetry) {
@@ -272,26 +283,41 @@ function HospitalDiscoveryInner() {
   const cheapest = decision?.cheapest_hospital;
 
   const optionsToRender = (decision?.all_options && decision.all_options.length > 0)
-    ? decision.all_options
-    : (currentCase?.responses || []).map(r => ({
-        hospital_id: r.hospital_id,
-        hospital_name: r.hospital_name,
-        hospital_address: (r as any).hospital_address || 'Nearby verified emergency facility',
-        hospital_capabilities: (r as any).hospital_capabilities || '',
-        response: r.response,
-        rejection_reason: r.rejection_reason,
-        eta: r.eta || 0,
-        distance_km: r.distance_km || 0,
-        estimated_cost: r.estimated_cost || 0,
-        is_recommended: false,
-        score: 0,
-        explanation: [],
-        available_beds: (r as any).available_beds || 0,
-        available_icu: (r as any).available_icu || 0,
-        flag: undefined,
-        requirement_unconfirmed: false,
-        supported_insurance: (r as any).supported_insurance || [],
-      }));
+    ? decision.all_options.map(opt => {
+        const hInfo = hospitalMap[opt.hospital_id];
+        return {
+          ...opt,
+          hospital_name: opt.hospital_name || hInfo?.name || `Hospital #${opt.hospital_id}`,
+          hospital_address: (opt.hospital_address && opt.hospital_address !== 'Nearby verified emergency facility')
+            ? opt.hospital_address
+            : (hInfo?.address || 'Nearby verified emergency facility'),
+          supported_insurance: (opt.supported_insurance && opt.supported_insurance.length > 0)
+            ? opt.supported_insurance
+            : (hInfo?.supported_insurance || []),
+        };
+      })
+    : (currentCase?.responses || []).map(r => {
+        const hInfo = hospitalMap[r.hospital_id];
+        return {
+          hospital_id: r.hospital_id,
+          hospital_name: r.hospital_name || hInfo?.name || `Hospital #${r.hospital_id}`,
+          hospital_address: (r as any).hospital_address || hInfo?.address || 'Nearby verified emergency facility',
+          hospital_capabilities: (r as any).hospital_capabilities || hInfo?.capabilities || '',
+          response: r.response,
+          rejection_reason: r.rejection_reason,
+          eta: r.eta || 0,
+          distance_km: r.distance_km || 0,
+          estimated_cost: r.estimated_cost || hInfo?.estimated_emergency_cost || 0,
+          is_recommended: false,
+          score: 0,
+          explanation: [],
+          available_beds: (r as any).available_beds || hInfo?.available_beds || 0,
+          available_icu: (r as any).available_icu || hInfo?.available_icu || 0,
+          flag: undefined,
+          requirement_unconfirmed: false,
+          supported_insurance: (r as any).supported_insurance || hInfo?.supported_insurance || [],
+        };
+      });
 
   const acceptedCount = decision?.accepted_count ?? (currentCase?.responses?.filter(r => r.response === 'ACCEPTED').length || 0);
   const rejectedCount = decision?.rejected_count ?? (currentCase?.responses?.filter(r => r.response === 'REJECTED').length || 0);
