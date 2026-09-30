@@ -265,7 +265,7 @@ export default function HospitalDashboard() {
         <div className="space-y-1.5">
           <div className="eyebrow flex items-center gap-2 text-xs font-mono font-bold tracking-wider text-[var(--muted)]">
             <Radio size={13} className="text-[#ff3b30] animate-pulse" />
-            <span>VERIFIED ER DESK · LIVE INBOX</span>
+            <span>VERIFIED ER DESK · ACTIVE INBOX</span>
             <span className="text-white/20">|</span>
             <span className="text-[11px] text-[var(--muted)] font-normal">
               Synced: {lastSyncedAt.toLocaleTimeString()}
@@ -275,7 +275,7 @@ export default function HospitalDashboard() {
             Emergency Case Intake
           </h1>
           <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed max-w-2xl m-0">
-            Real-time ambulance telemetry, incoming broadcast triage, and immediate admission coordination.
+            Ambulance intake details, incident location, and pre-arrival admission coordination.
           </p>
         </div>
 
@@ -808,7 +808,7 @@ export default function HospitalDashboard() {
               <Activity size={38} className="mx-auto text-[#2997ff]" />
               <h3 className="text-base font-bold text-white m-0">No active ER cases</h3>
               <p className="text-xs text-[var(--muted)] max-w-md mx-auto m-0 leading-relaxed">
-                When your facility accepts an incoming emergency query, live transit monitoring and ER prep tools
+                When your facility accepts an incoming emergency request, transit ETA and ER prep details
                 will appear here.
               </p>
             </div>
@@ -951,7 +951,7 @@ export default function HospitalDashboard() {
                       className="text-xs font-mono font-bold text-[#2997ff] hover:underline inline-flex items-center gap-1 cursor-pointer"
                     >
                       <MapPin size={13} />
-                      <span>{isMapOpen ? "Hide Route Map" : "View Live Inbound Route"}</span>
+                      <span>{isMapOpen ? "Hide Route Map" : "View Inbound Route"}</span>
                       {isMapOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                     </button>
 

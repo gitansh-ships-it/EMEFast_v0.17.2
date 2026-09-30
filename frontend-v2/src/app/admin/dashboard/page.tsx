@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   };
 
   const kpis = [
-    { label: 'Active Emergencies', value: metrics?.active_emergencies ?? 0, sub: 'Live Hospital Queries', color: metrics?.active_emergencies && metrics.active_emergencies > 0 ? 'text-amber-400' : 'text-[var(--text)]' },
+    { label: 'Active Emergencies', value: metrics?.active_emergencies ?? 0, sub: 'Active Hospital Requests', color: metrics?.active_emergencies && metrics.active_emergencies > 0 ? 'text-amber-400' : 'text-[var(--text)]' },
     { label: 'Verified Hospitals', value: `${metrics?.verified_hospitals ?? 0}/${metrics?.total_hospitals ?? 0}`, sub: 'Licensed Centers', color: 'text-[var(--text)]' },
     { label: 'Cases Today', value: metrics?.cases_today ?? 0, sub: '24h Emergency Cases', color: 'text-[var(--text)]' },
     { label: 'Avg Response', value: `${metrics?.avg_response_time_minutes ?? 0}m`, sub: 'Allocation Speed', color: 'text-[var(--text)]' },
@@ -74,8 +74,8 @@ export default function AdminDashboard() {
           <div className="admin-action-icon danger">
             <Radio size={20} />
           </div>
-          <div className="admin-action-title"><h3>Live Emergency Feed</h3><ChevronRight size={16}/></div>
-          <p>Real-time state emergency stream with live hospital acceptances and route status.</p>
+          <div className="admin-action-title"><h3>Emergency Case Feed</h3><ChevronRight size={16}/></div>
+          <p>State emergency stream with hospital acceptances and route status.</p>
         </Link>
 
         <Link href="/admin/users" className="admin-action-card v2-card v2-card-hover">

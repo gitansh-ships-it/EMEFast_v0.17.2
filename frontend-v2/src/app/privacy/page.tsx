@@ -5,6 +5,11 @@ import { ArrowLeft, ShieldCheck, Lock, Eye, Clock, FileText, CheckCircle2 } from
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-[#f5f5f7] pb-16">
+      {/* Prominent Decision-Support Boundary Notice */}
+      <aside aria-label="Emergency Services Notice" className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-200 px-4 py-2 text-center text-xs font-medium">
+        <span>Decision-support only. EMEFast does not dispatch ambulances. 108 / 112 remain the official emergency numbers.</span>
+      </aside>
+
       {/* Top Navigation */}
       <header className="topnav px-5 sm:px-8 py-4 border-b border-white/10">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -12,7 +17,7 @@ export default function PrivacyPage() {
             <ArrowLeft size={16} /> Back to EMEFast
           </Link>
           <div className="text-xs font-bold tracking-widest text-[#ff3b30] uppercase">
-            Health Data Trust
+            Pilot Governance
           </div>
         </div>
       </header>
@@ -20,13 +25,13 @@ export default function PrivacyPage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-12 pb-8">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#30d158]/10 border border-[#30d158]/20 text-[#30d158] text-xs font-semibold mb-4">
-          <ShieldCheck size={14} /> Consent-First Emergency Architecture
+          <ShieldCheck size={14} /> Emergency Coordination Pilot Disclosure
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-          Privacy & Consent Disclosure
+          Privacy & Pilot Data Disclosure
         </h1>
         <p className="mt-3 text-neutral-400 text-sm sm:text-base leading-relaxed">
-          EMEFast coordinates clinical capacity under strict data minimization. Learn how your emergency health data, GPS location, and voice telemetry are protected during active triage.
+          EMEFast coordinates emergency hospital selection and pre-arrival intake. Learn how emergency details, GPS location, and voice notes are handled during this pilot.
         </p>
       </section>
 
@@ -38,9 +43,9 @@ export default function PrivacyPage() {
               <Lock size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">1. Explicit Emergency Consent Model</h2>
+              <h2 className="text-lg font-bold text-white">1. Emergency Intake Data Collection</h2>
               <p className="mt-1 text-sm text-neutral-400 leading-relaxed">
-                Emergency activation via EMEFast triggers a scoped consent token. Patient details (age, symptoms, vitals, and ABHA ID if provided) are transmitted strictly to verified hospital emergency departments within clinical proximity that have active capability matches.
+                Emergency activation collects details needed for hospital intake coordination. Patient details (name if provided, age, symptoms, vital signs, and incident location) are transmitted to participating hospital emergency departments within clinical proximity to facilitate pre-arrival readiness.
               </p>
             </div>
           </div>
@@ -50,9 +55,9 @@ export default function PrivacyPage() {
               <Eye size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">2. Strict Need-to-Know Clinical Disclosure</h2>
+              <h2 className="text-lg font-bold text-white">2. Clinical Need-to-Know Information</h2>
               <p className="mt-1 text-sm text-neutral-400 leading-relaxed">
-                Hospitals receive clinical triage requirements (e.g. ICU bed requirement, ventilator need, trauma surgical capacity) to determine acceptance. Full medical history is never broadcast publicly or exposed to unverified institutions.
+                Hospitals receive clinical triage requirements (e.g. ICU bed requirement, specialized surgery, trauma support) to evaluate whether they can receive the patient. Intake details are accessible only to registered emergency desk operators.
               </p>
             </div>
           </div>
@@ -62,9 +67,9 @@ export default function PrivacyPage() {
               <Clock size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">3. Ephemeral Retention & Access Holds</h2>
+              <h2 className="text-lg font-bold text-white">3. Data Handling in Pilot</h2>
               <p className="mt-1 text-sm text-neutral-400 leading-relaxed">
-                Emergency coordination sessions, GPS telemetry, and pre-arrival voice memos are retained only for the duration of the active transfer plus mandatory medical audit records. Resource reservations automatically expire after 15 minutes unless verified upon patient arrival.
+                During this pilot, the system stores entered patient names (defaults to Unknown Patient if omitted), clinical condition notes and selected symptoms, device or pinned GPS coordinates, and voice audio recordings with raw text dictations. These records are stored in operational databases to coordinate transfers and generate operational audit trails. No end-to-end encryption is claimed at this stage. Medical and statutory data retention practices remain subject to ongoing pilot evaluation and legal review.
               </p>
             </div>
           </div>
@@ -74,17 +79,27 @@ export default function PrivacyPage() {
               <FileText size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">4. Standards & Statutory Alignment</h2>
+              <h2 className="text-lg font-bold text-white">4. Standards & Statutory Consideration</h2>
               <p className="mt-1 text-sm text-neutral-400 leading-relaxed">
-                Architecture designed in alignment with ABDM (Ayushman Bharat Digital Mission) principles, DISHA guidelines, and FHIR data standards for emergency healthcare interoperability.
+                Designed with consideration for ABDM, FHIR and applicable Indian data-protection requirements. Compliance status: pilot / validation required. Statutory alignment under the Digital Personal Data Protection (DPDP) Act and emergency medical data handling requires formal legal review before production deployment.
               </p>
             </div>
+          </div>
+
+          {/* Definition of Admin-Verified */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5">
+            <div className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-[#30d158]" /> Definition of &quot;Admin-Verified&quot; Facility Status
+            </div>
+            <p className="text-xs text-neutral-400 leading-relaxed m-0">
+              In EMEFast, an &quot;Admin-verified&quot; hospital indicates that a platform system administrator has confirmed the facility&apos;s operational existence, emergency desk contact information, and listed clinical capabilities in the administrative hospital registry (database flag <code className="text-[#ff817a]">Hospital.verified == True</code>). It confirms verified platform contact capability; it does not constitute clinical accreditation, medical endorsement, or statutory certification.
+            </p>
           </div>
         </div>
 
         {/* Action / Return */}
         <div className="pt-4 flex justify-between items-center text-xs text-neutral-500">
-          <span>EMEFast · Emergency Medical Fast Response System</span>
+          <span>EMEFast · Emergency Medical Coordination System</span>
           <Link href="/" className="text-neutral-300 hover:text-white underline underline-offset-4">
             Return to Homepage
           </Link>

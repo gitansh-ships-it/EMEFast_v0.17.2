@@ -625,6 +625,11 @@ export default function CreateEmergencyPage() {
 
   return (
     <main className="emergency-shell max-w-4xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-36 space-y-4 sm:space-y-6">
+      {/* Prominent Decision-Support Boundary Notice */}
+      <aside aria-label="Emergency Services Notice" className="w-full bg-amber-500/15 border border-amber-500/30 text-amber-200 p-2.5 rounded-2xl text-center text-xs font-medium">
+        <span>Decision-support only. EMEFast does not dispatch ambulances. 108 / 112 remain the official emergency numbers.</span>
+      </aside>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-white/10 pb-3">
         <div>
@@ -637,7 +642,7 @@ export default function CreateEmergencyPage() {
           <p className="text-xs text-[var(--muted)] mt-0.5">
             {isAmbulance
               ? "Sequential 4-step intake for paramedic emergency coordination and hospital handover."
-              : "Sequential 4-step intake for rapid clinical triage and verified hospital query."}
+              : "Sequential 4-step intake for rapid clinical triage and emergency request."}
           </p>
         </div>
 
@@ -716,7 +721,7 @@ export default function CreateEmergencyPage() {
                 </div>
                 <h2 className="text-lg font-bold text-[var(--text)] mt-1">Confirm Incident Coordinates</h2>
                 <p className="text-xs text-[var(--muted)] mt-0.5">
-                  Hospitals are matched by real-time drive time from this position.
+                  Hospitals are matched by estimated drive time from this position.
                 </p>
               </div>
               <button
@@ -1078,13 +1083,16 @@ export default function CreateEmergencyPage() {
           {/* Readiness Banner */}
           <div className="v2-card p-4 bg-emerald-500/10 border-emerald-500/30 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <HospitalIcon size={20} className="text-[#30d158] shrink-0" />
+              <ShieldCheck size={20} className="text-[#30d158] shrink-0" />
               <div>
                 <strong className="text-[var(--text)] text-xs sm:text-sm block">
-                  {loadingHospitals ? "Scanning hospital network…" : `${nearbyHospitalCount} Verified Emergency Hospitals`}
+                  {loadingHospitals ? "Scanning hospital network…" : `${nearbyHospitalCount} Admin-Verified Emergency Hospitals`}
                 </strong>
                 <span className="text-[11px] text-[var(--muted)]">
-                  Ready to receive query within 35 km radius with live bed tracking.
+                  Ready to receive emergency request within 35 km radius with hospital-reported capacity.
+                </span>
+                <span className="text-[10px] text-[var(--muted)] block mt-0.5">
+                  (Admin-verified indicates the facility is confirmed by system administrator in the hospital registry)
                 </span>
               </div>
             </div>
@@ -1093,6 +1101,11 @@ export default function CreateEmergencyPage() {
                 NETWORK ACTIVE
               </span>
             </div>
+          </div>
+
+          {/* Diagnostic Boundary Notice */}
+          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200">
+            <span>Emergency coordination and hospital matching. Not a medical diagnosis system.</span>
           </div>
 
           {/* Overview Review Card */}
@@ -1196,7 +1209,7 @@ export default function CreateEmergencyPage() {
 
           <div className="flex items-center justify-center gap-1.5 text-xs text-[var(--muted)] pt-3 pb-1">
             <ShieldCheck size={13} className="text-[#30d158]" />
-            <span>Hospitals accept query before arrival coordination</span>
+            <span>Hospitals accept emergency request before arrival coordination</span>
           </div>
         </section>
       )}
@@ -1277,12 +1290,12 @@ export default function CreateEmergencyPage() {
                 {submitting ? (
                   <>
                     <Loader2 className="animate-spin" size={18} />
-                    <span>Broadcasting Emergency Case…</span>
+                    <span>Sending Emergency Request…</span>
                   </>
                 ) : (
                   <>
                     <Zap size={18} />
-                    <span>Broadcast Emergency Case to {nearbyHospitalCount} Hospitals →</span>
+                    <span>Send emergency request to {nearbyHospitalCount} hospitals →</span>
                   </>
                 )}
               </button>

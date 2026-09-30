@@ -3,7 +3,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Radio, CheckCircle2, XCircle, Clock, Navigation, Shield,
+  Radio, CheckCircle2, XCircle, Clock, Navigation, Shield, ShieldCheck,
   Hospital as HospitalIcon, MapPin, ArrowRight, AlertTriangle, Zap, RefreshCw
 } from 'lucide-react';
 import api from '@/lib/api';
@@ -325,6 +325,11 @@ function HospitalDiscoveryInner() {
 
   return (
     <div className="hospital-discovery max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
+      {/* Prominent Decision-Support Boundary Notice */}
+      <aside aria-label="Emergency Services Notice" className="w-full bg-amber-500/15 border border-amber-500/30 text-amber-200 p-2.5 rounded-2xl text-center text-xs font-medium">
+        <span>Decision-support only. EMEFast does not dispatch ambulances. 108 / 112 remain the official emergency numbers.</span>
+      </aside>
+
       {/* Case Header */}
       <div className="v2-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
@@ -333,7 +338,7 @@ function HospitalDiscoveryInner() {
             <span className="text-[#6e7681] font-mono">· {currentCase.transport_mode}</span>
             <span className="text-ok-400 font-mono flex items-center gap-1 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-ok-400 animate-pulse-dot inline-block" />
-              Query Active
+              Request Active
             </span>
           </div>
           <h1 className="text-base sm:text-lg font-bold text-white">
@@ -360,6 +365,12 @@ function HospitalDiscoveryInner() {
         <button onClick={() => fetchData(true, 0)} className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px] w-full sm:w-auto">
           <RefreshCw size={13} /> Sync Responses
         </button>
+      </div>
+
+      {/* Diagnostic Boundary Notice */}
+      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+        <span>Emergency coordination and hospital matching. Not a medical diagnosis system.</span>
+        <span className="text-[10px] text-blue-300 font-mono">Admin-verified: Confirmed in administrative registry</span>
       </div>
 
       {/* Recommended Hero */}
@@ -389,7 +400,10 @@ function HospitalDiscoveryInner() {
             <div className="space-y-1">
               <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                 <HospitalIcon size={20} className="text-sos-300 shrink-0" />
-                {recommended.hospital_name}
+                <span>{recommended.hospital_name}</span>
+                <span className="match-badge bg-[rgba(48,209,88,0.12)] text-[#30d158] border border-[rgba(48,209,88,0.3)] inline-flex items-center gap-1 font-semibold text-[10px]">
+                  <ShieldCheck size={11} /> Admin-verified
+                </span>
               </h2>
               <p className="text-xs text-[#8b949e] flex items-center gap-1.5 flex-wrap">
                 <MapPin size={12} className="text-[#484f58]" />
@@ -449,7 +463,7 @@ function HospitalDiscoveryInner() {
             <Clock size={16} className="animate-spin" /> Hospital recommendation — waiting for responses
           </div>
           <p className="text-xs text-[var(--muted)] leading-relaxed">
-            Hospitals within range are reviewing the emergency request. Real-time recommendation will rank clinical fit, route ETA, and ICU availability once facilities accept.
+            Hospitals within range are reviewing the emergency request. Decision-support algorithm ranks clinical fit, route ETA, and reported ICU availability once facilities accept.
           </p>
         </div>
       )}
@@ -511,6 +525,9 @@ function HospitalDiscoveryInner() {
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="font-bold text-white text-sm">{opt.hospital_name}</h4>
+                    <span className="match-badge bg-[rgba(48,209,88,0.12)] text-[#30d158] border border-[rgba(48,209,88,0.3)] inline-flex items-center gap-1 font-semibold text-[10px]">
+                      <ShieldCheck size={10} /> Admin-verified
+                    </span>
                     {opt.is_recommended && (
                       <span className="match-badge">BEST OVERALL</span>
                     )}

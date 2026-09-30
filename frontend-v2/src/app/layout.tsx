@@ -2,8 +2,8 @@ import './globals.css';
 import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: 'EMEFast | Emergency Medical Fast Response System',
-  description: 'Emergency medical coordination, hospital intelligence and rapid response.',
+  title: 'EMEFast | Emergency Medical Coordination System',
+  description: 'Emergency medical coordination, hospital capability matching and pre-arrival communication.',
   manifest: '/manifest.json',
   appleWebApp: { capable: true, title: 'EMEFast', statusBarStyle: 'black-translucent' },
   icons: {

@@ -51,7 +51,7 @@ function NavigationInner() {
           <Navigation size={13} className="shrink-0" /> Route & Navigation
         </div>
         <h1 className="page-title">Hospital Route</h1>
-        <p className="page-subtitle mt-1">Live route, destination readiness and arrival coordination</p>
+        <p className="page-subtitle mt-1">Transit route, destination readiness and arrival coordination</p>
       </div>
 
       {currentCase ? (
@@ -96,7 +96,7 @@ function NavigationInner() {
             />
             <div className="p-4 sm:px-5 border-t border-[#21262d] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="text-xs font-mono text-[#6e7681]">
-                <span className="text-ok-400">●</span> GPS tracking enabled · live position updates when permitted
+                <span className="text-ok-400">●</span> GPS enabled · device position updates when permitted
               </div>
               <span className="text-[11px] text-[#484f58] shrink-0">
                 Case: {currentCase.latitude?.toFixed(4)}, {currentCase.longitude?.toFixed(4)}

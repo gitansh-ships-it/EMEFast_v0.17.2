@@ -116,6 +116,11 @@ export default function Home(){
   };
 
   return <main className="min-h-screen landing-page text-[var(--text)] pt-[env(safe-area-inset-top,0px)] pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
+    {/* Prominent Decision-Support Boundary Notice */}
+    <aside aria-label="Emergency Services Notice" className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-200 px-4 py-2 text-center text-xs font-medium">
+      <span>Decision-support only. EMEFast does not dispatch ambulances. 108 / 112 remain the official emergency numbers.</span>
+    </aside>
+
    <header className="topnav px-4 sm:px-8 py-3 sm:py-4">
      <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -129,7 +134,7 @@ export default function Home(){
          />
          <div className="min-w-0">
            <b className="text-base tracking-tight block">EMEFast</b>
-           <span className="hidden sm:block text-[10px] text-[var(--muted)] tracking-wider truncate">EMERGENCY MEDICAL FAST RESPONSE</span>
+           <span className="hidden sm:block text-[10px] text-[var(--muted)] tracking-wider truncate">EMERGENCY MEDICAL COORDINATION</span>
          </div>
        </Link>
        <div className="flex items-center gap-2 shrink-0">
@@ -150,13 +155,13 @@ export default function Home(){
          <span className="w-2 h-2 rounded-full bg-[#30d158] animate-pulse" />
          <span>Network online</span>
        </div>
-       <div className="status-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-neutral-300 font-medium text-[11px] sm:text-xs">
-         <Hospital size={13} className="text-[#30d158]" />
-         <span>Verified emergency hospitals</span>
+       <div className="status-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-neutral-300 font-medium text-[11px] sm:text-xs" title="Admin-verified: Confirmed by system administrator in the hospital registry">
+         <CheckCircle2 size={13} className="text-[#30d158]" />
+         <span>Admin-verified hospitals</span>
        </div>
        <div className="status-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-neutral-300 font-medium text-[11px] sm:text-xs">
          <Activity size={13} className="text-[#64d2ff]" />
-         <span>Real-time resource intelligence</span>
+         <span>Hospital-reported capacity</span>
        </div>
        {gpsStatus === 'ready' ? (
          <div className="status-pill status-pill-gps inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#30d158]/10 border border-[#30d158]/25 text-[#30d158] font-medium text-[11px] sm:text-xs">
@@ -177,36 +182,40 @@ export default function Home(){
            <span>{gpsStatus === 'denied' ? 'Location needed (Retry)' : 'Enable precise location'}</span>
          </button>
        )}
+       <div className="w-full text-[11px] text-[var(--muted)] pt-0.5 flex items-center gap-1.5">
+         <span className="text-white/80 font-semibold">Admin-verified:</span>
+         <span>Facility confirmed by system administrator in the hospital registry.</span>
+       </div>
      </div>
    </div>
 
    <section className="max-w-6xl mx-auto px-4 sm:px-8 pt-8 sm:pt-16 lg:pt-20 pb-12 sm:pb-14 grid lg:grid-cols-[1.1fr_.9fr] gap-8 sm:gap-12 items-center">
     <div>
-      <div className="badge-red px-3 py-1.5 text-[10px] font-semibold tracking-widest mb-4 sm:mb-5 inline-block">EMERGENCY RESPONSE NETWORK</div>
+      <div className="badge-red px-3 py-1.5 text-[10px] font-semibold tracking-widest mb-4 sm:mb-5 inline-block">EMERGENCY COORDINATION NETWORK</div>
       <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-[-.04em] sm:tracking-[-.055em] leading-[1.05] sm:leading-[.95]">
         Seconds matter.<br/><span className="text-[#ff453a]">We coordinate.</span>
       </h1>
       <p className="mt-4 sm:mt-6 max-w-xl text-[var(--muted)] text-base sm:text-lg leading-relaxed">
-        Create an emergency in seconds, match against hospital capability and resources, and keep the care team informed before arrival.
+        Initiate an emergency request in seconds, evaluate hospital capability matches, and alert receiving emergency departments before patient arrival.
       </p>
       <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <Link href="/ambulance/emergency/new" className="glass px-5 py-3 rounded-full text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 min-h-[44px] transition-colors border border-white/15 hover:border-white/30 text-[var(--text)]">
-          Start emergency manually <ArrowRight size={15}/>
+          Start emergency intake manually (4-step wizard) <ArrowRight size={15}/>
         </Link>
         <Link href="/ambulance/dashboard" className="text-xs text-[var(--muted)] hover:text-[var(--text)] inline-flex items-center justify-center gap-1.5 py-2 px-3 transition-colors underline-offset-4 hover:underline">
           Ambulance crew? Open Ambulance Workspace →
         </Link>
       </div>
       <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 text-xs text-[var(--muted)]">
-        <span className="flex items-center gap-2"><ShieldCheck size={15} className="text-[#30d158]"/>Consent-first health data</span>
-        <span className="flex items-center gap-2"><MapPin size={15} className="text-[#ff9f0a]"/>GPS-assisted hospital matching</span>
+        <span className="flex items-center gap-2"><ShieldCheck size={15} className="text-[#30d158]"/>Emergency intake data collection</span>
+        <span className="flex items-center gap-2"><MapPin size={15} className="text-[#ff9f0a]"/>GPS-assisted hospital recommendation</span>
       </div>
     </div>
     <div className="flex flex-col items-center justify-center py-4">
       <div className="badge-red px-3 py-1 text-[10px] font-bold tracking-widest mb-3 uppercase">PRIMARY EMERGENCY ACTION</div>
       <HoldSOS onComplete={triggerInstantSOS}/>
       <p className="mt-4 text-sm font-bold tracking-tight">Hold to trigger emergency SOS</p>
-      <p className="mt-1 text-xs text-[var(--muted)] text-center max-w-xs px-2">Instant emergency broadcast with hospital readiness matching. Designed to prevent accidental activation.</p>
+      <p className="mt-1 text-xs text-[var(--muted)] text-center max-w-xs px-2">Hold for 3 seconds to immediately create and broadcast a critical emergency request with device location. Release anytime before 3s to cancel.</p>
     </div>
    </section>
 
@@ -214,24 +223,24 @@ export default function Home(){
      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
        <div className="v2-card p-5 sm:p-6 v2-card-hover">
          <Mic className="text-[#ff453a]"/>
-         <h3 className="mt-4 sm:mt-5 font-semibold">Voice Emergency</h3>
-         <p className="mt-2 text-sm text-[var(--muted)]">Hindi + English voice capture with structured emergency fields and confirmation.</p>
+         <h3 className="mt-4 sm:mt-5 font-semibold">Voice Intake</h3>
+         <p className="mt-2 text-sm text-[var(--muted)]">Hindi + English audio recording with clinical dictation transcript.</p>
        </div>
        <div className="v2-card p-5 sm:p-6 v2-card-hover">
          <Hospital className="text-[#30d158]"/>
-         <h3 className="mt-4 sm:mt-5 font-semibold">Hospital Intelligence</h3>
-         <p className="mt-2 text-sm text-[var(--muted)]">Compare capability, resource readiness, ETA and hospital response instead of distance alone.</p>
+         <h3 className="mt-4 sm:mt-5 font-semibold">Hospital Capability Matching</h3>
+         <p className="mt-2 text-sm text-[var(--muted)]">Compare facility capability, reported bed counts, ETA and hospital response instead of distance alone.</p>
        </div>
        <div className="v2-card p-5 sm:p-6 v2-card-hover sm:col-span-2 md:col-span-1">
          <Navigation className="text-[#64d2ff]"/>
-         <h3 className="mt-4 sm:mt-5 font-semibold">Live Hospital Coordination</h3>
-         <p className="mt-2 text-sm text-[var(--muted)]">Hospital responses, recommendation factors, ER pre-alert and arrival states in one timeline.</p>
+         <h3 className="mt-4 sm:mt-5 font-semibold">Hospital Response Coordination</h3>
+         <p className="mt-2 text-sm text-[var(--muted)]">Hospital acceptance responses, recommendation factors, and pre-arrival alerts in one view.</p>
        </div>
      </div>
    </section>
 
    <footer className="max-w-6xl mx-auto px-4 sm:px-8 py-6 border-t border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-center text-[11px] text-[#8e8e93]">
-     <span>EMEFast · Emergency Medical Fast Response System</span>
+     <span>EMEFast · Emergency Medical Coordination System</span>
      <div className="flex items-center gap-6">
        <Link href="/privacy" className="hover:text-neutral-200 underline underline-offset-4 transition-colors min-h-[36px] flex items-center">
          Privacy & Consent Disclosure

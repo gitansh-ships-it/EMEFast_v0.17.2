@@ -28,17 +28,17 @@ export default function AdminEmergenciesPage() {
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <div>
         <div className="eyebrow red flex items-center gap-1.5 mb-1.5">
-          <Radio size={13} className="animate-pulse" /> Live Emergency Feed
+          <Radio size={13} className="animate-pulse" /> Emergency Case Feed
         </div>
-        <h1 className="page-title">Live Emergency Stream</h1>
-        <p className="page-subtitle mt-1">State-wide real-time emergency case monitoring</p>
+        <h1 className="page-title">Emergency Coordination Stream</h1>
+        <p className="page-subtitle mt-1">State-wide emergency case coordination and monitoring</p>
       </div>
 
       {/* Stats bar */}
       <div className="flex items-center gap-4 p-3 rounded-lg bg-[#161b22] border border-[#21262d] text-xs font-mono">
         <span className="text-ok-400 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-ok-400 animate-pulse-dot inline-block" />
-          {cases.filter(c => c.status === 'BROADCASTING').length} Query Active
+          {cases.filter(c => c.status === 'BROADCASTING').length} Request Active
         </span>
         <span className="text-[#484f58]">|</span>
         <span className="text-warn-300">{cases.filter(c => c.status === 'HOSPITAL_SELECTED').length} Hospital Selected</span>

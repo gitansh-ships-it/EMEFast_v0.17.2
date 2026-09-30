@@ -15,8 +15,10 @@ import {
   LayoutDashboard,
   Users,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useHospital } from "@/context/HospitalContext";
+import { getAuthSession, AuthSession } from "@/lib/auth";
 
 interface TopNavProps {
   role?: "USER" | "HOSPITAL" | "ADMIN";
@@ -25,6 +27,14 @@ interface TopNavProps {
 export default function TopNav({ role = "USER" }: TopNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setSession(getAuthSession());
+  }, [pathname]);
 
   const isHospital = pathname?.startsWith("/hospital");
   const isAdmin = pathname?.startsWith("/admin");
@@ -150,69 +160,106 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
               </span>
             </Link>
 
-            {/* Right: Sleek Theme Toggle & SOS Action */}
+            {/* Right Actions: Authenticated vs Logged-Out */}
             <div className="reimagined-top-actions">
               <ThemeToggle />
-              {activeRole !== "HOSPITAL" && activeRole !== "ADMIN" && (
-                <Link
-                  href={pathname?.startsWith("/ambulance") ? "/ambulance/emergency/new" : "/user/emergency/new"}
-                  className="reimagined-sos-btn pure-liquid-sos"
-                  aria-label="Open emergency SOS"
-                >
-                  <Siren size={14} strokeWidth={2.4} />
-                  <span>SOS</span>
-                </Link>
+              {(!session) ? (
+                <>
+                  <Link
+                    href="/user/emergency/new"
+                    className="reimagined-sos-btn pure-liquid-sos"
+                    aria-label="Start emergency intake"
+                  >
+                    <Siren size={14} strokeWidth={2.4} />
+                    <span>Start Emergency</span>
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="glass px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--text)] hover:text-white transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {activeRole !== "HOSPITAL" && activeRole !== "ADMIN" && (
+                    <Link
+                      href="/user/emergency/new"
+                      className="reimagined-sos-btn pure-liquid-sos"
+                      aria-label="Start emergency intake"
+                    >
+                      <Siren size={14} strokeWidth={2.4} />
+                      <span>SOS</span>
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("emefast_token");
+                      localStorage.removeItem("emefast_role");
+                      localStorage.removeItem("emefast_hospital_id");
+                      localStorage.removeItem("emefast_user_name");
+                      setSession(null);
+                      router.push("/login");
+                    }}
+                    className="glass px-2.5 py-1 rounded-full text-[11px] font-mono text-[var(--muted)] hover:text-white transition-colors"
+                    title="Sign Out"
+                  >
+                    Sign Out
+                  </button>
+                </>
               )}
             </div>
           </div>
         </div>
 
-        {/* LEVEL 2 — WORKSPACE SWITCHER (Top Inset Segmented Control) */}
-        <div className="top-workspace-container">
-          <div className="top-workspace-pill glass">
-            <div className="workspace-segment-row" role="tablist" aria-label="Workspaces">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeRole === "USER"}
-                aria-label="Ambulance workspace"
-                className={`workspace-segment-tab ${activeRole === "USER" ? "active" : ""}`}
-                onClick={() => router.push("/ambulance/dashboard")}
-              >
-                <Ambulance size={14} strokeWidth={2.2} className="segment-icon" />
-                <span>Ambulance</span>
-              </button>
-              <span className="workspace-divider" aria-hidden="true" />
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeRole === "HOSPITAL"}
-                aria-label="Hospital workspace"
-                className={`workspace-segment-tab ${activeRole === "HOSPITAL" ? "active" : ""}`}
-                onClick={() => router.push("/hospital/dashboard")}
-              >
-                <Building2 size={14} strokeWidth={2.2} className="segment-icon" />
-                <span>Hospital</span>
-              </button>
-              <span className="workspace-divider" aria-hidden="true" />
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeRole === "ADMIN"}
-                aria-label="Admin workspace"
-                className={`workspace-segment-tab ${activeRole === "ADMIN" ? "active" : ""}`}
-                onClick={() => router.push("/admin/dashboard")}
-              >
-                <Settings2 size={14} strokeWidth={2.2} className="segment-icon" />
-                <span>Admin</span>
-              </button>
+        {/* LEVEL 2 — WORKSPACE SWITCHER (Only shown after authentication) */}
+        {session && (
+          <div className="top-workspace-container">
+            <div className="top-workspace-pill glass">
+              <div className="workspace-segment-row" role="tablist" aria-label="Workspaces">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeRole === "USER"}
+                  aria-label="Ambulance workspace"
+                  className={`workspace-segment-tab ${activeRole === "USER" ? "active" : ""}`}
+                  onClick={() => router.push("/ambulance/dashboard")}
+                >
+                  <Ambulance size={14} strokeWidth={2.2} className="segment-icon" />
+                  <span>Ambulance</span>
+                </button>
+                <span className="workspace-divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeRole === "HOSPITAL"}
+                  aria-label="Hospital workspace"
+                  className={`workspace-segment-tab ${activeRole === "HOSPITAL" ? "active" : ""}`}
+                  onClick={() => router.push("/hospital/dashboard")}
+                >
+                  <Building2 size={14} strokeWidth={2.2} className="segment-icon" />
+                  <span>Hospital</span>
+                </button>
+                <span className="workspace-divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeRole === "ADMIN"}
+                  aria-label="Admin workspace"
+                  className={`workspace-segment-tab ${activeRole === "ADMIN" ? "active" : ""}`}
+                  onClick={() => router.push("/admin/dashboard")}
+                >
+                  <Settings2 size={14} strokeWidth={2.2} className="segment-icon" />
+                  <span>Admin</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </header>
 
-      {/* LEVEL 3 — FLOATING LIQUID GLASS BOTTOM NAVIGATION DOCK (Hidden during wizard) */}
-      {!isWizard && (
+      {/* LEVEL 3 — FLOATING LIQUID GLASS BOTTOM NAVIGATION DOCK (Only shown after authentication and when not in wizard) */}
+      {session && !isWizard && (
         <aside className="floating-bottom-liquid-dock" aria-label="Page Navigation">
           <nav className="bottom-dock-island bottom-nav glass" aria-label="Section navigation">
             <div className="context-nav-row" role="tablist">

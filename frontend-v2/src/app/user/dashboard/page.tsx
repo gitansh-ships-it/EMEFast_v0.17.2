@@ -125,7 +125,7 @@ export default function UserDashboard() {
       <section className="dashboard-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-1.5 mb-1 text-xs font-semibold text-[var(--muted)]">
-            <Radio size={13} className="text-red-500" /> Emergency Coordination Desk · Live
+            <Radio size={13} className="text-red-500" /> Emergency Coordination Desk · Active
           </div>
           <h1 className="page-title">Ambulance Emergency Workspace</h1>
           <p className="page-subtitle mt-1">Active triage and multi-hospital response coordination</p>
@@ -199,7 +199,7 @@ export default function UserDashboard() {
           <article className="dashboard-case-card glass-panel p-5 sm:p-6 space-y-4">
             <div className="case-topline flex flex-wrap items-center justify-between gap-3">
               <div className="case-title-wrap flex flex-wrap items-center gap-2">
-                <span className="live-badge"><span /> LIVE CASE</span>
+                <span className="live-badge"><span /> ACTIVE CASE</span>
                 <span className="case-code font-mono font-bold text-[var(--text)]">{activeCase.case_code}</span>
                 <span className={`severity-badge ${activeCase.priority === 'CRITICAL' ? 'critical' : ''}`}>
                   {formatEnum(activeCase.priority)}
@@ -444,16 +444,16 @@ export default function UserDashboard() {
                 <Clock3 size={16} className="animate-spin" /> Hospital recommendation — waiting for responses
               </div>
               <p className="text-xs text-[var(--muted)] leading-relaxed">
-                Emergency broadcast sent to verified hospitals. Real-time recommendation will rank clinical fit, route ETA, and ICU availability once facilities accept.
+                Emergency broadcast sent to admin-verified hospitals. Decision-support algorithm ranks clinical fit, route ETA, and hospital-reported ICU availability once facilities accept.
               </p>
             </div>
           )}
 
-          {/* 5. MAP: Live route / location map */}
+          {/* 5. MAP: Incident route / location map */}
           <article className="glass-panel dashboard-map-panel">
             <div className="panel-heading">
               <div>
-                <span className="eyebrow"><MapPin size={12} /> LIVE LOCATION & ROUTE</span>
+                <span className="eyebrow"><MapPin size={12} /> INCIDENT LOCATION & ROUTE</span>
                 <h3>{activeCase.selected_hospital?.name || recommended?.hospital_name || 'Ambulance GPS Location'}</h3>
               </div>
               <span className="map-live-pill"><span /> GPS / MAP</span>
@@ -471,7 +471,7 @@ export default function UserDashboard() {
               onRouteInfo={setRouteInfo}
             />
             <div className="map-footer">
-              <span><span className="gps-dot" /> Live GPS telemetry from ambulance crew</span>
+              <span><span className="gps-dot" /> Reported incident location coordinates</span>
               <span>{routeInfo ? `${routeInfo.distanceKm.toFixed(1)} km · ${routeInfo.durationMin} min` : (activeCase.selected_hospital || recommended) ? 'Calculating transit route geometry...' : 'Route calculated upon facility selection'}</span>
             </div>
           </article>
