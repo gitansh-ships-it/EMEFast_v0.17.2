@@ -189,7 +189,7 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
                       aria-label="Start emergency intake"
                     >
                       <Siren size={14} strokeWidth={2.4} />
-                      <span>SOS</span>
+                      <span>Start Emergency</span>
                     </Link>
                   )}
                   <button

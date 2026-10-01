@@ -12,6 +12,7 @@ type LiveMapProps = {
   onRouteInfo?: (info: { distanceKm: number; durationMin: number }) => void;
   onPickPosition?: (point: Point) => void;
   allowManualPick?: boolean;
+  trackDeviceGps?: boolean;
 };
 
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
@@ -45,7 +46,7 @@ function loadLeaflet() {
   });
 }
 
-export default function LiveMap({ origin, destination, destinationLabel = "Hospital", onLivePosition, onRouteInfo, onPickPosition, allowManualPick = false }: LiveMapProps) {
+export default function LiveMap({ origin, destination, destinationLabel = "Hospital", onLivePosition, onRouteInfo, onPickPosition, allowManualPick = false, trackDeviceGps = false }: LiveMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
   const originMarkerRef = useRef<any>(null);
@@ -55,7 +56,7 @@ export default function LiveMap({ origin, destination, destinationLabel = "Hospi
   const lastRouteRef = useRef<string>("");
   const lastRouteAtRef = useRef<number>(0);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [message, setMessage] = useState("Loading live map…");
+  const [message, setMessage] = useState(trackDeviceGps ? "Loading live map…" : "Incident map active");
   const [livePosition, setLivePosition] = useState<Point>(origin);
   const livePositionRef = useRef<Point>(origin);
   const [showTraffic, setShowTraffic] = useState(false);
@@ -143,9 +144,9 @@ export default function LiveMap({ origin, destination, destinationLabel = "Hospi
         const points = [origin, ...(validPoint(destination) ? [destination!] : [])];
         localMap.fitBounds(points.map((p) => [p.lat, p.lng]), { padding: [40, 40], maxZoom: points.length > 1 ? 15 : 16 });
         setStatus("ready");
-        setMessage("Live map active");
+        setMessage(trackDeviceGps ? "Live map active" : "Incident location mapped");
 
-        if (navigator.geolocation) {
+        if (trackDeviceGps && navigator.geolocation) {
           watchRef.current = navigator.geolocation.watchPosition(
             (pos) => {
               // Use the real browser location even when desktop accuracy is coarse.
@@ -286,15 +287,17 @@ export default function LiveMap({ origin, destination, destinationLabel = "Hospi
       <div className={`live-map-status ${status === "error" ? "error" : ""}`}>
         <span className="live-map-status-dot" />
         <span className="live-map-status-text">{message}</span>
-        <button
-          type="button"
-          onClick={refreshGPS}
-          className="live-map-refresh-btn"
-          title="Refresh device GPS"
-          aria-label="Refresh device GPS"
-        >
-          ↻
-        </button>
+        {trackDeviceGps && (
+          <button
+            type="button"
+            onClick={refreshGPS}
+            className="live-map-refresh-btn"
+            title="Refresh device GPS"
+            aria-label="Refresh device GPS"
+          >
+            ↻
+          </button>
+        )}
       </div>
 
       <button

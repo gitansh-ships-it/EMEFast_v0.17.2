@@ -92,7 +92,7 @@ export default function PrivacyPage() {
               <ShieldCheck size={14} className="text-[#30d158]" /> Definition of &quot;Admin-Verified&quot; Facility Status
             </div>
             <p className="text-xs text-neutral-400 leading-relaxed m-0">
-              In EMEFast, an &quot;Admin-verified&quot; hospital indicates that a platform system administrator has confirmed the facility&apos;s operational existence, emergency desk contact information, and listed clinical capabilities in the administrative hospital registry (database flag <code className="text-[#ff817a]">Hospital.verified == True</code>). It confirms verified platform contact capability; it does not constitute clinical accreditation, medical endorsement, or statutory certification.
+              A system administrator has marked the facility as verified in the hospital registry. Criteria are set by the pilot administrator. Not clinical accreditation or statutory certification.
             </p>
           </div>
         </div>

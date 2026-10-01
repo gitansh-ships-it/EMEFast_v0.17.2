@@ -93,6 +93,7 @@ function NavigationInner() {
               destination={currentCase.selected_hospital ? { lat: currentCase.selected_hospital.latitude, lng: currentCase.selected_hospital.longitude } : null}
               destinationLabel={currentCase.selected_hospital?.name || 'Hospital ER'}
               onRouteInfo={setRouteInfo}
+              trackDeviceGps={true}
             />
             <div className="p-4 sm:px-5 border-t border-[#21262d] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="text-xs font-mono text-[#6e7681]">

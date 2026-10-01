@@ -143,7 +143,7 @@ export default function Home(){
          </Link>
          <button onClick={goToManual} disabled={loading} className="sos-btn px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs flex gap-1.5 sm:gap-2 items-center whitespace-nowrap min-h-[44px]">
            <Siren size={14} className="shrink-0"/>
-           <span>{loading?'Starting…':'Emergency SOS'}</span>
+           <span>{loading?'Starting…':'Start Emergency'}</span>
          </button>
        </div>
      </div>
@@ -155,7 +155,7 @@ export default function Home(){
          <span className="w-2 h-2 rounded-full bg-[#30d158] animate-pulse" />
          <span>Network online</span>
        </div>
-       <div className="status-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-neutral-300 font-medium text-[11px] sm:text-xs" title="Admin-verified: Confirmed by system administrator in the hospital registry">
+       <div className="status-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-neutral-300 font-medium text-[11px] sm:text-xs" title="A system administrator has marked the facility as verified in the hospital registry. Criteria are set by the pilot administrator. Not clinical accreditation or statutory certification.">
          <CheckCircle2 size={13} className="text-[#30d158]" />
          <span>Admin-verified hospitals</span>
        </div>
@@ -184,7 +184,7 @@ export default function Home(){
        )}
        <div className="w-full text-[11px] text-[var(--muted)] pt-0.5 flex items-center gap-1.5">
          <span className="text-white/80 font-semibold">Admin-verified:</span>
-         <span>Facility confirmed by system administrator in the hospital registry.</span>
+         <span>A system administrator has marked the facility as verified in the hospital registry. Criteria are set by the pilot administrator. Not clinical accreditation or statutory certification.</span>
        </div>
      </div>
    </div>
