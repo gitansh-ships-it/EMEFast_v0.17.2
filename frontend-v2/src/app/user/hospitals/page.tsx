@@ -90,6 +90,14 @@ function HospitalDiscoveryInner() {
   const [error, setError] = useState<string | null>(null);
   const [isWaking, setIsWaking] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'reconnecting' | 'offline'>('connected');
+  const [overrideModalOpen, setOverrideModalOpen] = useState(false);
+  const [overrideHospital, setOverrideHospital] = useState<{ id: number; name: string } | null>(null);
+  const [overrideReason, setOverrideReason] = useState('Patient or family preference');
+  const [customReason, setCustomReason] = useState('');
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [showTimeline, setShowTimeline] = useState(false);
 
   useEffect(() => {
     api.get('/hospitals').then(res => {
@@ -142,6 +150,8 @@ function HospitalDiscoveryInner() {
       setError(null);
       setIsWaking(false);
       setRetryAttempt(0);
+      setConnectionStatus('connected');
+      setLastSyncedAt(new Date().toLocaleTimeString());
 
       if (caseData) {
         setCurrentCase(caseData);
@@ -150,12 +160,18 @@ function HospitalDiscoveryInner() {
           const recRes = await api.get(`/emergency/${caseData.id}/recommendation`);
           setDecision(recRes.data);
         } catch {}
+
+        try {
+          const timeRes = await api.get(`/emergency/${caseData.id}/timeline`);
+          setTimeline(timeRes.data || []);
+        } catch {}
       } else {
         setCurrentCase(null);
         setDecision(null);
       }
     } catch (err: any) {
       clearTimeout(timeoutId);
+      setConnectionStatus(attempt >= 2 ? 'offline' : 'reconnecting');
       if (err?.response?.status === 401) {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('emefast_token');
@@ -197,11 +213,24 @@ function HospitalDiscoveryInner() {
     return () => clearInterval(interval);
   }, [caseIdParam, error, isWaking]);
 
-  const handleSelect = async (hospitalId: number) => {
+  const handleSelect = async (hospitalId: number, explicitOverrideReason?: string) => {
     if (!currentCase) return;
+    const isRecommended = decision?.recommended_hospital?.hospital_id === hospitalId;
+    if (!isRecommended && !explicitOverrideReason) {
+      const hObj = (decision?.all_options || []).find(o => o.hospital_id === hospitalId) || hospitalMap[hospitalId];
+      setOverrideHospital({ id: hospitalId, name: hObj?.hospital_name || hObj?.name || `Hospital #${hospitalId}` });
+      setOverrideModalOpen(true);
+      return;
+    }
+
     setSelecting(true);
     try {
-      await api.post(`/emergency/${currentCase.id}/select-hospital`, { hospital_id: hospitalId });
+      const payload: any = { hospital_id: hospitalId };
+      if (explicitOverrideReason) {
+        payload.override_reason = explicitOverrideReason;
+      }
+      await api.post(`/emergency/${currentCase.id}/select-hospital`, payload);
+      setOverrideModalOpen(false);
       router.push(`/user/navigation?case_id=${currentCase.id}`);
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to select hospital.');
@@ -319,6 +348,10 @@ function HospitalDiscoveryInner() {
           requirement_unconfirmed: false,
           supported_insurance: (r as any).supported_insurance || hInfo?.supported_insurance || [],
           simulated: Boolean(r.simulated),
+          is_stale: false,
+          primary_exclusion: undefined,
+          why_not: undefined,
+          why_this: undefined,
         };
       });
 
@@ -357,6 +390,60 @@ function HospitalDiscoveryInner() {
             </a>
           </div>
         </aside>
+      )}
+
+      {/* Real-time Connection Status Banner */}
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono">
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${
+            connectionStatus === 'connected' ? 'bg-[#30d158] animate-pulse' :
+            connectionStatus === 'reconnecting' ? 'bg-[#ff9f0a] animate-ping' :
+            'bg-red-500'
+          }`} />
+          <span className="text-[var(--text)] font-semibold">
+            {connectionStatus === 'connected' ? `Live Network Synced (${lastSyncedAt || 'active'})` :
+             connectionStatus === 'reconnecting' ? `Reconnecting to hospital responses… (attempt ${retryAttempt})` :
+             `REAL-TIME CONNECTION LOST`}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowTimeline(!showTimeline)}
+            className="text-[11px] text-blue-400 hover:text-blue-300 underline underline-offset-2 flex items-center gap-1 cursor-pointer"
+          >
+            <Clock size={11} /> {showTimeline ? 'Hide Incident Timeline' : 'View Incident Timeline'}
+          </button>
+        </div>
+      </div>
+
+      {/* Incident Event Timeline (Expandable) */}
+      {showTimeline && (
+        <section className="v2-card p-4 space-y-3 border border-blue-500/30 bg-blue-950/10 animate-in">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 font-mono">
+              <Clock size={13} className="text-blue-400" /> Permanent Incident Event Log · {currentCase.case_code}
+            </h3>
+            <span className="text-[10px] text-[var(--muted)] font-mono">{timeline.length} events recorded</span>
+          </div>
+          {timeline.length === 0 ? (
+            <p className="text-xs text-[var(--muted)]">No audit events logged yet for this emergency case.</p>
+          ) : (
+            <div className="space-y-2 border-l-2 border-blue-500/30 pl-3 ml-1">
+              {timeline.map((evt: any, i: number) => (
+                <div key={evt.id || i} className="text-xs space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] text-blue-300 font-bold">{evt.action}</span>
+                    <span className="text-[10px] text-[var(--muted)] font-mono">
+                      {evt.timestamp ? new Date(evt.timestamp).toLocaleTimeString() : '—'}
+                    </span>
+                    <span className="text-[10px] text-neutral-400 font-mono">[{evt.performed_by || 'SYSTEM'}]</span>
+                  </div>
+                  <p className="text-[11px] text-neutral-300 m-0">{evt.details}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {/* Prominent Decision-Support Boundary Notice */}
@@ -411,14 +498,31 @@ function HospitalDiscoveryInner() {
       {(currentCase.status === 'HOSPITAL_ACCEPTED' || currentCase.status === 'HOSPITAL_SELECTED') && recommended ? (
         <div className="v2-card p-4 sm:p-5 space-y-4 border border-sos-400/40">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#d7261e] text-white text-xs font-semibold">
-              <Zap size={12} className="fill-white" /> Recommended Best Overall Option
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#d7261e] text-white text-xs font-semibold">
+                <Zap size={12} className="fill-white" /> Recommended Best Overall Option
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                MATCH CONFIDENCE: {recommended.confidence || 'HIGH'}
+              </span>
+              {Boolean(recommended.is_stale) && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  RESOURCE DATA STALE
+                </span>
+              )}
+            </div>
             <span className="text-xl sm:text-2xl font-bold text-[var(--text)] tnum flex items-baseline gap-2">
               <span>{recommended.eta} <span className="text-xs text-[var(--muted)] font-normal">min ETA</span></span>
               <span className="ml-2 text-base sm:text-lg text-[var(--text)] font-semibold">₹{recommended.estimated_cost?.toLocaleString?.() || recommended.estimated_cost}</span>
             </span>
           </div>
+
+          {Boolean(recommended.is_stale) && (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-center gap-2">
+              <AlertTriangle size={15} className="shrink-0 text-amber-400" />
+              <span>RESOURCE DATA STALE: Reported hospital capacity counts have not been refreshed recently. Verify on-ground availability upon arrival.</span>
+            </div>
+          )}
 
           {(recommended.flag === "requirement not confirmed" || (recommended as any).requirement_unconfirmed || decision?.decision_summary?.toLowerCase().includes("requirement not confirmed")) && (
             <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5 font-semibold" role="alert">
@@ -474,21 +578,24 @@ function HospitalDiscoveryInner() {
             <button
               onClick={() => handleSelect(recommended.hospital_id)}
               disabled={selecting}
-              className="sos-btn select-hospital-btn flex items-center justify-center gap-2 px-5 py-3 text-sm shrink-0 min-h-[48px] w-full md:w-auto"
+              className="sos-btn select-hospital-btn flex items-center justify-center gap-2 px-5 py-3 text-sm shrink-0 min-h-[48px] w-full md:w-auto cursor-pointer"
             >
               <Navigation size={15} />
-              {selecting ? 'Selecting...' : 'SELECT HOSPITAL'}
+              {selecting ? 'Selecting...' : 'SELECT RECOMMENDED'}
               <ArrowRight size={15} />
             </button>
           </div>
 
-          {recommended.explanation?.length > 0 && (
-            <div className="p-3 rounded-lg bg-[#21262d] border border-[#30363d] text-xs text-[#8b949e] space-y-1.5">
-              <div className="font-mono text-[10px] text-[#484f58] uppercase tracking-wider">Decision Explanation Factors</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                {recommended.explanation.map((exp, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <CheckCircle2 size={11} className="text-ok-400 shrink-0" />
+          {/* WHY THIS HOSPITAL? Checklist */}
+          {((recommended.why_this && recommended.why_this.length > 0) || (recommended.explanation && recommended.explanation.length > 0)) && (
+            <div className="p-3.5 rounded-xl bg-[#21262d] border border-[#30363d] text-xs text-[#8b949e] space-y-2">
+              <div className="font-mono text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 size={12} /> WHY THIS HOSPITAL? (DECISION FACTORS)
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {((recommended.why_this && recommended.why_this.length > 0) ? recommended.why_this : recommended.explanation).map((exp, i) => (
+                  <div key={i} className="flex items-center gap-2 text-neutral-200">
+                    <CheckCircle2 size={13} className="text-ok-400 shrink-0" />
                     <span>{exp}</span>
                   </div>
                 ))}
@@ -505,6 +612,45 @@ function HospitalDiscoveryInner() {
             Hospitals within range are reviewing the emergency request. Decision-support algorithm ranks clinical fit, route ETA, and reported ICU availability once facilities accept.
           </p>
         </div>
+      )}
+
+      {/* No Hospital Accepted Escalation Flow */}
+      {acceptedCount === 0 && totalContacted > 0 && (
+        <aside role="alert" className="w-full bg-amber-950/40 border-2 border-amber-500/50 text-white p-5 rounded-2xl space-y-3 shadow-xl">
+          <div className="flex items-center gap-2.5 text-amber-400 font-bold text-base">
+            <AlertTriangle size={22} className="shrink-0" />
+            <span>NO HOSPITAL ACCEPTED YET — ESCALATION WORKFLOW</span>
+          </div>
+          <p className="text-xs text-neutral-200 leading-relaxed max-w-2xl">
+            None of the {totalContacted} contacted emergency facilities have confirmed admission yet. Escalate to central ambulance dispatch (108 / 112) or manually select any facility to override.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              onClick={() => {
+                const firstAvailable = optionsToRender[0];
+                if (firstAvailable) {
+                  setOverrideHospital({ id: firstAvailable.hospital_id, name: firstAvailable.hospital_name });
+                  setOverrideModalOpen(true);
+                }
+              }}
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-md transition-all cursor-pointer min-h-[44px]"
+            >
+              Select Hospital Manually (Override)
+            </button>
+            <a
+              href="tel:108"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#ff3b30] hover:bg-[#ff453a] text-white text-xs font-bold transition-all min-h-[44px]"
+            >
+              📞 Call 108
+            </a>
+            <a
+              href="tel:112"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white text-xs font-bold transition-all min-h-[44px]"
+            >
+              📞 Call 112
+            </a>
+          </div>
+        </aside>
       )}
 
       {(currentCase.status === 'HOSPITAL_ACCEPTED' || currentCase.status === 'HOSPITAL_SELECTED') && decision && recommended && (
@@ -561,7 +707,7 @@ function HospitalDiscoveryInner() {
                 }`}>
                   <HospitalIcon size={16} />
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="font-bold text-white text-sm">{opt.hospital_name}</h4>
                     <span className="match-badge bg-[rgba(48,209,88,0.12)] text-[#30d158] border border-[rgba(48,209,88,0.3)] inline-flex items-center gap-1 font-semibold text-[10px]">
@@ -574,6 +720,11 @@ function HospitalDiscoveryInner() {
                     )}
                     {opt.is_recommended && (
                       <span className="match-badge">BEST OVERALL</span>
+                    )}
+                    {Boolean(opt.is_stale) && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        ⚠ Data stale
+                      </span>
                     )}
                     {(opt.flag === "requirement not confirmed" || (opt as any).requirement_unconfirmed) && (
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -601,14 +752,34 @@ function HospitalDiscoveryInner() {
                         </div>
                       );
                     })()}
-              
-            
                   </div>
+
                   <p className="text-[#6e7681]">{opt.hospital_address} · {opt.distance_km} km</p>
+                  
                   {opt.hospital_capabilities && (
                     <p className="font-mono text-[#484f58]">Specialties: <span className="text-[#8b949e]">{opt.hospital_capabilities}</span></p>
                   )}
-                  {opt.rejection_reason && (
+
+                  {/* Primary Exclusion Factor */}
+                  {opt.primary_exclusion && (
+                    <p className="text-red-400 font-semibold text-[11px] flex items-center gap-1">
+                      <XCircle size={11} /> Primary Exclusion: {opt.primary_exclusion}
+                    </p>
+                  )}
+
+                  {/* WHY NOT Factors for non-recommended or rejected */}
+                  {!opt.is_recommended && opt.why_not && opt.why_not.length > 0 && (
+                    <div className="text-[11px] text-neutral-400 pl-3 border-l-2 border-neutral-700/60 space-y-0.5 pt-0.5">
+                      <span className="text-[10px] font-mono text-neutral-500 block uppercase">Why not selected:</span>
+                      {opt.why_not.map((reason, ridx) => (
+                        <div key={ridx} className="flex items-center gap-1.5 text-neutral-300">
+                          <span className="text-neutral-500">·</span> {reason}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {opt.rejection_reason && !opt.primary_exclusion && (
                     <p className="text-sos-300 font-semibold">Reason: {opt.rejection_reason}</p>
                   )}
                 </div>
@@ -641,6 +812,87 @@ function HospitalDiscoveryInner() {
           ))}
         </div>
       </div>
+
+      {/* Manual Override Confirmation Modal */}
+      {overrideModalOpen && overrideHospital && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in">
+          <div className="v2-card p-6 max-w-lg w-full space-y-4 border border-amber-500/40 bg-[#161b22] text-white shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                <AlertTriangle size={18} />
+                <span>MANUAL HOSPITAL OVERRIDE</span>
+              </div>
+              <button
+                onClick={() => setOverrideModalOpen(false)}
+                className="text-neutral-400 hover:text-white p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              You are manually choosing <strong className="text-white">{overrideHospital.name}</strong> instead of the system recommended facility. An audit log entry will permanently record this override.
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-mono uppercase text-neutral-400 block font-semibold">
+                Reason for Manual Selection (Required):
+              </label>
+              {[
+                "Patient or family preference",
+                "Attending physician directive",
+                "Specific cashless insurance tie-up",
+                "Closer to kin / primary caregiver",
+                "Pre-existing medical record at facility",
+                "Other (specify below)"
+              ].map((reason) => (
+                <label key={reason} className="flex items-center gap-2.5 p-2 rounded-lg bg-neutral-800/40 border border-neutral-700/40 text-xs cursor-pointer hover:bg-neutral-800/70">
+                  <input
+                    type="radio"
+                    name="override_reason"
+                    value={reason}
+                    checked={overrideReason === reason}
+                    onChange={() => setOverrideReason(reason)}
+                    className="accent-[#ff3b30]"
+                  />
+                  <span>{reason}</span>
+                </label>
+              ))}
+
+              {overrideReason === "Other (specify below)" && (
+                <input
+                  type="text"
+                  placeholder="Enter detailed override reason..."
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  className="w-full bg-black/40 border border-neutral-700 rounded-xl p-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#ff3b30]"
+                />
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setOverrideModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const finalReason = overrideReason === "Other (specify below)" ? (customReason.trim() || "Other reason") : overrideReason;
+                  handleSelect(overrideHospital.id, finalReason);
+                }}
+                disabled={selecting}
+                className="px-5 py-2.5 rounded-xl bg-[#ff3b30] hover:bg-[#ff453a] text-white text-xs font-bold transition-transform active:scale-95 shadow-lg"
+              >
+                {selecting ? 'Recording Override…' : 'Confirm & Select Hospital'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

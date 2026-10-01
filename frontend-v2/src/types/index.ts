@@ -2,7 +2,7 @@ export interface HospitalResponse {
   id: number;
   hospital_id: number;
   hospital_name: string;
-  response: 'ACCEPTED' | 'REJECTED' | 'PENDING';
+  response: 'ACCEPTED' | 'REJECTED' | 'PENDING' | 'SELECTED';
   eta: number;
   distance_km?: number;
   estimated_cost?: number;
@@ -39,6 +39,12 @@ export interface EmergencyCase {
   hospitals_contacted?: number;
   responses?: HospitalResponse[];
   selected_hospital?: Hospital;
+  override_reason?: string;
+  gps_accuracy?: number;
+  stored_accuracy?: number;
+  gps_source?: string;
+  gps_timestamp?: string;
+  stored_timestamp?: string;
   voice_note_path?: string;
   voice_transcript?: string;
   created_at: string;
@@ -82,6 +88,11 @@ export interface RecommendedOption {
   flag?: string;
   requirement_unconfirmed?: boolean;
   simulated?: boolean;
+  why_this?: string[];
+  why_not?: string[];
+  primary_exclusion?: string;
+  confidence?: string;
+  is_stale?: boolean;
 }
 
 export interface DecisionEngineResult {

@@ -6,24 +6,91 @@ import { ArrowRight, Mic, MapPin, ShieldCheck, Siren, Hospital, Activity, Phone,
 import api from '@/lib/api';
 
 function HoldSOS({onComplete}:{onComplete:()=>void}){
-  const [holding,setHolding]=useState(false); const [progress,setProgress]=useState(0); const timer=useRef<ReturnType<typeof setInterval>|null>(null);
-  const start=()=>{ if(holding)return; setHolding(true); setProgress(0); if('vibrate' in navigator) navigator.vibrate(40); let p=0; timer.current=setInterval(()=>{p+=100/30;setProgress(Math.min(p,100));if(p>=100){clearInterval(timer.current!);if('vibrate'in navigator)navigator.vibrate([100,50,200]);onComplete();setHolding(false);setProgress(0)}},100)};
-  const stop=()=>{if(timer.current)clearInterval(timer.current);setHolding(false);setProgress(0)};
-  return <button
-    aria-label="Hold for emergency SOS"
-    onPointerDown={start}
-    onPointerUp={stop}
-    onPointerLeave={stop}
-    onTouchStart={(e) => { e.preventDefault(); start(); }}
-    onTouchEnd={stop}
-    onTouchCancel={stop}
-    onContextMenu={e=>e.preventDefault()}
-    className="homepage-sos-btn relative w-44 h-44 sm:w-52 sm:h-52 rounded-full select-none touch-none flex items-center justify-center bg-[#171719] border border-white/10 shadow-[0_20px_80px_rgba(255,59,48,.16)] cursor-pointer active:scale-95 transition-transform text-white"
-  >
-    {holding&&<span className="absolute inset-[-14px] rounded-full border border-[#ff3b30]/50 pointer-events-none" style={{transform:`scale(${.85+progress/300})`,opacity:1-progress/100}}/>}
-    <span className="absolute inset-3 rounded-full bg-[#ff3b30] shadow-[inset_0_2px_12px_rgba(255,255,255,.2),0_12px_45px_rgba(255,59,48,.3)] pointer-events-none" style={{background:`conic-gradient(#ff3b30 ${progress}%, #b52b25 ${progress}% 100%)`}}/>
-    <span className="relative z-10 flex flex-col items-center text-white pointer-events-none"><Siren size={30}/><span className="mt-2 text-lg font-black tracking-[.16em] text-white">{holding?'HOLD…':'SOS'}</span><span className="text-[10px] uppercase tracking-widest text-white/90">{holding?`${Math.ceil((100-progress)/33)}s remaining`:'3-second hold'}</span></span>
-  </button>
+  const [holding,setHolding]=useState(false);
+  const [progress,setProgress]=useState(0);
+  const [cancelled,setCancelled]=useState(false);
+  const [activated,setActivated]=useState(false);
+  const timer=useRef<ReturnType<typeof setInterval>|null>(null);
+  const cancelTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+
+  const start=()=>{
+    if(holding || activated) return;
+    setHolding(true);
+    setCancelled(false);
+    setProgress(0);
+    if(cancelTimer.current) clearTimeout(cancelTimer.current);
+    if('vibrate' in navigator) navigator.vibrate(40);
+    let p=0;
+    timer.current=setInterval(()=>{
+      p+=100/30;
+      setProgress(Math.min(p,100));
+      if(p>=100){
+        clearInterval(timer.current!);
+        if('vibrate' in navigator) navigator.vibrate([100,50,200]);
+        setHolding(false);
+        setActivated(true);
+        onComplete();
+      }
+    },100);
+  };
+
+  const stop=()=>{
+    if(activated) return;
+    if(timer.current){
+      clearInterval(timer.current);
+      if(holding && progress > 5 && progress < 100){
+        setCancelled(true);
+        cancelTimer.current = setTimeout(()=>setCancelled(false), 1800);
+      }
+    }
+    setHolding(false);
+    setProgress(0);
+  };
+
+  return (
+    <div className="flex flex-col items-center">
+      <button
+        aria-label="Hold for emergency SOS"
+        onPointerDown={start}
+        onPointerUp={stop}
+        onPointerLeave={stop}
+        onTouchStart={(e) => { e.preventDefault(); start(); }}
+        onTouchEnd={stop}
+        onTouchCancel={stop}
+        onContextMenu={e=>e.preventDefault()}
+        disabled={activated}
+        className={`homepage-sos-btn relative w-44 h-44 sm:w-52 sm:h-52 rounded-full select-none touch-none flex items-center justify-center bg-[#171719] border border-white/10 shadow-[0_20px_80px_rgba(255,59,48,.16)] cursor-pointer active:scale-95 transition-all text-white ${activated ? 'ring-4 ring-emerald-500 animate-pulse' : ''}`}
+      >
+        {holding && (
+          <span className="absolute inset-[-14px] rounded-full border border-[#ff3b30]/50 pointer-events-none" style={{transform:`scale(${.85+progress/300})`,opacity:1-progress/100}}/>
+        )}
+        <span
+          className="absolute inset-3 rounded-full bg-[#ff3b30] shadow-[inset_0_2px_12px_rgba(255,255,255,.2),0_12px_45px_rgba(255,59,48,.3)] pointer-events-none"
+          style={{background: activated ? '#30d158' : `conic-gradient(#ff3b30 ${progress}%, #21262d ${progress}% 100%)`}}
+        />
+        <span className="relative z-10 flex flex-col items-center text-white pointer-events-none">
+          <Siren size={30} className={activated ? 'text-white' : ''} />
+          <span className="mt-2 text-base sm:text-lg font-black tracking-[.14em] text-white">
+            {activated ? 'ACTIVATED' : holding ? 'HOLDING…' : 'SOS'}
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-white/90">
+            {activated ? 'Broadcasting…' : holding ? `${Math.ceil((100-progress)/33)}s remaining` : '3-second hold'}
+          </span>
+        </span>
+      </button>
+
+      {cancelled && (
+        <span className="mt-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-mono font-medium animate-fadeIn">
+          Release detected · Hold cancelled
+        </span>
+      )}
+      {activated && (
+        <span className="mt-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono font-bold animate-pulse">
+          SOS ACTIVATED — CONNECTING NETWORK
+        </span>
+      )}
+    </div>
+  );
 }
 
 export default function Home(){

@@ -144,12 +144,18 @@ class EmergencyCaseCreate(BaseModel):
     ambulance_details: Optional[str] = None
     description: Optional[str] = None
     voice_transcript: Optional[str] = None
+    gps_accuracy: Optional[float] = None
+    stored_accuracy: Optional[float] = None
+    gps_source: Optional[str] = "DEVICE"
+    gps_timestamp: Optional[datetime] = None
+    stored_timestamp: Optional[datetime] = None
 
 class EmergencyCaseUpdateStatus(BaseModel):
     status: str # Canonical: DRAFT, BROADCASTING, WAITING_FOR_RESPONSES, PARTIAL_RESPONSES, HOSPITAL_ACCEPTED, HOSPITAL_SELECTED, COMPLETED, CANCELLED
 
 class SelectHospitalRequest(BaseModel):
     hospital_id: int
+    override_reason: Optional[str] = None
 
 class EmergencyCaseOut(BaseModel):
     id: int
@@ -172,6 +178,12 @@ class EmergencyCaseOut(BaseModel):
     selected_hospital_id: Optional[int] = None
     selected_hospital_eta: Optional[float] = None
     selected_hospital: Optional[HospitalOut] = None
+    override_reason: Optional[str] = None
+    gps_accuracy: Optional[float] = None
+    stored_accuracy: Optional[float] = None
+    gps_source: Optional[str] = None
+    gps_timestamp: Optional[datetime] = None
+    stored_timestamp: Optional[datetime] = None
     description: Optional[str] = None
     voice_note_path: Optional[str] = None
     voice_transcript: Optional[str] = None
@@ -217,9 +229,15 @@ class RecommendedOption(BaseModel):
     # New: expose supported insurance codes for the hospital
     supported_insurance: List[str] = Field(default_factory=list)
     rejection_reason: Optional[str] = None
-    explanation: List[str]
+    explanation: List[str] = Field(default_factory=list)
     flag: Optional[str] = None
     requirement_unconfirmed: bool = False
+    why_this: List[str] = Field(default_factory=list)
+    why_not: List[str] = Field(default_factory=list)
+    primary_exclusion: Optional[str] = None
+    confidence: Optional[str] = "High"
+    is_stale: bool = False
+    simulated: bool = False
 
 class DecisionEngineResult(BaseModel):
     fastest_hospital: Optional[RecommendedOption] = None

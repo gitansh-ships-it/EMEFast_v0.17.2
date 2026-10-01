@@ -375,7 +375,10 @@ export default function CreateEmergencyPage() {
   const [lng, setLng] = useState<number | null>(null);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [address, setAddress] = useState("Acquiring incident coordinates…");
-  const [gpsState, setGpsState] = useState<"idle" | "locating" | "locked" | "error">("idle");
+  const [gpsState, setGpsState] = useState<"GPS_LOCKING" | "GPS_FOUND" | "GPS_CONFIRMED" | "GPS_FAILED" | "MANUAL_LOCATION">("GPS_LOCKING");
+  const [gpsSource, setGpsSource] = useState<"DEVICE" | "BROWSER" | "MANUAL">("DEVICE");
+  const [gpsTimestamp, setGpsTimestamp] = useState<number | null>(null);
+  const [freshnessSec, setFreshnessSec] = useState<number>(0);
   const [gpsMessage, setGpsMessage] = useState("");
   const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
   const [voiceText, setVoiceText] = useState("");
@@ -383,6 +386,15 @@ export default function CreateEmergencyPage() {
   const [insurance, setInsurance] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Freshness counter
+  useEffect(() => {
+    if (!gpsTimestamp) return;
+    const interval = setInterval(() => {
+      setFreshnessSec(Math.max(0, Math.floor((Date.now() - gpsTimestamp) / 1000)));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [gpsTimestamp]);
 
   // Hospital Discovery Info for Step 4
   const [verifiedHospitals, setVerifiedHospitals] = useState<any[]>([]);
@@ -399,11 +411,11 @@ export default function CreateEmergencyPage() {
     gpsWatchRef.current = null;
     if (gpsTimeoutRef.current) clearTimeout(gpsTimeoutRef.current);
     gpsTimeoutRef.current = null;
-    setGpsState("locating");
+    setGpsState("GPS_LOCKING");
     setGpsMessage("");
 
     if (!navigator.geolocation) {
-      setGpsState("error");
+      setGpsState("GPS_FAILED");
       setGpsMessage("Location is not supported by this browser. Tap 'Drop Pin on Map' to place incident pin.");
       setLat(null);
       setLng(null);
@@ -426,6 +438,10 @@ export default function CreateEmergencyPage() {
       setLat(pos.coords.latitude);
       setLng(pos.coords.longitude);
       setAccuracy(nextAccuracy);
+      setGpsSource(pos.coords.altitude != null || nextAccuracy < 50 ? "DEVICE" : "BROWSER");
+      const now = Date.now();
+      setGpsTimestamp(now);
+      setFreshnessSec(0);
       settled = true;
 
       const cleanCoordStr = `Current device location (${pos.coords.latitude.toFixed(4)}°, ${pos.coords.longitude.toFixed(4)}°)`;
@@ -433,9 +449,9 @@ export default function CreateEmergencyPage() {
       if (nextAccuracy <= 100) {
         setGpsMessage("");
       } else {
-        setGpsMessage(`Desktop location is approximate (±${Math.round(nextAccuracy)} m). Pinned location shown on map.`);
+        setGpsMessage(`Location accuracy is approximate (±${Math.round(nextAccuracy)} m). Pinned location shown on map.`);
       }
-      setGpsState("locked");
+      setGpsState("GPS_FOUND");
       finish();
     };
 
@@ -451,7 +467,7 @@ export default function CreateEmergencyPage() {
     const onError = (err: GeolocationPositionError) => {
       if (settled) return;
       if (err.code === 1) {
-        setGpsState("error");
+        setGpsState("GPS_FAILED");
         setGpsMessage("Location permission is blocked. Tap 'Drop Pin on Map' to place the incident pin manually.");
         setLat(null);
         setLng(null);
@@ -463,7 +479,7 @@ export default function CreateEmergencyPage() {
         fallbackToStandardLocation();
         return;
       }
-      setGpsState("error");
+      setGpsState("GPS_FAILED");
       setGpsMessage("Unable to acquire satellite fix. Tap 'Drop Pin on Map' to place the incident pin manually.");
       setLat(null);
       setLng(null);
@@ -485,7 +501,7 @@ export default function CreateEmergencyPage() {
   useEffect(() => {
     const isDenied = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("gps") === "denied";
     if (isDenied) {
-      setGpsState("error");
+      setGpsState("GPS_FAILED");
       setGpsMessage("GPS location unavailable or permission denied. Tap 'Drop Pin on Map' to set incident location.");
       setLat(null);
       setLng(null);
@@ -542,6 +558,9 @@ export default function CreateEmergencyPage() {
         setError("Incident location is required before continuing. Please place a pin or allow GPS.");
         return;
       }
+      if (currentStep === 1 && gpsState === "GPS_FOUND") {
+        setGpsState("GPS_CONFIRMED");
+      }
       if (currentStep === 2 && !condition.trim() && selectedSymptoms.length === 0 && !voiceBlob) {
         setError("Please select at least one symptom or describe the emergency condition.");
         return;
@@ -590,6 +609,11 @@ export default function CreateEmergencyPage() {
         address,
         voice_transcript: voiceText.trim() || undefined,
         insurance: insurance.trim() || undefined,
+        gps_accuracy: accuracy != null ? accuracy : undefined,
+        stored_accuracy: accuracy != null ? accuracy : undefined,
+        gps_source: gpsSource,
+        gps_timestamp: gpsTimestamp ? new Date(gpsTimestamp).toISOString() : new Date().toISOString(),
+        stored_timestamp: gpsTimestamp ? new Date(gpsTimestamp).toISOString() : new Date().toISOString(),
       });
 
       const caseId = res.data.id;
@@ -648,9 +672,18 @@ export default function CreateEmergencyPage() {
 
         {/* Consolidated Location Indicator */}
         <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono shrink-0">
-          <span className={`w-2 h-2 rounded-full ${gpsState === "locked" ? "bg-[#30d158]" : gpsState === "locating" ? "bg-[#ff9f0a] animate-ping" : "bg-neutral-400"}`} />
+          <span className={`w-2 h-2 rounded-full ${
+            gpsState === "GPS_FOUND" || gpsState === "GPS_CONFIRMED" ? "bg-[#30d158]" :
+            gpsState === "GPS_LOCKING" ? "bg-[#ff9f0a] animate-ping" :
+            gpsState === "MANUAL_LOCATION" ? "bg-blue-400" :
+            "bg-red-500"
+          }`} />
           <span className="text-[var(--text)] font-semibold">
-            {gpsState === "locked" ? "Location Locked" : gpsState === "locating" ? "Acquiring GPS…" : "Manual Pin"}
+            {gpsState === "GPS_FOUND" ? "GPS Found" :
+             gpsState === "GPS_CONFIRMED" ? "GPS Confirmed" :
+             gpsState === "GPS_LOCKING" ? "GPS Locking…" :
+             gpsState === "MANUAL_LOCATION" ? "Manual Pin" :
+             "GPS Failed"}
           </span>
         </div>
       </div>
@@ -727,11 +760,11 @@ export default function CreateEmergencyPage() {
               <button
                 type="button"
                 onClick={detectGPS}
-                disabled={gpsState === "locating"}
+                disabled={gpsState === "GPS_LOCKING"}
                 className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold flex items-center gap-1.5 text-[var(--text)] transition-colors cursor-pointer"
               >
-                <Crosshair size={13} className={gpsState === "locating" ? "animate-spin text-[#ff3b30]" : ""} />
-                <span>{gpsState === "locating" ? "Acquiring…" : "Re-detect GPS"}</span>
+                <Crosshair size={13} className={gpsState === "GPS_LOCKING" ? "animate-spin text-[#ff3b30]" : ""} />
+                <span>{gpsState === "GPS_LOCKING" ? "Acquiring…" : "Re-detect GPS"}</span>
               </button>
             </div>
 
@@ -745,9 +778,12 @@ export default function CreateEmergencyPage() {
                     setLat(point.lat);
                     setLng(point.lng);
                     setAccuracy(null);
+                    setGpsSource("MANUAL");
+                    setGpsTimestamp(Date.now());
+                    setFreshnessSec(0);
                     setAddress(`Manually pinned location (${point.lat.toFixed(4)}°, ${point.lng.toFixed(4)}°)`);
                     setGpsMessage("");
-                    setGpsState("locked");
+                    setGpsState("MANUAL_LOCATION");
                   }}
                 />
               ) : (
@@ -765,8 +801,11 @@ export default function CreateEmergencyPage() {
                       setLat(26.9124);
                       setLng(75.7873);
                       setAccuracy(null);
+                      setGpsSource("MANUAL");
+                      setGpsTimestamp(Date.now());
+                      setFreshnessSec(0);
                       setAddress("Manually pinned incident location (tap map to move)");
-                      setGpsState("locked");
+                      setGpsState("MANUAL_LOCATION");
                       setGpsMessage("");
                     }}
                     className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-semibold text-[var(--text)] flex items-center gap-1.5 cursor-pointer"
@@ -778,15 +817,37 @@ export default function CreateEmergencyPage() {
               )}
             </div>
 
-            {/* Consolidated Location Metadata */}
-            <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
-              <div className="flex items-center gap-2">
-                <MapPin size={14} className="red-mono-label shrink-0" />
-                <span className="text-[var(--text)] font-semibold truncate">{address}</span>
+            {/* Explicit GPS State Machine & Metadata HUD */}
+            <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs font-mono">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">GPS STATUS:</span>
+                  <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                    gpsState === "GPS_FOUND" || gpsState === "GPS_CONFIRMED" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" :
+                    gpsState === "GPS_LOCKING" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse" :
+                    gpsState === "MANUAL_LOCATION" ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" :
+                    "bg-red-500/20 text-red-300 border border-red-500/30"
+                  }`}>
+                    {gpsState}
+                  </span>
+                </div>
+                <div className="text-[11px] text-[var(--muted)] flex items-center gap-2">
+                  <span>Source: <strong className="text-white">{gpsSource}</strong></span>
+                  {gpsTimestamp && (
+                    <span>· Freshness: <strong className="text-white">{freshnessSec < 3 ? 'Fresh fix' : `Captured ${freshnessSec}s ago`}</strong></span>
+                  )}
+                </div>
               </div>
-              <div className="text-[var(--muted)] shrink-0">
-                {lat != null && lng != null ? `${lat.toFixed(5)}°, ${lng.toFixed(5)}°` : "Coordinates pending"}
-                {accuracy != null && <span className="ml-1 text-[10px] text-[#30d158]">(±{Math.round(accuracy)}m)</span>}
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/5">
+                <div className="flex items-center gap-1.5 truncate">
+                  <MapPin size={13} className="text-[#ff3b30] shrink-0" />
+                  <span className="text-[var(--text)] font-semibold truncate">{address}</span>
+                </div>
+                <div className="text-[var(--muted)] shrink-0 flex items-center gap-1.5">
+                  <span>{lat != null && lng != null ? `${lat.toFixed(5)}°, ${lng.toFixed(5)}°` : "Coordinates pending"}</span>
+                  {accuracy != null && <span className="text-emerald-400 font-semibold">(±{Math.round(accuracy)}m)</span>}
+                </div>
               </div>
             </div>
 
@@ -1205,6 +1266,17 @@ export default function CreateEmergencyPage() {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Explicit Consent & Pilot Data Notice */}
+          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200 space-y-2">
+            <div className="flex items-center gap-2 font-bold text-white">
+              <ShieldCheck size={16} className="text-[#30d158]" />
+              <span>Pilot Consent & Emergency Data Notice</span>
+            </div>
+            <p className="text-[11px] text-blue-300 leading-relaxed m-0">
+              By sending this emergency request, you consent to transmitting incident location, reported symptoms, and triage notes to nearby participating hospitals for emergency readiness coordination. EMEFast is a demonstration / pilot coordination platform and does not replace statutory 108 / 112 emergency dispatch.
+            </p>
           </div>
 
           <div className="flex items-center justify-center gap-1.5 text-xs text-[var(--muted)] pt-3 pb-1">

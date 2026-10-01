@@ -72,10 +72,22 @@ class EmergencyCase(Base):
     status = Column(String, default=CaseState.WAITING_FOR_RESPONSES.value, index=True) # Canonical CaseState
     selected_hospital_id = Column(Integer, ForeignKey("hospitals.id"), nullable=True)
     selected_hospital_eta = Column(Float, nullable=True) # in minutes
+    override_reason = Column(String, nullable=True)
+    gps_accuracy = Column(Float, nullable=True)
+    gps_source = Column(String, nullable=True, default="DEVICE") # DEVICE, BROWSER, MANUAL
+    gps_timestamp = Column(DateTime, nullable=True)
     description = Column(Text, nullable=True)
     voice_note_path = Column(String, nullable=True)
     voice_transcript = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    @property
+    def stored_accuracy(self):
+        return self.gps_accuracy
+
+    @property
+    def stored_timestamp(self):
+        return self.gps_timestamp
     
     user = relationship("User", foreign_keys=[user_id])
     selected_hospital = relationship("Hospital", foreign_keys=[selected_hospital_id])

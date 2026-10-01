@@ -148,3 +148,35 @@ async def release_resource(
         from logging_config import logger
         logger.error(f"Resource release failed: {exc}")
         raise HTTPException(status_code=500, detail=f"Resource release failed: {exc}")
+
+@router.post("/{resource_id}/occupy")
+async def occupy_resource(
+    resource_id: int,
+    user: UserContext = Depends(require_hospital),
+    db: AsyncSession = Depends(get_db)
+):
+    """Mark a reserved or available resource as OCCUPIED upon patient admission."""
+    try:
+        stmt = select(HospitalResourceUnit).where(HospitalResourceUnit.id == resource_id).with_for_update()
+        result = await db.execute(stmt)
+        resource = result.scalar_one_or_none()
+        if not resource:
+            raise HTTPException(status_code=404, detail="Resource not found")
+        if user.role == "HOSPITAL" and user.hospital_id is not None and user.hospital_id != resource.hospital_id:
+            raise HTTPException(status_code=403, detail="Hospital not authorized for this resource")
+        if resource.status == "OCCUPIED":
+            raise HTTPException(status_code=400, detail="Resource is already occupied")
+
+        resource.status = "OCCUPIED"
+        res_stmt = select(ResourceReservation).where(ResourceReservation.resource_id == resource_id, ResourceReservation.status == "HELD")
+        res_result = await db.execute(res_stmt)
+        for reservation in res_result.scalars().all():
+            reservation.status = "OCCUPIED"
+        await db.commit()
+        return {"status": "success", "resource_status": "OCCUPIED"}
+    except HTTPException:
+        await db.rollback()
+        raise
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Resource occupation failed: {exc}")

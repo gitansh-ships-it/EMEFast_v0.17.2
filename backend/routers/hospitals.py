@@ -189,21 +189,31 @@ async def update_hospital_resources(
     if not hosp:
         raise HTTPException(status_code=404, detail="Hospital not found")
         
-    if res_in.emergency_status is not None:
-        hosp.emergency_status = res_in.emergency_status
-    if res_in.capabilities is not None:
-        hosp.capabilities = res_in.capabilities
-    if res_in.emergency_capacity is not None:
-        hosp.emergency_capacity = res_in.emergency_capacity
-    if res_in.available_beds is not None:
-        hosp.available_beds = res_in.available_beds
-    if res_in.available_icu is not None:
+    # Track mutations and record audit log
+    changes = []
+    if res_in.available_icu is not None and res_in.available_icu != hosp.available_icu:
+        changes.append(f"ICU: {hosp.available_icu} -> {res_in.available_icu}")
         hosp.available_icu = res_in.available_icu
-    if res_in.oxygen_available is not None:
+    if res_in.available_beds is not None and res_in.available_beds != hosp.available_beds:
+        changes.append(f"Beds: {hosp.available_beds} -> {res_in.available_beds}")
+        hosp.available_beds = res_in.available_beds
+    if res_in.emergency_status is not None and res_in.emergency_status != hosp.emergency_status:
+        changes.append(f"Status: {hosp.emergency_status} -> {res_in.emergency_status}")
+        hosp.emergency_status = res_in.emergency_status
+    if res_in.capabilities is not None and res_in.capabilities != hosp.capabilities:
+        changes.append("Capabilities updated")
+        hosp.capabilities = res_in.capabilities
+    if res_in.emergency_capacity is not None and res_in.emergency_capacity != hosp.emergency_capacity:
+        changes.append(f"Capacity: {hosp.emergency_capacity} -> {res_in.emergency_capacity}")
+        hosp.emergency_capacity = res_in.emergency_capacity
+    if res_in.oxygen_available is not None and res_in.oxygen_available != hosp.oxygen_available:
+        changes.append(f"Oxygen: {hosp.oxygen_available} -> {res_in.oxygen_available}")
         hosp.oxygen_available = res_in.oxygen_available
-    if res_in.blood_units is not None:
+    if res_in.blood_units is not None and res_in.blood_units != hosp.blood_units:
+        changes.append(f"Blood units: {hosp.blood_units} -> {res_in.blood_units}")
         hosp.blood_units = res_in.blood_units
-    if res_in.trauma_capability is not None:
+    if res_in.trauma_capability is not None and res_in.trauma_capability != hosp.trauma_capability:
+        changes.append(f"Trauma capability: {hosp.trauma_capability} -> {res_in.trauma_capability}")
         hosp.trauma_capability = res_in.trauma_capability
 
     # Handle supported_insurance field
@@ -212,7 +222,16 @@ async def update_hospital_resources(
         unknown = validate_insurance_codes(res_in.supported_insurance)
         if unknown:
             raise HTTPException(status_code=400, detail=f"Unknown insurance codes: {', '.join(unknown)}")
+        changes.append("Insurance list updated")
         hosp.supported_insurance = res_in.supported_insurance
+
+    if changes:
+        audit = AuditLog(
+            performed_by=user.email or f"hospital_{hosp.id}",
+            action="RESOURCE_UPDATED",
+            details=f"Hospital '{hosp.name}' resources updated: {'; '.join(changes)}"
+        )
+        db.add(audit)
 
     await db.commit()
     await db.refresh(hosp)

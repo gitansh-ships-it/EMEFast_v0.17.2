@@ -1,5 +1,6 @@
 import re
 import math
+import datetime
 from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -34,7 +35,7 @@ def capability_match(case: EmergencyCase, hosp: Hospital) -> tuple[bool,list[str
     if 'oxygen' in req and not hosp.oxygen_available: missing.append('oxygen')
     if 'trauma' in req and not hosp.trauma_capability: missing.append('trauma care')
     if 'ventilator' in req and 'ventilator' not in caps: missing.append('ventilator')
-    mapping={'cardiac':'cardiac','cardiologist':'cardiac','neuro':'neuro','neurosurgeon':'neuro','stroke':'neuro','orthopedic':'orthopedic','pediatric':'pediatric','maternity':'maternity','obstetric':'maternity','trauma':'trauma'}
+    mapping={'cardiac':'cardi','cardiologist':'cardi','neuro':'neuro','neurosurgeon':'neuro','stroke':'neuro','orthopedic':'ortho','pediatric':'pediatr','maternity':'matern','obstetric':'obste','trauma':'trauma'}
     for r, needle in mapping.items():
         if r in req and needle not in caps: missing.append(r)
     return (not missing), missing
@@ -69,12 +70,69 @@ async def evaluate_decision_engine(db: AsyncSession, case: EmergencyCase) -> Dic
             # Ranking weights: ETA 0.70, resources 0.25, cost 0.05
             score=round(eta_score*0.70 + resource_score*0.25 + cost_score*0.05,1)
         explanation=[f'Response: {resp.response}',f'ETA: {eta} min',f'Estimated emergency cost: ₹{cost:,}']
-        if feasible: explanation.append('Eligibility: requirements currently satisfied')
-        elif missing: explanation.append('Not feasible: missing '+', '.join(sorted(set(missing))))
-        elif hosp.emergency_status!='ONLINE': explanation.append('Not feasible: ER currently offline')
-        elif not hosp.verified: explanation.append('Not feasible: hospital not verified')
-        elif (hosp.available_beds or 0)<=0: explanation.append('Not feasible: no emergency beds available')
-        opt={'hospital_id':hosp.id,'hospital_name':hosp.name,'latitude':hosp.latitude,'longitude':hosp.longitude,'hospital_address':hosp.address,'hospital_capabilities':hosp.capabilities or '', 'response':resp.response,'rejection_reason':resp.rejection_reason,'eta':eta,'distance_km':dist,'available_icu':hosp.available_icu or 0,'available_beds':hosp.available_beds or 0,'estimated_cost':cost,'is_recommended':False,'score':score,'explanation':explanation,'capability_match':feasible,'supported_insurance':hosp.supported_insurance or []}
+        why_this = []
+        why_not = []
+        primary_exclusion = None
+
+        if feasible and resp.response == 'ACCEPTED':
+            why_this.append("Required capability confirmed")
+            why_this.append("Resource available (beds / ICU)")
+            why_this.append("ER accepting (ONLINE)")
+            why_this.append("Hospital accepted emergency broadcast")
+            explanation.append('Eligibility: requirements currently satisfied')
+        elif missing:
+            primary_exclusion = f"Required resource/capability missing: {', '.join(sorted(set(missing)))}"
+            why_not.append(f"Missing {', '.join(sorted(set(missing)))}")
+            explanation.append('Not feasible: missing '+', '.join(sorted(set(missing))))
+        elif hosp.emergency_status != 'ONLINE':
+            primary_exclusion = f"ER desk is {hosp.emergency_status.lower()}"
+            why_not.append("ER desk offline")
+            explanation.append('Not feasible: ER currently offline')
+        elif not hosp.verified:
+            primary_exclusion = "Hospital not admin-verified in registry"
+            why_not.append("Facility unverified")
+            explanation.append('Not feasible: hospital not verified')
+        elif (hosp.available_beds or 0) <= 0:
+            primary_exclusion = "No available emergency beds reported"
+            why_not.append("Zero available beds")
+            explanation.append('Not feasible: no emergency beds available')
+        elif resp.response == 'REJECTED':
+            primary_exclusion = f"Declined by ER Desk: {resp.rejection_reason or 'Capacity full'}"
+            why_not.append("Hospital declined")
+
+        # Confidence assessment based on real verified fields
+        confidence = "High" if (feasible and resp.response == 'ACCEPTED' and (hosp.available_icu or 0) > 0 and eta < 25) else "Moderate" if (feasible and resp.response == 'ACCEPTED') else "Low"
+
+        # Resource freshness
+        freshness_seconds = int((datetime.datetime.utcnow() - hosp.created_at).total_seconds()) if getattr(hosp, 'created_at', None) else 60
+        is_stale = freshness_seconds > 3600
+
+        opt={
+            'hospital_id':hosp.id,
+            'hospital_name':hosp.name,
+            'latitude':hosp.latitude,
+            'longitude':hosp.longitude,
+            'hospital_address':hosp.address,
+            'hospital_capabilities':hosp.capabilities or '',
+            'response':resp.response,
+            'rejection_reason':resp.rejection_reason,
+            'eta':eta,
+            'distance_km':dist,
+            'available_icu':hosp.available_icu or 0,
+            'available_beds':hosp.available_beds or 0,
+            'estimated_cost':cost,
+            'is_recommended':False,
+            'score':score,
+            'explanation':explanation,
+            'why_this':why_this,
+            'why_not':why_not,
+            'primary_exclusion':primary_exclusion,
+            'confidence':confidence,
+            'is_stale':is_stale,
+            'capability_match':feasible,
+            'supported_insurance':hosp.supported_insurance or [],
+            'simulated':getattr(resp, 'simulated', False) or False
+        }
         all_options.append(opt)
         if resp.response=='ACCEPTED' and feasible: accepted.append(opt)
 

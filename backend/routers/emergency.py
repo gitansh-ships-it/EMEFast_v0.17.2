@@ -79,8 +79,14 @@ async def create_emergency_case(
     user_id: Optional[int] = None,
     db: AsyncSession = Depends(get_db)
 ):
-    # Generate unique Case Code e.g. EME-1042
-    case_code = f"EME-{uuid4().hex[:10].upper()}"
+    # Generate authoritative permanent Incident ID e.g. EMF-2026-1001-00042
+    import datetime
+    from sqlalchemy import func
+    today = datetime.datetime.utcnow()
+    date_prefix = f"EMF-{today.strftime('%Y-%m%d')}"
+    count_res = await db.execute(select(func.count(EmergencyCase.id)))
+    next_seq = (count_res.scalar() or 0) + 1
+    case_code = f"{date_prefix}-{next_seq:05d}"
     
     # Ensure standard emergency stabilization is always preserved
     raw_reqs = (case_in.requirements or "").strip()
@@ -91,6 +97,10 @@ async def create_emergency_case(
         final_requirements = ", ".join(req_parts)
     else:
         final_requirements = "Emergency stabilization"
+
+    gps_acc = case_in.gps_accuracy if case_in.gps_accuracy is not None else case_in.stored_accuracy
+    gps_src = case_in.gps_source or ("MANUAL" if gps_acc is None else "DEVICE")
+    gps_ts = case_in.gps_timestamp or case_in.stored_timestamp or datetime.datetime.utcnow()
 
     new_case = EmergencyCase(
         case_code=case_code,
@@ -109,7 +119,10 @@ async def create_emergency_case(
         ambulance_details=case_in.ambulance_details,
         status=CaseState.BROADCASTING.value,
         description=case_in.description,
-        voice_transcript=case_in.voice_transcript
+        voice_transcript=case_in.voice_transcript,
+        gps_accuracy=gps_acc,
+        gps_source=gps_src,
+        gps_timestamp=gps_ts,
     )
     db.add(new_case)
     await db.flush()
@@ -272,6 +285,7 @@ async def select_hospital(
     # Update case
     case.selected_hospital_id = hospital.id
     case.selected_hospital_eta = eta
+    case.override_reason = req.override_reason.strip() if req.override_reason else None
     case.status = CaseState.HOSPITAL_SELECTED.value
     
     # Mark response as SELECTED
@@ -279,12 +293,19 @@ async def select_hospital(
         if r.hospital_id == hospital.id:
             r.response = "SELECTED"
             
-    # Add Audit Log
+    # Add Audit Log / Timeline event
+    if req.override_reason and req.override_reason.strip():
+        action_name = "MANUAL_OVERRIDE_SELECTED"
+        audit_details = f"Manual override: Hospital '{hospital.name}' selected for case {case.case_code}. Reason: {req.override_reason.strip()}. ETA: {eta} mins ({dist} km)."
+    else:
+        action_name = "HOSPITAL_SELECTED"
+        audit_details = f"Hospital '{hospital.name}' selected for case {case.case_code}. ETA: {eta} mins ({dist} km)."
+
     audit = AuditLog(
         case_id=case.id,
         performed_by="USER",
-        action="HOSPITAL_SELECTED",
-        details=f"Hospital '{hospital.name}' selected for case {case.case_code}. ETA: {eta} mins ({dist} km)."
+        action=action_name,
+        details=audit_details
     )
     db.add(audit)
     
@@ -296,6 +317,37 @@ async def select_hospital(
         .where(EmergencyCase.id == id)
     )
     return result.scalar_one()
+
+@router.get("/{id}/timeline")
+async def get_emergency_timeline(id: int, db: AsyncSession = Depends(get_db)):
+    """Authoritative emergency timeline events recorded for this incident."""
+    case_res = await db.execute(select(EmergencyCase).where(EmergencyCase.id == id))
+    case = case_res.scalars().first()
+    if not case:
+        raise HTTPException(status_code=404, detail="Emergency case not found")
+        
+    logs_res = await db.execute(
+        select(AuditLog)
+        .where(AuditLog.case_id == id)
+        .order_by(AuditLog.timestamp.asc())
+    )
+    logs = logs_res.scalars().all()
+    events = [
+        {
+            "id": l.id,
+            "incident_id": case.case_code,
+            "action": l.action,
+            "performed_by": l.performed_by,
+            "details": l.details,
+            "timestamp": l.timestamp.isoformat() if l.timestamp else None
+        }
+        for l in logs
+    ]
+    return {
+        "case_id": case.id,
+        "incident_id": case.case_code,
+        "events": events
+    }
 
 @router.post("/{id}/status", response_model=EmergencyCaseOut)
 async def update_case_status(

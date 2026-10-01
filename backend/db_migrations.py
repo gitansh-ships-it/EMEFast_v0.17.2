@@ -58,3 +58,20 @@ async def ensure_hospital_response_simulated_column(conn):
     stmt = text("ALTER TABLE hospital_responses ADD COLUMN simulated BOOLEAN DEFAULT 0")
     await conn.execute(stmt)
     logger.info("[migration] added simulated column to hospital_responses")
+
+async def ensure_emergency_case_gps_columns(conn):
+    """Idempotent addition of GPS metadata and override_reason columns to emergency_cases."""
+    columns = await conn.run_sync(lambda sync_conn: inspect(sync_conn).get_columns("emergency_cases"))
+    existing = {c["name"] for c in columns}
+    specs = [
+        ("gps_accuracy", "FLOAT"),
+        ("gps_source", "VARCHAR"),
+        ("gps_timestamp", "DATETIME"),
+        ("override_reason", "VARCHAR"),
+    ]
+    for name, col_type in specs:
+        if name in existing:
+            continue
+        stmt = text(f"ALTER TABLE emergency_cases ADD COLUMN {name} {col_type}")
+        await conn.execute(stmt)
+        logger.info("[migration] added column %s to emergency_cases", name)
