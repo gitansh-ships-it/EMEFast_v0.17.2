@@ -331,8 +331,11 @@ export default function LiveMap({
       });
 
       const L = (window as any).L;
-      if (L && map && result.geometry?.length) {
-        routeRef.current?.remove();
+      const activeMap = leafletMapRef.current;
+      if (L && activeMap && result.geometry?.length) {
+        if (routeRef.current) {
+          try { routeRef.current.remove(); } catch {}
+        }
         const strokeColor = isLightMode() ? "#d70015" : "#ff3b30";
         routeRef.current = L.polyline(result.geometry, {
           color: strokeColor,
@@ -340,10 +343,10 @@ export default function LiveMap({
           opacity: 0.95,
           lineCap: "round",
           lineJoin: "round",
-        }).addTo(map);
+        }).addTo(activeMap);
 
         const bounds = L.latLngBounds(result.geometry);
-        map.fitBounds(bounds, { padding: [55, 55], maxZoom: 16 });
+        activeMap.fitBounds(bounds, { padding: [55, 55], maxZoom: 16 });
       }
     } catch {
       // Aborted or failed
