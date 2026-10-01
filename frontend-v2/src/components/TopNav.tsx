@@ -174,7 +174,7 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
                     className="reimagined-sos-btn pure-liquid-sos header-sos-btn"
                     aria-label="Start emergency intake"
                   >
-                    <Siren size={14} strokeWidth={2.4} />
+                    <Siren size={13} strokeWidth={2.4} />
                     <span>Start Emergency</span>
                   </Link>
                   <Link
@@ -189,10 +189,10 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
                   {activeRole !== "HOSPITAL" && activeRole !== "ADMIN" && (
                     <Link
                       href="/user/emergency/new"
-                      className="reimagined-sos-btn header-sos-btn"
+                      className="reimagined-sos-btn pure-liquid-sos header-sos-btn"
                       aria-label="Start emergency intake"
                     >
-                      <Siren size={14} strokeWidth={2.4} />
+                      <Siren size={13} strokeWidth={2.4} />
                       <span>Start Emergency</span>
                     </Link>
                   )}
