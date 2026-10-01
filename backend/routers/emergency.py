@@ -22,7 +22,6 @@ router = APIRouter(prefix="/api/emergency", tags=["emergency"])
 async def upload_voice_note(
     id: int,
     request: Request,
-    user: UserContext = Depends(require_roles(["USER", "HOSPITAL", "ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     """Store a recorded emergency voice note and optional transcript with the case.
