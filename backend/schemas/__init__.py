@@ -93,6 +93,7 @@ class HospitalResponseOut(BaseModel):
     distance_km: Optional[float] = None
     estimated_cost: Optional[int] = None
     responded_at: Optional[datetime] = None
+    simulated: Optional[bool] = False
 
     class Config:
         from_attributes = True
@@ -118,6 +119,7 @@ class HospitalResponseOut(BaseModel):
                 "distance_km": getattr(data, "distance_km", None),
                 "estimated_cost": getattr(data, "estimated_cost", None),
                 "responded_at": getattr(data, "responded_at", None),
+                "simulated": getattr(data, "simulated", False) or False,
             }
         return data
 
@@ -166,6 +168,7 @@ class EmergencyCaseOut(BaseModel):
     address: Optional[str] = None
     ambulance_details: Optional[str] = None
     status: str
+    hospitals_contacted: Optional[int] = None
     selected_hospital_id: Optional[int] = None
     selected_hospital_eta: Optional[float] = None
     selected_hospital: Optional[HospitalOut] = None
@@ -177,6 +180,22 @@ class EmergencyCaseOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_hospitals_contacted(cls, data: Any) -> Any:
+        if hasattr(data, "responses"):
+            resps = getattr(data, "responses", None) or []
+            if not hasattr(data, "hospitals_contacted") or getattr(data, "hospitals_contacted", None) is None:
+                # We can dynamically treat len(responses) as hospitals_contacted if not set
+                try:
+                    setattr(data, "hospitals_contacted", len(resps))
+                except Exception:
+                    pass
+        elif isinstance(data, dict):
+            if "hospitals_contacted" not in data or data.get("hospitals_contacted") is None:
+                data["hospitals_contacted"] = len(data.get("responses") or [])
+        return data
 
 # --- Decision Engine Schemas ---
 class RecommendedOption(BaseModel):

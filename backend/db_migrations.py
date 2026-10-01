@@ -47,3 +47,14 @@ async def ensure_hospital_resource_columns(conn):
         stmt = text(f"ALTER TABLE hospitals ADD COLUMN {name} {col_type}")
         await conn.execute(stmt)
         logger.info("[migration] added missing column %s", name)
+
+async def ensure_hospital_response_simulated_column(conn):
+    """Idempotent addition of ``simulated`` BOOLEAN column to ``hospital_responses``."""
+    columns = await conn.run_sync(lambda sync_conn: inspect(sync_conn).get_columns("hospital_responses"))
+    column_names = [c["name"] for c in columns]
+    if "simulated" in column_names:
+        logger.info("[migration] simulated column already present on hospital_responses")
+        return
+    stmt = text("ALTER TABLE hospital_responses ADD COLUMN simulated BOOLEAN DEFAULT 0")
+    await conn.execute(stmt)
+    logger.info("[migration] added simulated column to hospital_responses")

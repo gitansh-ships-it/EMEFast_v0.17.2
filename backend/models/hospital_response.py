@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 import datetime
 from .base import Base
@@ -15,6 +15,7 @@ class HospitalResponse(Base):
     distance_km = Column(Float, nullable=True) # Distance in kilometers
     estimated_cost = Column(Integer, nullable=True)
     responded_at = Column(DateTime, nullable=True)
+    simulated = Column(Boolean, nullable=True, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     emergency_case = relationship("EmergencyCase", back_populates="responses")

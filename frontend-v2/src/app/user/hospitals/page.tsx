@@ -285,6 +285,7 @@ function HospitalDiscoveryInner() {
   const optionsToRender = (decision?.all_options && decision.all_options.length > 0)
     ? decision.all_options.map(opt => {
         const hInfo = hospitalMap[opt.hospital_id];
+        const respItem = (currentCase?.responses || []).find(r => r.hospital_id === opt.hospital_id);
         return {
           ...opt,
           hospital_name: opt.hospital_name || hInfo?.name || `Hospital #${opt.hospital_id}`,
@@ -294,6 +295,7 @@ function HospitalDiscoveryInner() {
           supported_insurance: (opt.supported_insurance && opt.supported_insurance.length > 0)
             ? opt.supported_insurance
             : (hInfo?.supported_insurance || []),
+          simulated: Boolean(opt.simulated ?? respItem?.simulated),
         };
       })
     : (currentCase?.responses || []).map(r => {
@@ -316,6 +318,7 @@ function HospitalDiscoveryInner() {
           flag: undefined,
           requirement_unconfirmed: false,
           supported_insurance: (r as any).supported_insurance || hInfo?.supported_insurance || [],
+          simulated: Boolean(r.simulated),
         };
       });
 
@@ -323,8 +326,39 @@ function HospitalDiscoveryInner() {
   const rejectedCount = decision?.rejected_count ?? (currentCase?.responses?.filter(r => r.response === 'REJECTED').length || 0);
   const pendingCount = decision?.pending_count ?? (currentCase?.responses?.filter(r => r.response === 'PENDING').length || (currentCase?.responses?.length || 0));
 
+  const totalContacted = currentCase.hospitals_contacted ?? (currentCase.responses?.length || 0);
+
   return (
     <div className="hospital-discovery max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
+      {/* Zero hospitals in range alert */}
+      {totalContacted === 0 && (
+        <aside role="alert" className="w-full bg-red-950/40 border-2 border-[#ff3b30] text-white p-6 rounded-2xl text-center space-y-3 shadow-xl">
+          <div className="w-12 h-12 mx-auto rounded-full bg-[#ff3b30]/20 border border-[#ff3b30]/40 flex items-center justify-center text-[#ff3b30]">
+            <AlertTriangle size={26} />
+          </div>
+          <h2 className="text-lg font-bold text-white">
+            No verified hospital within 25 km of this location. Call 108 / 112.
+          </h2>
+          <p className="text-xs text-neutral-300 max-w-lg mx-auto">
+            Emergency broadcast found no participating verified facilities within the 25 km operating radius. Contact statutory emergency services immediately:
+          </p>
+          <div className="flex items-center justify-center gap-4 pt-2">
+            <a
+              href="tel:108"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#ff3b30] hover:bg-[#ff453a] text-white text-sm font-bold shadow-lg transition-transform active:scale-95"
+            >
+              📞 Call 108
+            </a>
+            <a
+              href="tel:112"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white text-sm font-bold shadow-lg transition-transform active:scale-95"
+            >
+              📞 Call 112
+            </a>
+          </div>
+        </aside>
+      )}
+
       {/* Prominent Decision-Support Boundary Notice */}
       <aside aria-label="Emergency Services Notice" className="w-full bg-amber-500/15 border border-amber-500/30 text-amber-200 p-2.5 rounded-2xl text-center text-xs font-medium">
         <span>Decision-support only. EMEFast does not dispatch ambulances. 108 / 112 remain the official emergency numbers.</span>
@@ -404,6 +438,11 @@ function HospitalDiscoveryInner() {
                 <span className="match-badge bg-[rgba(48,209,88,0.12)] text-[#30d158] border border-[rgba(48,209,88,0.3)] inline-flex items-center gap-1 font-semibold text-[10px]">
                   <ShieldCheck size={11} /> Admin-verified
                 </span>
+                {Boolean((recommended as any).simulated) && (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                    SIMULATED
+                  </span>
+                )}
               </h2>
               <p className="text-xs text-[#8b949e] flex items-center gap-1.5 flex-wrap">
                 <MapPin size={12} className="text-[#484f58]" />
@@ -528,6 +567,11 @@ function HospitalDiscoveryInner() {
                     <span className="match-badge bg-[rgba(48,209,88,0.12)] text-[#30d158] border border-[rgba(48,209,88,0.3)] inline-flex items-center gap-1 font-semibold text-[10px]">
                       <ShieldCheck size={10} /> Admin-verified
                     </span>
+                    {Boolean(opt.simulated) && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                        SIMULATED
+                      </span>
+                    )}
                     {opt.is_recommended && (
                       <span className="match-badge">BEST OVERALL</span>
                     )}

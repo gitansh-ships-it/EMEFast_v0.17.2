@@ -551,11 +551,11 @@ export default function CreateEmergencyPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Calculate nearby verified hospitals
+  // Calculate nearby verified hospitals within broadcast radius (25 km)
   const nearbyHospitalCount = verifiedHospitals.filter((h) => {
     if (lat == null || lng == null || !h.latitude || !h.longitude) return true;
-    return haversineDistanceKm(lat, lng, h.latitude, h.longitude) <= 35.0;
-  }).length || (verifiedHospitals.length > 0 ? verifiedHospitals.length : 3);
+    return haversineDistanceKm(lat, lng, h.latitude, h.longitude) <= 25.0;
+  }).length;
 
   // Final Submit
   const handleBroadcast = async () => {

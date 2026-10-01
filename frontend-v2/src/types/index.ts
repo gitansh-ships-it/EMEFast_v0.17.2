@@ -7,6 +7,7 @@ export interface HospitalResponse {
   distance_km?: number;
   estimated_cost?: number;
   rejection_reason?: string;
+  simulated?: boolean;
 }
 
 export type CaseState =
@@ -35,6 +36,7 @@ export interface EmergencyCase {
   address?: string;
   ambulance_details?: string;
   status: CaseState;
+  hospitals_contacted?: number;
   responses?: HospitalResponse[];
   selected_hospital?: Hospital;
   voice_note_path?: string;
@@ -78,8 +80,8 @@ export interface RecommendedOption {
   estimated_cost: number;
   supported_insurance?: string[];
   flag?: string;
-
   requirement_unconfirmed?: boolean;
+  simulated?: boolean;
 }
 
 export interface DecisionEngineResult {

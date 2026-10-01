@@ -9,7 +9,7 @@ from models import Base
 from contextlib import asynccontextmanager
 import os
 from logging_config import logger
-from db_migrations import ensure_supported_insurance_column, ensure_hospital_resource_columns
+from db_migrations import ensure_supported_insurance_column, ensure_hospital_resource_columns, ensure_hospital_response_simulated_column
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
@@ -17,6 +17,7 @@ async def lifespan(app: FastAPI):
 
         await ensure_supported_insurance_column(conn)
         await ensure_hospital_resource_columns(conn)
+        await ensure_hospital_response_simulated_column(conn)
         from sqlalchemy import text
         # Canonical CaseState data migration for existing rows
         await conn.execute(text("UPDATE emergency_cases SET status = 'WAITING_FOR_RESPONSES' WHERE status IN ('SEARCHING', 'AWAITING_RESPONSE')"))

@@ -120,27 +120,43 @@ async def create_emergency_case(
     hospitals = [h for h in hosp_query.scalars().all() if calculate_haversine_distance(new_case.latitude, new_case.longitude, h.latitude, h.longitude) <= BROADCAST_RADIUS_KM]
     
     # 2. Broadcast to hospitals (create HospitalResponse records).
-    # The local package ships with DEMO_MODE=1 so the complete comparison flow
-    # is immediately testable. Set DEMO_MODE=0 for real hospital responses.
-    demo_mode = os.getenv("DEMO_MODE", "1").lower() in {"1", "true", "yes", "on"}
+    # DEMO_MODE defaults to "0" (off). Set DEMO_MODE=1 explicitly to test automated responses.
+    demo_mode = os.getenv("DEMO_MODE", "0").lower() in {"1", "true", "yes", "on"}
+    raw_desk_ids = os.getenv("DEMO_DESK_HOSPITAL_IDS", "1,2")
+    demo_desk_ids = {int(x.strip()) for x in raw_desk_ids.split(",") if x.strip().isdigit()}
+
     hospitals.sort(key=lambda h: calculate_haversine_distance(new_case.latitude, new_case.longitude, h.latitude, h.longitude))
+    has_any_accepted = False
     for index, hosp in enumerate(hospitals):
         dist = calculate_haversine_distance(new_case.latitude, new_case.longitude, hosp.latitude, hosp.longitude)
         eta = estimate_eta_minutes(dist)
         response_state = "PENDING"
+        is_simulated = False
+        rejection_reason = None
+
         if demo_mode:
-            if index in (0, 1, 3, 4):
+            if hosp.id in demo_desk_ids:
+                # These hospitals always remain PENDING so their dashboard inbox receives the case!
+                response_state = "PENDING"
+                is_simulated = False
+            elif index in (0, 1, 3, 4):
                 response_state = "ACCEPTED"
+                is_simulated = True
+                has_any_accepted = True
             elif index in (2, 5):
                 response_state = "REJECTED"
+                is_simulated = True
+                rejection_reason = "No matching specialist capacity for this demo case"
+
         resp = HospitalResponse(
             case_id=new_case.id,
             hospital_id=hosp.id,
             response=response_state,
-            rejection_reason="No matching specialist capacity for this demo case" if response_state == "REJECTED" else None,
+            rejection_reason=rejection_reason,
             distance_km=dist,
             eta=eta,
-            estimated_cost=hosp.estimated_emergency_cost
+            estimated_cost=hosp.estimated_emergency_cost,
+            simulated=is_simulated
         )
         db.add(resp)
         
@@ -153,8 +169,8 @@ async def create_emergency_case(
     )
     db.add(audit)
     
-    # Broadcast phase complete: transition to WAITING_FOR_RESPONSES (or HOSPITAL_ACCEPTED if instant demo mode acceptances)
-    if demo_mode and len(hospitals) > 0:
+    # Broadcast phase complete: transition to WAITING_FOR_RESPONSES (or HOSPITAL_ACCEPTED if any accepted)
+    if has_any_accepted:
         new_case.status = CaseState.HOSPITAL_ACCEPTED.value
     else:
         new_case.status = CaseState.WAITING_FOR_RESPONSES.value

@@ -78,7 +78,13 @@ Desktop.ini
 # GitHub Workflows (Pushable via GitHub Web UI or PAT with 'workflow' scope)
 .github/workflows/
 
-# IDE & Editors
-.vscode/
-.idea/
-
+# Transient html/debug/test artifacts
+page.html
+vercel_page*.html
+recommendation.json
+package-lock.json
+tests/e2e/test_*.py
+tests/e2e/*.py
+backend/create_test_sqlite.py
+conftest.py
+frontend-v2/ambulance_screenshots.js
