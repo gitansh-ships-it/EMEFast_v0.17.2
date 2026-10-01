@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Radio, CheckCircle2, XCircle, Clock, Navigation, Shield, ShieldCheck,
-  Hospital as HospitalIcon, MapPin, ArrowRight, AlertTriangle, Zap, RefreshCw, Edit3
+  Hospital as HospitalIcon, MapPin, ArrowRight, AlertTriangle, Zap, RefreshCw, Edit3, Mic
 } from 'lucide-react';
 import api from '@/lib/api';
 import { EmergencyCase, DecisionEngineResult } from '@/types';
@@ -515,6 +515,33 @@ function HospitalDiscoveryInner() {
           </button>
         </div>
       </div>
+
+      {/* Voice Note & Assessment Memo (if present) */}
+      {currentCase.voice_note_path && (
+        <div className="p-3 sm:p-4 rounded-xl bg-blue-500/[0.08] border border-blue-500/25 space-y-2">
+          <div className="flex items-center justify-between text-xs text-blue-300 font-bold font-mono">
+            <span className="flex items-center gap-1.5">
+              <Mic size={14} className="text-[#2997ff]" /> Voice Note Recorded
+            </span>
+            <span className="text-[10px] text-blue-400 font-normal">Transmitted to Hospitals</span>
+          </div>
+          <audio
+            controls
+            preload="none"
+            src={
+              currentCase.voice_note_path.startsWith('http')
+                ? currentCase.voice_note_path
+                : `${(api.defaults.baseURL || '').replace(/\/api$/, '')}${currentCase.voice_note_path}`
+            }
+            className="w-full h-8"
+          />
+          {currentCase.voice_transcript && (
+            <p className="text-[11px] text-neutral-300 italic bg-black/20 p-2 rounded border border-white/5 m-0">
+              &quot;{currentCase.voice_transcript}&quot;
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Diagnostic Boundary Notice */}
       <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">

@@ -13,7 +13,7 @@ from models import EmergencyCase, Hospital, HospitalResponse, AuditLog, CaseStat
 from schemas import EmergencyCaseCreate, EmergencyCaseOut, EmergencyCaseUpdateStatus, SelectHospitalRequest, DecisionEngineResult
 from services.hospital_matching import evaluate_decision_engine, calculate_haversine_distance, estimate_eta_minutes
 from services.storage import get_voice_storage
-from auth import require_authenticated, UserContext
+from auth import require_authenticated, require_roles, UserContext
 
 router = APIRouter(prefix="/api/emergency", tags=["emergency"])
 
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/emergency", tags=["emergency"])
 async def upload_voice_note(
     id: int,
     request: Request,
-    user: UserContext = Depends(require_authenticated),
+    user: UserContext = Depends(require_roles(["USER", "HOSPITAL", "ADMIN"])),
     db: AsyncSession = Depends(get_db)
 ):
     """Store a recorded emergency voice note and optional transcript with the case.
