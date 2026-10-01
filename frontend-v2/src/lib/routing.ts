@@ -51,16 +51,22 @@ export async function fetchAuthoritativeRoute(
     return cached.result;
   }
 
+  const effectiveTomTomKey =
+    (tomtomApiKey && tomtomApiKey.trim() !== "" && tomtomApiKey !== "YOUR_TOMTOM_API_KEY_HERE"
+      ? tomtomApiKey
+      : process.env.NEXT_PUBLIC_TOMTOM_API_KEY || "FtEclPAu7Ksrt5sy6f5XvnHr4JmDZ8uB"
+    ).trim();
+
   const validTomTomKey = Boolean(
-    tomtomApiKey &&
-    tomtomApiKey.trim() !== "" &&
-    tomtomApiKey !== "YOUR_TOMTOM_API_KEY_HERE"
+    effectiveTomTomKey &&
+    effectiveTomTomKey !== "" &&
+    effectiveTomTomKey !== "YOUR_TOMTOM_API_KEY_HERE"
   );
 
   // TIER 1: TomTom Traffic-Aware Road Routing
   if (validTomTomKey) {
     try {
-      const url = `https://api.tomtom.com/routing/1/calculateRoute/${origin.lat},${origin.lng}:${destination.lat},${destination.lng}/json?key=${tomtomApiKey}&traffic=true`;
+      const url = `https://api.tomtom.com/routing/1/calculateRoute/${origin.lat},${origin.lng}:${destination.lat},${destination.lng}/json?key=${effectiveTomTomKey}&traffic=true`;
       const res = await fetch(url, { signal });
       if (res.ok) {
         const data = await res.json();
