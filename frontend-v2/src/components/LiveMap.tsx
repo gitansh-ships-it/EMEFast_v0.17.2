@@ -31,11 +31,10 @@ type LiveMapProps = {
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 const LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
-// CARTO official open tiles for clean Light & Dark styling
-const CARTO_LIGHT_URL = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const CARTO_DARK_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OSM</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>';
+// Map tiles: Standard OSM tiles with CSS dark inversion layer to avoid third-party watermarks
+const OSM_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const OSM_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>';
 
 function validPoint(p?: Point | null): boolean {
   return !!p && Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180;
@@ -175,13 +174,9 @@ export default function LiveMap({
         };
         locateControl.addTo(localMap);
 
-        // Theme-aware initial tile selection
-        const light = isLightMode();
-        const initialTileUrl = light ? CARTO_LIGHT_URL : CARTO_DARK_URL;
-        const tileLayer = L.tileLayer(initialTileUrl, {
+        const tileLayer = L.tileLayer(OSM_TILE_URL, {
           maxZoom: 19,
-          subdomains: "abcd",
-          attribution: CARTO_ATTRIBUTION,
+          attribution: OSM_ATTRIBUTION,
         }).addTo(localMap);
         baseTileLayerRef.current = tileLayer;
         leafletMapRef.current = localMap;
@@ -271,10 +266,6 @@ export default function LiveMap({
   // 2. Dynamic Dark/Light Theme Switching Without Map Recreation
   useEffect(() => {
     const updateTileTheme = (light: boolean) => {
-      if (baseTileLayerRef.current) {
-        const nextUrl = light ? CARTO_LIGHT_URL : CARTO_DARK_URL;
-        baseTileLayerRef.current.setUrl(nextUrl);
-      }
       // Re-style route line for theme contrast
       if (routeRef.current) {
         const strokeColor = light ? "#d70015" : "#ff3b30";
