@@ -297,7 +297,7 @@ export default function LiveMap({
   // 3. Single Source of Truth Route Calculation
   const calculateRoute = useCallback(async () => {
     const map = leafletMapRef.current;
-    if (!map || !validPoint(destination) || !validPoint(livePosition)) return;
+    if (!validPoint(destination) || !validPoint(livePosition)) return;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -352,17 +352,18 @@ export default function LiveMap({
     }
   }, [destination, livePosition, tomtomApiKey, onRouteInfo]);
 
-  // Trigger route computation when coordinates change
+  // Trigger route computation when coordinates change or when map finishes initializing
   useEffect(() => {
+    if (status !== "ready") return;
     if (!validPoint(destination) || !validPoint(livePosition)) return;
     const key = `${livePosition.lat.toFixed(4)},${livePosition.lng.toFixed(4)}-${destination!.lat.toFixed(4)},${destination!.lng.toFixed(4)}-${routeRetryCount}`;
     const now = Date.now();
-    if (key === lastRouteRef.current && now - lastRouteAtRef.current < 6000) return;
+    if (key === lastRouteRef.current && now - lastRouteAtRef.current < 4000) return;
     lastRouteRef.current = key;
     lastRouteAtRef.current = now;
 
     calculateRoute();
-  }, [livePosition.lat, livePosition.lng, destination?.lat, destination?.lng, routeRetryCount, calculateRoute]);
+  }, [status, livePosition.lat, livePosition.lng, destination?.lat, destination?.lng, routeRetryCount, calculateRoute]);
 
   const refreshGPS = () => {
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
