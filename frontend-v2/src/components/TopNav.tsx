@@ -171,7 +171,7 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
                 <>
                   <Link
                     href="/user/emergency/new"
-                    className="reimagined-sos-btn header-sos-btn"
+                    className="reimagined-sos-btn pure-liquid-sos header-sos-btn"
                     aria-label="Start emergency intake"
                   >
                     <Siren size={14} strokeWidth={2.4} />
