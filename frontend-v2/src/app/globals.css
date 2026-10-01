@@ -3553,6 +3553,15 @@ html.theme-light .theme-lens-toggle,
   background-color: #d7261e !important;
 }
 
+@media (max-width: 640px) {
+  .reimagined-sos-btn.pure-liquid-sos {
+    padding: 0 7px !important;
+    gap: 3px !important;
+    font-size: 10px !important;
+    max-width: 95px !important;
+  }
+}
+
 html.theme-dark .reimagined-sos-btn.pure-liquid-sos,
 :root .reimagined-sos-btn.pure-liquid-sos {
   background-color: #d7261e !important;
