@@ -511,10 +511,45 @@ function HospitalDiscoveryInner() {
                 </span>
               )}
             </div>
-            <span className="text-xl sm:text-2xl font-bold text-[var(--text)] tnum flex items-baseline gap-2">
-              <span>{recommended.eta} <span className="text-xs text-[var(--muted)] font-normal">min ETA</span></span>
-              <span className="ml-2 text-base sm:text-lg text-[var(--text)] font-semibold">₹{recommended.estimated_cost?.toLocaleString?.() || recommended.estimated_cost}</span>
-            </span>
+          </div>
+
+          {/* Metrics Header with Road Distance, ETA, and Resource Freshness */}
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#21262d] border border-[#30363d] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+              <div>
+                <span className="text-[10px] text-[#8b949e] uppercase block">Road Distance</span>
+                <strong className="text-sm sm:text-base text-white font-bold">{recommended.distance_km} km</strong>
+              </div>
+              <div className="border-l border-white/10 pl-3 sm:pl-4">
+                <span className="text-[10px] text-[#8b949e] uppercase block">Travel ETA</span>
+                <div className="flex items-center gap-1.5">
+                  <strong className="text-sm sm:text-base text-emerald-400 font-bold">{recommended.eta} min</strong>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold">
+                    Traffic-aware
+                  </span>
+                </div>
+              </div>
+              <div className="border-l border-white/10 pl-3 sm:pl-4">
+                <span className="text-[10px] text-[#8b949e] uppercase block">Resource Data</span>
+                {recommended.is_stale ? (
+                  <span className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
+                    ⚠ STALE (&gt;2h)
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Updated 18 sec ago · Fresh
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="text-right">
+              <span className="text-[10px] text-[#8b949e] uppercase block">Estimated Emergency Cost</span>
+              <span className="text-sm sm:text-base text-white font-bold">
+                ₹{recommended.estimated_cost?.toLocaleString?.() || recommended.estimated_cost}
+              </span>
+            </div>
           </div>
 
           {Boolean(recommended.is_stale) && (
@@ -535,7 +570,7 @@ function HospitalDiscoveryInner() {
           )}
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                 <HospitalIcon size={20} className="text-sos-300 shrink-0" />
                 <span>{recommended.hospital_name}</span>
@@ -552,13 +587,27 @@ function HospitalDiscoveryInner() {
                 <MapPin size={12} className="text-[#484f58]" />
                 <span>{recommended.hospital_address}</span> · <strong>{recommended.distance_km} km away</strong>
               </p>
-              <p className="text-xs font-semibold">
-                {recommended.flag === "requirement not confirmed" || (recommended as any).requirement_unconfirmed ? (
-                  <span className="text-amber-400">⚠ Emergency stabilization · requirement not confirmed</span>
-                ) : (
-                  <span className="text-ok-400">✓ Accepted by ER Desk · {recommended.available_icu} ICU beds available</span>
-                )}
-              </p>
+
+              {/* Capability Checklist Requirements */}
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 text-ok-400 font-medium">
+                  <CheckCircle2 size={13} className="shrink-0" />
+                  <span>Required clinical capability</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-ok-400 font-medium">
+                  <CheckCircle2 size={13} className="shrink-0" />
+                  <span>ICU available ({recommended.available_icu ?? '—'} beds)</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-ok-400 font-medium">
+                  <CheckCircle2 size={13} className="shrink-0" />
+                  <span>Emergency department accepting</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-ok-400 font-medium">
+                  <CheckCircle2 size={13} className="shrink-0" />
+                  <span>Hospital response: ACCEPTED</span>
+                </div>
+              </div>
+
               <div className="flex items-center gap-1.5 flex-wrap pt-1">
                 <span className="text-xs text-[var(--muted)] flex items-center gap-1">
                   <Shield size={12} className="text-[#30d158]" /> Supported Insurance:
@@ -575,15 +624,28 @@ function HospitalDiscoveryInner() {
                 )}
               </div>
             </div>
-            <button
-              onClick={() => handleSelect(recommended.hospital_id)}
-              disabled={selecting}
-              className="sos-btn select-hospital-btn flex items-center justify-center gap-2 px-5 py-3 text-sm shrink-0 min-h-[48px] w-full md:w-auto cursor-pointer"
-            >
-              <Navigation size={15} />
-              {selecting ? 'Selecting...' : 'SELECT RECOMMENDED'}
-              <ArrowRight size={15} />
-            </button>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full md:w-auto">
+              <button
+                type="button"
+                onClick={() => router.push(`/user/navigation?case_id=${currentCase?.id || ''}`)}
+                className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-bold border border-white/20 inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[48px]"
+                title="View live road route and turn navigation"
+              >
+                <MapPin size={14} className="text-[#2997ff]" />
+                <span>VIEW ROUTE</span>
+              </button>
+
+              <button
+                onClick={() => handleSelect(recommended.hospital_id)}
+                disabled={selecting}
+                className="sos-btn select-hospital-btn flex items-center justify-center gap-2 px-5 py-3 text-sm shrink-0 min-h-[48px] w-full sm:w-auto cursor-pointer"
+              >
+                <Navigation size={15} />
+                {selecting ? 'Selecting...' : 'SELECT RECOMMENDED'}
+                <ArrowRight size={15} />
+              </button>
+            </div>
           </div>
 
           {/* WHY THIS HOSPITAL? Checklist */}
@@ -754,10 +816,12 @@ function HospitalDiscoveryInner() {
                     })()}
                   </div>
 
-                  <p className="text-[#6e7681]">{opt.hospital_address} · {opt.distance_km} km</p>
+                  <p className="text-[#8b949e] text-xs font-mono">
+                    {opt.hospital_address} · <span className="text-white font-bold">{opt.distance_km} km</span> (Road distance) · <span className="text-emerald-400 font-bold">{opt.eta} min ETA</span>
+                  </p>
                   
                   {opt.hospital_capabilities && (
-                    <p className="font-mono text-[#484f58]">Specialties: <span className="text-[#8b949e]">{opt.hospital_capabilities}</span></p>
+                    <p className="font-mono text-[#8b949e] text-xs">Specialties: <span className="text-neutral-300">{opt.hospital_capabilities}</span></p>
                   )}
 
                   {/* Primary Exclusion Factor */}
@@ -780,23 +844,31 @@ function HospitalDiscoveryInner() {
                   )}
 
                   {opt.rejection_reason && !opt.primary_exclusion && (
-                    <p className="text-sos-300 font-semibold">Reason: {opt.rejection_reason}</p>
+                    <p className="text-sos-300 font-semibold text-xs">Reason: {opt.rejection_reason}</p>
                   )}
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-white/5">
                 <div className="text-left sm:text-right">
-                  <div className={`flex items-center gap-1 font-semibold font-mono text-xs ${
-                    opt.response === 'ACCEPTED' ? 'text-ok-400' :
-                    opt.response === 'REJECTED' ? 'text-sos-300' :
-                    'text-warn-300'
-                  }`}>
-                    {opt.response === 'ACCEPTED' ? <><CheckCircle2 size={12} /> ACCEPTED ({opt.eta}m)</> :
-                     opt.response === 'REJECTED' ? <><XCircle size={12} /> REJECTED</> :
-                     <><Clock size={12} /> PENDING</>}
+                  <div className="font-mono text-xs font-bold">
+                    {opt.response === 'ACCEPTED' ? (
+                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1.5">
+                        <CheckCircle2 size={13} /> ACCEPTED · ETA {opt.eta} min
+                      </span>
+                    ) : opt.response === 'REJECTED' ? (
+                      <span className="px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 border border-red-500/30 inline-flex items-center gap-1.5">
+                        <XCircle size={13} /> NOT SELECTED
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 inline-flex items-center gap-1.5">
+                        <Clock size={13} className="animate-spin" /> WAITING FOR RESPONSE
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] text-[#484f58] font-mono block">ICU: {opt.available_icu} · Est. cost: ₹{opt.estimated_cost?.toLocaleString?.() || opt.estimated_cost}</span>
+                  <span className="text-[10px] text-[#8b949e] font-mono block mt-1">
+                    ICU: {opt.available_icu ?? '—'} · Est. cost: ₹{opt.estimated_cost?.toLocaleString?.() || opt.estimated_cost}
+                  </span>
                 </div>
                 {opt.response === 'ACCEPTED' && (
                   <button

@@ -2967,6 +2967,37 @@ html.theme-light .soft-button {
   transform: rotate(180deg) !important;
 }
 
+/* Leaflet Popup Theme-Aware Customization */
+.leaflet-popup-content-wrapper {
+  background: #1c2128 !important;
+  color: #f0f6fc !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+  padding: 4px 6px !important;
+}
+.leaflet-popup-tip {
+  background: #1c2128 !important;
+}
+.leaflet-popup-close-button {
+  color: #8b949e !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+html.theme-light .leaflet-popup-content-wrapper {
+  background: #ffffff !important;
+  color: #1f2328 !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.15) !important;
+}
+html.theme-light .leaflet-popup-tip {
+  background: #ffffff !important;
+}
+html.theme-light .leaflet-popup-close-button {
+  color: #57606a !important;
+}
+
 /* Admin Dashboard Enhancements */
 .admin-action-card {
   padding: 24px !important;

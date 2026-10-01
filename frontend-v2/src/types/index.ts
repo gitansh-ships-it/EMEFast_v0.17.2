@@ -8,6 +8,7 @@ export interface HospitalResponse {
   estimated_cost?: number;
   rejection_reason?: string;
   simulated?: boolean;
+  responded_at?: string;
 }
 
 export type CaseState =

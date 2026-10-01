@@ -3,7 +3,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Navigation, MapPin, Clock, CheckCircle2, Radio, AlertTriangle, ArrowRight } from 'lucide-react';
-import LiveMap from '@/components/LiveMap';
+import LiveMap, { RouteInfo } from '@/components/LiveMap';
 import api from '@/lib/api';
 import { EmergencyCase } from '@/types';
 import { formatEnum } from '@/lib/format';
@@ -21,7 +21,7 @@ function NavigationInner() {
   const caseIdParam = searchParams.get('case_id');
   const [currentCase, setCurrentCase] = useState<EmergencyCase | null>(null);
   const [loading, setLoading] = useState(true);
-  const [routeInfo, setRouteInfo] = useState<{ distanceKm: number; durationMin: number } | null>(null);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
 
   useEffect(() => {
     const fetchCase = async () => {
@@ -72,17 +72,43 @@ function NavigationInner() {
                 {currentCase.selected_hospital?.address || 'Navigating...'}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 navigation-metrics">
-              {[
-                { label: 'ETA', value: routeInfo ? `${routeInfo.durationMin} MIN` : 'Calculating…', color: 'text-sos-300' },
-                { label: 'Distance', value: routeInfo ? `${routeInfo.distanceKm.toFixed(1)} km` : 'Calculating…', color: 'text-white' },
-                { label: 'ICU Beds', value: `${currentCase.selected_hospital?.available_icu || '—'} Open`, color: 'text-ok-400' },
-              ].map(m => (
-                <div key={m.label} className="p-2.5 sm:p-3 rounded-lg bg-[#21262d] border border-[#30363d] text-center sm:text-left">
-                  <span className="text-[10px] font-mono text-[#484f58] uppercase block">{m.label}</span>
-                  <span className={`text-xs sm:text-sm font-bold truncate block ${m.color}`}>{m.value}</span>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 navigation-metrics">
+              <div className="p-2.5 sm:p-3 rounded-lg bg-[#21262d] border border-[#30363d] text-center sm:text-left">
+                <span className="text-[10px] font-mono text-[#8b949e] uppercase block">
+                  {routeInfo?.isRoadRoute ? 'Road Distance' : 'Approx. Straight-Line'}
+                </span>
+                <span className="text-xs sm:text-sm font-bold truncate block text-white">
+                  {routeInfo ? `${routeInfo.distanceKm.toFixed(1)} km` : 'Calculating…'}
+                </span>
+              </div>
+
+              <div className="p-2.5 sm:p-3 rounded-lg bg-[#21262d] border border-[#30363d] text-center sm:text-left">
+                <span className="text-[10px] font-mono text-[#8b949e] uppercase block">
+                  {routeInfo?.isTrafficAware ? 'Traffic-Aware ETA' : 'Travel ETA'}
+                </span>
+                <span className="text-xs sm:text-sm font-bold truncate block text-sos-300">
+                  {routeInfo?.isFailed
+                    ? 'ROUTE UNAVAILABLE'
+                    : routeInfo
+                    ? `${routeInfo.durationMin} MIN`
+                    : 'Calculating…'}
+                </span>
+                {routeInfo && !routeInfo.isFailed && (
+                  <span className="text-[9px] font-mono text-[#8b949e] block mt-0.5">
+                    {routeInfo.isTrafficAware ? '✓ Live traffic delay factored' : 'Traffic data unavailable'}
+                  </span>
+                )}
+              </div>
+
+              <div className="p-2.5 sm:p-3 rounded-lg bg-[#21262d] border border-[#30363d] text-center sm:text-left">
+                <span className="text-[10px] font-mono text-[#8b949e] uppercase block">ICU Beds</span>
+                <span className="text-xs sm:text-sm font-bold truncate block text-ok-400">
+                  {`${currentCase.selected_hospital?.available_icu ?? '—'} Open`}
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400/80 block mt-0.5">
+                  ER Destination Confirmed
+                </span>
+              </div>
             </div>
           </div>
 

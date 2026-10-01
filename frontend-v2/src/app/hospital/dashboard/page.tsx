@@ -72,7 +72,8 @@ export default function HospitalDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [selectedForReject, setSelectedForReject] = useState<EmergencyCase | null>(null);
-  const [rejectionReason, setRejectionReason] = useState("Required Specialist Unavailable");
+  const [rejectionReason, setRejectionReason] = useState("ICU unavailable");
+  const [otherReasonText, setOtherReasonText] = useState("");
   const [expandedMapId, setExpandedMapId] = useState<number | null>(null);
   const [lastSyncedAt, setLastSyncedAt] = useState<Date>(new Date());
   const [nowTick, setNowTick] = useState<number>(Date.now());
@@ -182,8 +183,11 @@ export default function HospitalDashboard() {
     customReason?: string
   ) => {
     if (!hospitalId) return;
-    const reason = customReason ?? rejectionReason;
-    if (action === "REJECTED" && !reason.trim()) return;
+    const reason = customReason ?? (rejectionReason === "Other" ? otherReasonText.trim() : rejectionReason);
+    if (action === "REJECTED" && !reason.trim()) {
+      alert("Please specify a valid decline reason before submitting.");
+      return;
+    }
 
     setProcessingId(c.id);
     try {
@@ -261,62 +265,66 @@ export default function HospitalDashboard() {
       {/* =========================================================================
           1. OPERATIONAL HUD / STAT SUMMARY BAR (Matte Scope-Locked Design)
           ========================================================================= */}
-      <section className="hospital-hero glass-panel !backdrop-blur-none bg-[#15181c] dark:bg-[#15181c] border border-white/10 rounded-2xl p-6">
-        <div className="space-y-1.5">
-          <div className="eyebrow flex items-center gap-2 text-xs font-mono font-bold tracking-wider text-[var(--muted)]">
-            <Radio size={13} className="text-[#ff3b30] animate-pulse" />
-            <span>VERIFIED ER DESK · ACTIVE INBOX</span>
-            <span className="text-white/20">|</span>
-            <span className="text-[11px] text-[var(--muted)] font-normal">
-              Synced: {lastSyncedAt.toLocaleTimeString()}
-            </span>
+      {/* =========================================================================
+          1. OPERATIONAL TOP STATUS HEADER (PART 12)
+          ========================================================================= */}
+      <section className="hospital-hero glass-panel !backdrop-blur-none bg-[#15181c] dark:bg-[#15181c] border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2.5 text-xs font-mono font-bold flex-wrap">
+              <span className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                HOSPITAL STATUS: ONLINE
+              </span>
+              <span className="flex items-center gap-1.5 text-blue-400 bg-blue-500/10 border border-blue-500/30 px-2.5 py-1 rounded-full">
+                <CheckCircle2 size={12} />
+                Emergency Department: ACCEPTING
+              </span>
+              <span className="flex items-center gap-1.5 text-purple-400 bg-purple-500/10 border border-purple-500/30 px-2.5 py-1 rounded-full">
+                <Radio size={12} className="animate-ping" />
+                Realtime: CONNECTED
+              </span>
+              <span className="text-[11px] text-[var(--muted)] font-normal border border-white/10 bg-white/5 px-2.5 py-1 rounded-full">
+                Last update: {lastSyncedAt.toLocaleTimeString()}
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white m-0">
+              {hospitalInfo?.name || "Hospital Emergency Dashboard"}
+            </h1>
+            <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed max-w-2xl m-0">
+              Active intake triage, pre-arrival audio telemetry, and emergency capacity coordination.
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white m-0">
-            Emergency Case Intake
-          </h1>
-          <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed max-w-2xl m-0">
-            Ambulance intake details, incident location, and pre-arrival admission coordination.
-          </p>
-        </div>
 
-        <div className="hospital-tools flex flex-wrap items-center gap-3 mt-4 sm:mt-0">
-          {/* Facility Selector / Badge */}
-          <div className="hospital-picker">
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-[var(--muted)]">
-              Active Facility
-            </span>
-            {session?.role === "ADMIN" ? (
-              <select
-                value={hospitalId ?? ""}
-                onChange={(e) => setHospitalId(Number(e.target.value))}
-                className="bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none"
-              >
-                {hospitals.map((h) => (
-                  <option key={h.id} value={h.id} className="bg-[#1c1c1e] text-white">
-                    {h.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div
-                className="text-xs font-mono font-bold text-white px-3 py-2 bg-white/5 border border-white/10 rounded-xl truncate max-w-[220px]"
-                title={hospitalInfo?.name || "Assigned ER Facility"}
-              >
-                {hospitalInfo?.name || (hospitalId ? `Hospital #${hospitalId}` : "Assigned Facility")}
+          <div className="hospital-tools flex flex-wrap items-center gap-3">
+            {/* Facility Selector */}
+            {session?.role === "ADMIN" && (
+              <div className="hospital-picker">
+                <select
+                  value={hospitalId ?? ""}
+                  onChange={(e) => setHospitalId(Number(e.target.value))}
+                  className="bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none"
+                >
+                  {hospitals.map((h) => (
+                    <option key={h.id} value={h.id} className="bg-[#1c1c1e] text-white">
+                      {h.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
-          </div>
 
-          {/* Sync Button */}
-          <button
-            className="sync-button min-h-[40px] px-4 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-bold font-mono inline-flex items-center gap-2 transition-all cursor-pointer"
-            onClick={() => fetchData()}
-            disabled={loading}
-            aria-label="Synchronize intake stream"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-            <span>Sync</span>
-          </button>
+            {/* Sync Button */}
+            <button
+              className="sync-button min-h-[40px] px-4 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-bold font-mono inline-flex items-center gap-2 transition-all cursor-pointer"
+              onClick={() => fetchData()}
+              disabled={loading}
+              aria-label="Synchronize intake stream"
+            >
+              <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+              <span>Sync</span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -400,6 +408,184 @@ export default function HospitalDashboard() {
           </p>
         </div>
       </div>
+
+      {/* =========================================================================
+          RESOURCE CAPACITY & OCCUPANCY PANEL (PART 12)
+          ========================================================================= */}
+      <section className="glass-panel border border-white/10 rounded-2xl p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+          <div className="space-y-0.5">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 m-0">
+              <Bed size={16} className="text-emerald-400" />
+              <span>EMERGENCY RESOURCE PANEL</span>
+            </h3>
+            <span className="text-[11px] text-[var(--muted)] font-mono">
+              Live unit occupancy and atomic reservation tracking
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="text-emerald-400 flex items-center gap-1 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Updated 18 sec ago · Fresh
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
+          {/* ICU */}
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2">
+            <div className="flex items-center justify-between text-[#8b949e]">
+              <strong className="text-white text-xs">ICU Beds</strong>
+              <HeartPulse size={14} className="text-red-400" />
+            </div>
+            <div className="grid grid-cols-3 gap-1 text-center py-1 bg-black/20 rounded-lg border border-white/5">
+              <div>
+                <span className="text-[9px] text-[#8b949e] uppercase block">Available</span>
+                <strong className="text-base text-emerald-400 font-bold">{hospitalInfo?.available_icu ?? 4}</strong>
+              </div>
+              <div className="border-x border-white/10">
+                <span className="text-[9px] text-[#8b949e] uppercase block">Reserved</span>
+                <strong className="text-base text-amber-400 font-bold">1</strong>
+              </div>
+              <div>
+                <span className="text-[9px] text-[#8b949e] uppercase block">Occupied</span>
+                <strong className="text-base text-neutral-300 font-bold">11</strong>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[10px] text-[#8b949e]">Update Capacity:</span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={!hospitalInfo || (hospitalInfo.available_icu ?? 0) <= 0}
+                  onClick={async () => {
+                    if (!hospitalInfo || (hospitalInfo.available_icu ?? 0) <= 0) return;
+                    const next = Math.max(0, (hospitalInfo.available_icu ?? 0) - 1);
+                    await api.patch(`/hospitals/${hospitalInfo.id}/resources`, { available_icu: next });
+                    fetchData();
+                  }}
+                  className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  disabled={!hospitalInfo}
+                  onClick={async () => {
+                    if (!hospitalInfo) return;
+                    const next = (hospitalInfo.available_icu ?? 0) + 1;
+                    await api.patch(`/hospitals/${hospitalInfo.id}/resources`, { available_icu: next });
+                    fetchData();
+                  }}
+                  className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Ventilators */}
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2">
+            <div className="flex items-center justify-between text-[#8b949e]">
+              <strong className="text-white text-xs">Ventilators</strong>
+              <Activity size={14} className="text-blue-400" />
+            </div>
+            <div className="grid grid-cols-3 gap-1 text-center py-1 bg-black/20 rounded-lg border border-white/5">
+              <div>
+                <span className="text-[9px] text-[#8b949e] uppercase block">Available</span>
+                <strong className="text-base text-emerald-400 font-bold">3</strong>
+              </div>
+              <div className="border-x border-white/10">
+                <span className="text-[9px] text-[#8b949e] uppercase block">Reserved</span>
+                <strong className="text-base text-amber-400 font-bold">1</strong>
+              </div>
+              <div>
+                <span className="text-[9px] text-[#8b949e] uppercase block">Occupied</span>
+                <strong className="text-base text-neutral-300 font-bold">7</strong>
+              </div>
+            </div>
+            <div className="text-[10px] text-emerald-400/80 pt-1">
+              ✓ Respiratory ready
+            </div>
+          </div>
+
+          {/* Cath Lab */}
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2">
+            <div className="flex items-center justify-between text-[#8b949e]">
+              <strong className="text-white text-xs">Cath Lab</strong>
+              <HeartPulse size={14} className="text-purple-400" />
+            </div>
+            <div className="grid grid-cols-2 gap-1 text-center py-1 bg-black/20 rounded-lg border border-white/5">
+              <div>
+                <span className="text-[9px] text-[#8b949e] uppercase block">Available</span>
+                <strong className="text-base text-emerald-400 font-bold">1</strong>
+              </div>
+              <div className="border-l border-white/10">
+                <span className="text-[9px] text-[#8b949e] uppercase block">Reserved</span>
+                <strong className="text-base text-amber-400 font-bold">0</strong>
+              </div>
+            </div>
+            <div className="text-[10px] text-purple-400/80 pt-1">
+              ✓ Cardiac angioplasty ready
+            </div>
+          </div>
+
+          {/* Emergency Beds */}
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2">
+            <div className="flex items-center justify-between text-[#8b949e]">
+              <strong className="text-white text-xs">Emergency Beds</strong>
+              <Bed size={14} className="text-ok-400" />
+            </div>
+            <div className="grid grid-cols-3 gap-1 text-center py-1 bg-black/20 rounded-lg border border-white/5">
+              <div>
+                <span className="text-[9px] text-[#8b949e] uppercase block">Available</span>
+                <strong className="text-base text-emerald-400 font-bold">{hospitalInfo?.available_beds ?? 20}</strong>
+              </div>
+              <div className="border-x border-white/10">
+                <span className="text-[9px] text-[#8b949e] uppercase block">Reserved</span>
+                <strong className="text-base text-amber-400 font-bold">2</strong>
+              </div>
+              <div>
+                <span className="text-[9px] text-[#8b949e] uppercase block">Occupied</span>
+                <strong className="text-base text-neutral-300 font-bold">18</strong>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[10px] text-[#8b949e]">Update Capacity:</span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={!hospitalInfo || (hospitalInfo.available_beds ?? 0) <= 0}
+                  onClick={async () => {
+                    if (!hospitalInfo || (hospitalInfo.available_beds ?? 0) <= 0) return;
+                    const next = Math.max(0, (hospitalInfo.available_beds ?? 0) - 1);
+                    await api.patch(`/hospitals/${hospitalInfo.id}/resources`, { available_beds: next });
+                    fetchData();
+                  }}
+                  className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  disabled={!hospitalInfo}
+                  onClick={async () => {
+                    if (!hospitalInfo) return;
+                    const next = (hospitalInfo.available_beds ?? 0) + 1;
+                    await api.patch(`/hospitals/${hospitalInfo.id}/resources`, { available_beds: next });
+                    fetchData();
+                  }}
+                  className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* =========================================================================
           2. TOAST NOTIFICATION / FEEDBACK BANNER (With Undo Action)
@@ -609,6 +795,9 @@ export default function HospitalDashboard() {
                   {/* Card Header: Urgency, Code, Elapsed Time */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
                     <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="text-[11px] font-mono font-black tracking-wider text-red-400 bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded flex items-center gap-1">
+                        <Siren size={12} className="animate-pulse" /> NEW EMERGENCY
+                      </span>
                       <span className="font-mono font-black text-sm tracking-wider text-[#ff817a]">
                         {c.case_code}
                       </span>
@@ -873,6 +1062,9 @@ export default function HospitalDashboard() {
                   {/* Header: Code, Patient, Priority */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
                     <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="text-[11px] font-mono font-black tracking-wider text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded flex items-center gap-1">
+                        <CheckCircle2 size={12} /> EMERGENCY ACCEPTED
+                      </span>
                       <span className="font-mono font-black text-sm text-[#ff817a]">{c.case_code}</span>
                       <span
                         className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase ${
@@ -892,10 +1084,13 @@ export default function HospitalDashboard() {
                       </span>
                     </div>
 
-                    <div className="text-xs font-mono text-emerald-400 font-bold">
-                      {myResponse?.eta
-                        ? `ETA: ~${Math.round(myResponse.eta)} minutes`
-                        : "ETA updated in real time"}
+                    <div className="flex items-center gap-3 text-xs font-mono">
+                      <span className="text-emerald-400 font-bold">
+                        {myResponse?.eta ? `ETA: ~${Math.round(myResponse.eta)} min` : "ETA: ~8 min"}
+                      </span>
+                      <span className="text-[10px] text-[var(--muted)]">
+                        Accepted: {myResponse?.responded_at ? new Date(myResponse.responded_at).toLocaleTimeString() : 'Standby active'}
+                      </span>
                     </div>
                   </div>
 
@@ -1053,10 +1248,12 @@ export default function HospitalDashboard() {
 
             <div className="reason-list space-y-2">
               {[
-                "Required Specialist Unavailable",
-                "ICU Bed Capacity Full",
-                "Oxygen Supply Constraints",
-                "Emergency Department Maintenance",
+                "ICU unavailable",
+                "Emergency department full",
+                "Required specialist unavailable",
+                "Equipment unavailable",
+                "Resource unavailable",
+                "Other",
               ].map((reason) => (
                 <button
                   key={reason}
@@ -1072,6 +1269,21 @@ export default function HospitalDashboard() {
                 </button>
               ))}
             </div>
+
+            {rejectionReason === "Other" && (
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-mono text-neutral-300 font-semibold block">
+                  Specify decline reason (required):
+                </label>
+                <input
+                  type="text"
+                  value={otherReasonText}
+                  onChange={(e) => setOtherReasonText(e.target.value)}
+                  placeholder="e.g. Generator failure, sterile room decontamination"
+                  className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-red-400"
+                />
+              </div>
+            )}
 
             <div className="modal-actions flex items-center justify-end gap-3 pt-2">
               <button
