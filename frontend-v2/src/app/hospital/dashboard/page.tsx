@@ -893,7 +893,7 @@ export default function HospitalDashboard() {
                   </div>
 
                   {/* Voice Note & Assessment (if present) */}
-                  {c.voice_note_path && (
+                  {(c.voice_note_path || c.voice_transcript) && (
                     <div className="p-3 rounded-xl bg-blue-500/[0.07] border border-blue-500/20 space-y-2">
                       <div className="flex items-center justify-between text-xs text-blue-300 font-bold font-mono">
                         <span className="flex items-center gap-1.5">
@@ -903,16 +903,18 @@ export default function HospitalDashboard() {
                           <span className="text-[10px] text-blue-400 font-normal">Transcript Available</span>
                         )}
                       </div>
-                      <audio
-                        controls
-                        preload="none"
-                        src={
-                          c.voice_note_path.startsWith('http')
-                            ? c.voice_note_path
-                            : `${(api.defaults.baseURL || '').replace(/\/api$/, '')}${c.voice_note_path}`
-                        }
-                        className="w-full h-8"
-                      />
+                      {c.voice_note_path && (
+                        <audio
+                          controls
+                          preload="none"
+                          src={
+                            c.voice_note_path.startsWith('http')
+                              ? c.voice_note_path
+                              : `${(api.defaults.baseURL || '').replace(/\/api$/, '')}${c.voice_note_path}`
+                          }
+                          className="w-full h-8"
+                        />
+                      )}
                       {c.voice_transcript && (
                         <p className="text-[11px] text-neutral-300 italic bg-black/20 p-2 rounded border border-white/5 m-0">
                           &quot;{c.voice_transcript}&quot;
@@ -1143,7 +1145,7 @@ export default function HospitalDashboard() {
                   </div>
 
                   {/* Voice Note & Assessment (if present) */}
-                  {c.voice_note_path && (
+                  {(c.voice_note_path || c.voice_transcript) && (
                     <div className="p-3 rounded-xl bg-blue-500/[0.07] border border-blue-500/20 space-y-2">
                       <div className="flex items-center justify-between text-xs text-blue-300 font-bold font-mono">
                         <span className="flex items-center gap-1.5">
@@ -1153,16 +1155,18 @@ export default function HospitalDashboard() {
                           <span className="text-[10px] text-blue-400 font-normal">Transcript Available</span>
                         )}
                       </div>
-                      <audio
-                        controls
-                        preload="none"
-                        src={
-                          c.voice_note_path.startsWith('http')
-                            ? c.voice_note_path
-                            : `${(api.defaults.baseURL || '').replace(/\/api$/, '')}${c.voice_note_path}`
-                        }
-                        className="w-full h-8"
-                      />
+                      {c.voice_note_path && (
+                        <audio
+                          controls
+                          preload="none"
+                          src={
+                            c.voice_note_path.startsWith('http')
+                              ? c.voice_note_path
+                              : `${(api.defaults.baseURL || '').replace(/\/api$/, '')}${c.voice_note_path}`
+                          }
+                          className="w-full h-8"
+                        />
+                      )}
                       {c.voice_transcript && (
                         <p className="text-[11px] text-neutral-300 italic bg-black/20 p-2 rounded border border-white/5 m-0">
                           &quot;{c.voice_transcript}&quot;

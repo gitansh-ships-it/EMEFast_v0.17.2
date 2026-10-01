@@ -517,7 +517,7 @@ function HospitalDiscoveryInner() {
       </div>
 
       {/* Voice Note & Assessment Memo (if present) */}
-      {currentCase.voice_note_path && (
+      {(currentCase.voice_note_path || currentCase.voice_transcript) && (
         <div className="p-3 sm:p-4 rounded-xl bg-blue-500/[0.08] border border-blue-500/25 space-y-2">
           <div className="flex items-center justify-between text-xs text-blue-300 font-bold font-mono">
             <span className="flex items-center gap-1.5">
@@ -525,16 +525,18 @@ function HospitalDiscoveryInner() {
             </span>
             <span className="text-[10px] text-blue-400 font-normal">Transmitted to Hospitals</span>
           </div>
-          <audio
-            controls
-            preload="none"
-            src={
-              currentCase.voice_note_path.startsWith('http')
-                ? currentCase.voice_note_path
-                : `${(api.defaults.baseURL || '').replace(/\/api$/, '')}${currentCase.voice_note_path}`
-            }
-            className="w-full h-8"
-          />
+          {currentCase.voice_note_path && (
+            <audio
+              controls
+              preload="none"
+              src={
+                currentCase.voice_note_path.startsWith('http')
+                  ? currentCase.voice_note_path
+                  : `${(api.defaults.baseURL || '').replace(/\/api$/, '')}${currentCase.voice_note_path}`
+              }
+              className="w-full h-8"
+            />
+          )}
           {currentCase.voice_transcript && (
             <p className="text-[11px] text-neutral-300 italic bg-black/20 p-2 rounded border border-white/5 m-0">
               &quot;{currentCase.voice_transcript}&quot;
