@@ -191,7 +191,7 @@ function NavigationInner() {
           </div>
 
           {/* Clean Uncluttered Map Card */}
-          <div className="w-full h-[400px] sm:h-[480px]">
+          <div className="w-full h-[460px] sm:h-[520px]">
             <LiveMap
               origin={{ lat: currentCase.latitude, lng: currentCase.longitude }}
               destination={

@@ -295,8 +295,8 @@ html.theme-light .toast-floating {
 }
 
 /* Lightweight real map (Leaflet is loaded only when the navigation screen is opened). */
-.live-map-shell { position: relative; min-height: 420px; background: #101214; }
-.live-map { width: 100%; height: 420px; background: #15181c; }
+.live-map-shell { position: relative; width: 100%; height: 100%; background: #101214; }
+.live-map { width: 100%; height: 100%; background: #15181c; }
 .live-map-shell .leaflet-container { font-family: inherit; background: #15181c; }
 
 /* Dark mode tile filter for clean night styling without third-party watermarks */
