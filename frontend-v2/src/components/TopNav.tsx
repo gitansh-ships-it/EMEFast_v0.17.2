@@ -40,6 +40,10 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
   const isAdmin = pathname?.startsWith("/admin");
   const isAmbulance = pathname?.startsWith("/ambulance") || pathname?.startsWith("/user");
   const isWizard = pathname?.includes("/emergency/new");
+  const isEmergencyFlow =
+    pathname?.includes("/emergency") ||
+    pathname?.includes("/user/hospitals") ||
+    pathname?.includes("/user/navigation");
   const activeRole = isAdmin ? "ADMIN" : isHospital ? "HOSPITAL" : isAmbulance ? "USER" : role;
 
   // Real-time counts lifted to HospitalContext (zero duplicate polling)
@@ -144,7 +148,7 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
           <div className="reimagined-top-inner">
             {/* Left: Brand Logo & Wordmark */}
             <Link href="/" className="reimagined-brand-link" aria-label="EMEFast Home">
-              <span className="reimagined-brand-icon pure-liquid-brand-icon" aria-hidden="true">
+              <span className="reimagined-brand-icon brand-logo-badge" aria-hidden="true">
                 <Image
                   src="/app-logo.png"
                   alt="EMEFast"
@@ -167,7 +171,7 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
                 <>
                   <Link
                     href="/user/emergency/new"
-                    className="reimagined-sos-btn pure-liquid-sos"
+                    className="reimagined-sos-btn header-sos-btn"
                     aria-label="Start emergency intake"
                   >
                     <Siren size={14} strokeWidth={2.4} />
@@ -185,7 +189,7 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
                   {activeRole !== "HOSPITAL" && activeRole !== "ADMIN" && (
                     <Link
                       href="/user/emergency/new"
-                      className="reimagined-sos-btn pure-liquid-sos"
+                      className="reimagined-sos-btn header-sos-btn"
                       aria-label="Start emergency intake"
                     >
                       <Siren size={14} strokeWidth={2.4} />
@@ -212,8 +216,8 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
           </div>
         </div>
 
-        {/* LEVEL 2 — WORKSPACE SWITCHER (Only shown after authentication) */}
-        {session && (
+        {/* LEVEL 2 — WORKSPACE SWITCHER (Only shown after authentication and hidden on mobile emergency flow) */}
+        {session && !isEmergencyFlow && (
           <div className="top-workspace-container">
             <div className="top-workspace-pill glass">
               <div className="workspace-segment-row" role="tablist" aria-label="Workspaces">
@@ -258,8 +262,8 @@ export default function TopNav({ role = "USER" }: TopNavProps) {
         )}
       </header>
 
-      {/* LEVEL 3 — FLOATING LIQUID GLASS BOTTOM NAVIGATION DOCK (Only shown after authentication and when not in wizard) */}
-      {session && !isWizard && (
+      {/* LEVEL 3 — FLOATING BOTTOM NAVIGATION DOCK (Hidden during emergency/navigation workflow) */}
+      {session && !isWizard && !isEmergencyFlow && (
         <aside className="floating-bottom-liquid-dock" aria-label="Page Navigation">
           <nav className="bottom-dock-island bottom-nav glass" aria-label="Section navigation">
             <div className="context-nav-row" role="tablist">

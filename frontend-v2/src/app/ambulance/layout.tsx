@@ -5,7 +5,7 @@ export default function AmbulanceLayout({ children }: { children: React.ReactNod
     <div className="app-frame">
       <TopNav role="USER" />
       <main className="app-content">{children}</main>
-      <footer className="apple-footer">
+      <footer className="system-footer">
         <span>EMEFast · Ambulance medical coordination</span>
         <span>Destination recommendation & hospital coordination network</span>
       </footer>

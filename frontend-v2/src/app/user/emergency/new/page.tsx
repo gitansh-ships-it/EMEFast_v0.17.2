@@ -400,6 +400,50 @@ export default function CreateEmergencyPage() {
   const [verifiedHospitals, setVerifiedHospitals] = useState<any[]>([]);
   const [loadingHospitals, setLoadingHospitals] = useState(false);
 
+  // Form draft state restoration & preservation (survives back navigation and refresh)
+  useEffect(() => {
+    try {
+      const draft = localStorage.getItem("emefast_emergency_draft");
+      if (draft) {
+        const p = JSON.parse(draft);
+        if (p.mode) setMode(p.mode);
+        if (p.priority) setPriority(p.priority);
+        if (p.name) setName(p.name);
+        if (p.age) setAge(p.age);
+        if (Array.isArray(p.selectedSymptoms) && p.selectedSymptoms.length) setSelectedSymptoms(p.selectedSymptoms);
+        if (p.condition) setCondition(p.condition);
+        if (Array.isArray(p.requirements)) setRequirements(p.requirements);
+        if (p.lat != null) setLat(p.lat);
+        if (p.lng != null) setLng(p.lng);
+        if (p.accuracy != null) setAccuracy(p.accuracy);
+        if (p.address) setAddress(p.address);
+        if (p.gpsState) setGpsState(p.gpsState);
+        if (p.insurance) setInsurance(p.insurance);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      const draft = {
+        mode,
+        priority,
+        name,
+        age,
+        selectedSymptoms,
+        condition,
+        requirements,
+        lat,
+        lng,
+        accuracy,
+        address,
+        gpsState,
+        insurance,
+      };
+      localStorage.setItem("emefast_emergency_draft", JSON.stringify(draft));
+    } catch {}
+  }, [mode, priority, name, age, selectedSymptoms, condition, requirements, lat, lng, accuracy, address, gpsState, insurance]);
+
   const gpsWatchRef = useRef<number | null>(null);
   const gpsTimeoutRef = useRef<ReturnType<typeof setTimeout> | number | null>(null);
 

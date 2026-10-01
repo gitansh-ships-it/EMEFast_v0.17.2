@@ -20,7 +20,7 @@
 
 * { box-sizing: border-box; min-width: 0; }
 html { background: var(--black); scroll-behavior: smooth; }
-body { margin: 0; min-height: 100vh; background: var(--black); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans Devanagari", Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body { margin: 0; min-height: 100vh; background: var(--black); color: var(--text); font-family: BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans Devanagari", Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 button,input,textarea,select { font: inherit; -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
@@ -58,7 +58,7 @@ html.theme-light .v2-card {
 /* Level 2: Floating Elevation (Header, Sticky Action Bar, Bottom Dock) */
 .elevation-floating,
 .reimagined-top-nav,
-.apple-nav,
+.system-nav,
 .global-bottom-dock,
 .bottom-dock-inner,
 .wizard-action-bar,
@@ -67,7 +67,7 @@ html.theme-light .v2-card {
 }
 html.theme-light .elevation-floating,
 html.theme-light .reimagined-top-nav,
-html.theme-light .apple-nav,
+html.theme-light .system-nav,
 html.theme-light .global-bottom-dock,
 html.theme-light .bottom-dock-inner,
 html.theme-light .wizard-action-bar,
@@ -265,33 +265,33 @@ html.theme-light .toast-floating {
 
 .app-frame { min-height:100vh; background:#050505; }
 .app-content { min-height:calc(100vh - 82px); }
-.apple-nav { position:sticky; top:0; z-index:80; background:rgba(5,5,5,.70); border-bottom:1px solid rgba(255,255,255,.075); backdrop-filter:blur(30px) saturate(150%); -webkit-backdrop-filter:blur(30px) saturate(150%); }
-.apple-nav-inner { max-width:1280px; margin:0 auto; min-height:62px; padding:8px 18px; display:flex; align-items:center; gap:18px; }
+.system-nav { position:sticky; top:0; z-index:80; background:rgba(5,5,5,.70); border-bottom:1px solid rgba(255,255,255,.075); backdrop-filter:blur(30px) saturate(150%); -webkit-backdrop-filter:blur(30px) saturate(150%); }
+.nav-inner { max-width:1280px; margin:0 auto; min-height:62px; padding:8px 18px; display:flex; align-items:center; gap:18px; }
 .brand-mark { display:flex; align-items:center; gap:9px; color:#f5f5f7; text-decoration:none; font-weight:800; font-size:14px; letter-spacing:-.02em; white-space:nowrap; }
 .brand-mark small { color:#8e8e93; font-size:9px; letter-spacing:.08em; margin-left:2px; }
 .brand-icon { width:32px; height:32px; display:grid; place-items:center; border-radius:11px; background:linear-gradient(145deg,#ff453a,#c71914); color:#fff; box-shadow:0 7px 22px rgba(255,59,48,.18), inset 0 1px 0 rgba(255,255,255,.25); }
-.apple-nav-pills { flex:1; display:flex; align-items:center; justify-content:center; gap:4px; overflow-x:auto; scrollbar-width:none; }
-.apple-nav-pills::-webkit-scrollbar { display:none; }
-.apple-nav-pill { display:flex; align-items:center; gap:6px; padding:9px 12px; border-radius:999px; color:#85858c; text-decoration:none; font-size:11px; font-weight:700; white-space:nowrap; transition:all .22s cubic-bezier(.2,.8,.2,1); }
-.apple-nav-pill:hover { color:#fff; background:rgba(255,255,255,.055); }
-.apple-nav-pill.active { color:#fff; background:rgba(255,255,255,.10); box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
-.apple-nav-actions { display:flex; align-items:center; gap:8px; }
+.nav-pills { flex:1; display:flex; align-items:center; justify-content:center; gap:4px; overflow-x:auto; scrollbar-width:none; }
+.nav-pills::-webkit-scrollbar { display:none; }
+.nav-pill { display:flex; align-items:center; gap:6px; padding:9px 12px; border-radius:999px; color:#85858c; text-decoration:none; font-size:11px; font-weight:700; white-space:nowrap; transition:all .22s cubic-bezier(.2,.8,.2,1); }
+.nav-pill:hover { color:#fff; background:rgba(255,255,255,.055); }
+.nav-pill.active { color:#fff; background:rgba(255,255,255,.10); box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
+.nav-actions { display:flex; align-items:center; gap:8px; }
 .network-pill { display:flex; align-items:center; gap:6px; padding:8px 10px; border:1px solid rgba(48,209,88,.16); border-radius:999px; color:#8ce9a1; background:rgba(48,209,88,.055); font-size:9px; font-weight:800; white-space:nowrap; }
 .network-pill span { width:6px; height:6px; border-radius:50%; background:#30d158; animation:pulse-dot 1.6s ease-in-out infinite; }
 .nav-sos { min-height:38px; padding:0 13px; display:flex; align-items:center; gap:7px; border:1px solid rgba(255,255,255,.16); border-radius:999px; background:#ff3b30; color:#fff; font-size:10px; font-weight:850; box-shadow:0 7px 24px rgba(255,59,48,.16); }
-.apple-nav-subbar { min-height:27px; display:flex; align-items:center; justify-content:space-between; gap:12px; max-width:1280px; margin:0 auto; padding:0 20px; color:#606066; font-size:9px; }
-.apple-nav-subbar span:first-child { display:flex; align-items:center; gap:5px; color:#74747b; }
+.nav-subbar { min-height:27px; display:flex; align-items:center; justify-content:space-between; gap:12px; max-width:1280px; margin:0 auto; padding:0 20px; color:#606066; font-size:9px; }
+.nav-subbar span:first-child { display:flex; align-items:center; gap:5px; color:#74747b; }
 .subbar-note { color:#4e4e54; }
-.apple-footer { max-width:1220px; margin:0 auto; padding:20px 22px calc(24px + env(safe-area-inset-bottom)); display:flex; justify-content:space-between; gap:15px; color:#4e4e54; font-size:9px; border-top:1px solid rgba(255,255,255,.055); }
+.system-footer { max-width:1220px; margin:0 auto; padding:20px 22px calc(24px + env(safe-area-inset-bottom)); display:flex; justify-content:space-between; gap:15px; color:#4e4e54; font-size:9px; border-top:1px solid rgba(255,255,255,.055); }
 
 @media(max-width:760px){
- .apple-nav-inner{padding:8px 12px;gap:9px;}
- .apple-nav-pills{justify-content:flex-start;}
+ .nav-inner{padding:8px 12px;gap:9px;}
+ .nav-pills{justify-content:flex-start;}
  .network-pill{display:none;}
- .apple-nav-subbar{padding:0 13px;}
+ .nav-subbar{padding:0 13px;}
  .subbar-note{display:none;}
- .apple-footer{padding-left:13px;padding-right:13px;}
- .apple-footer span:last-child{display:none;}
+ .system-footer{padding-left:13px;padding-right:13px;}
+ .system-footer span:last-child{display:none;}
 }
 
 /* Lightweight real map (Leaflet is loaded only when the navigation screen is opened). */
@@ -347,11 +347,11 @@ html.theme-light .v2-card p { color: #334155 !important; }
 html.theme-light .v2-card h1,
 html.theme-light .v2-card h2,
 html.theme-light .v2-card h3 { color: #0f172a !important; }
-html.theme-light .apple-nav { background: rgba(255,255,255,.78); border-bottom-color: rgba(15,23,42,.08); box-shadow: 0 8px 35px rgba(15,23,42,.06); }
-html.theme-light .apple-nav-pill { color: #667085; }
-html.theme-light .apple-nav-pill.active { color: #101828; background: rgba(15,23,42,.07); }
+html.theme-light .system-nav { background: rgba(255,255,255,.78); border-bottom-color: rgba(15,23,42,.08); box-shadow: 0 8px 35px rgba(15,23,42,.06); }
+html.theme-light .nav-pill { color: #667085; }
+html.theme-light .nav-pill.active { color: #101828; background: rgba(15,23,42,.07); }
 html.theme-light .brand-mark { color: #101828; }
-html.theme-light .apple-nav-subbar, html.theme-light .apple-footer { color: #98a2b3; border-color: rgba(15,23,42,.08); }
+html.theme-light .nav-subbar, html.theme-light .system-footer { color: #98a2b3; border-color: rgba(15,23,42,.08); }
 html.theme-light .subbar-note { color: #98a2b3; }
 html.theme-light .network-pill { background: rgba(48,209,88,.10); border-color: rgba(48,209,88,.22); color: #16713a; }
 html.theme-light .theme-toggle { background: rgba(15,23,42,.07); border-color: rgba(15,23,42,.10); }
@@ -367,7 +367,7 @@ html.theme-light [class~="bg-[#21262d]"] { background: rgba(15,23,42,.055) !impo
 html.theme-light [class~="bg-[#30363d]"] { background: rgba(15,23,42,.08) !important; }
 html.theme-light [class~="border-[#21262d]"] { border-color: rgba(15,23,42,.08) !important; }
 html.theme-light [class~="border-[#30363d]"] { border-color: rgba(15,23,42,.10) !important; }
-html.theme-light .apple-nav-actions { color: #667085; }
+html.theme-light .nav-actions { color: #667085; }
 html.theme-light .live-map-shell { background: #eef2f6; }
 html.theme-light .live-map { background: #e7edf3; }
 html.theme-light .live-map-status { background: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #0f172a !important; box-shadow: 0 10px 30px rgba(15,23,42,.12); backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
@@ -422,10 +422,10 @@ input, textarea, select, button { max-width: 100%; }
 
 /* Navigation: compact glass header + horizontally scrollable tabs. */
 @media (max-width: 900px) {
-  .apple-nav-inner { flex-wrap: wrap; }
-  .apple-nav-pills { order: 3; flex-basis: 100%; width: 100%; padding: 2px 0 4px; }
-  .apple-nav-pill { min-height: 36px; }
-  .apple-nav-subbar { min-height: 24px; }
+  .nav-inner { flex-wrap: wrap; }
+  .nav-pills { order: 3; flex-basis: 100%; width: 100%; padding: 2px 0 4px; }
+  .nav-pill { min-height: 36px; }
+  .nav-subbar { min-height: 24px; }
   .workspace-grid { gap: 14px; }
   .workspace-main, .workspace-side { gap: 14px; }
   .section-heading { gap: 12px; }
@@ -433,17 +433,17 @@ input, textarea, select, button { max-width: 100%; }
 
 @media (max-width: 640px) {
   html { font-size: 15px; }
-  .apple-nav-inner { min-height: 56px; padding: 7px 10px; gap: 7px; }
+  .nav-inner { min-height: 56px; padding: 7px 10px; gap: 7px; }
   .brand-mark { font-size: 13px; gap: 7px; }
   .brand-icon { width: 30px; height: 30px; border-radius: 10px; }
   .brand-mark small { font-size: 8px; }
-  .apple-nav-actions { margin-left: auto; gap: 6px; }
+  .nav-actions { margin-left: auto; gap: 6px; }
   .theme-toggle { flex: 0 0 auto; }
   .nav-sos { min-height: 36px; padding: 0 10px; }
   .nav-sos span { display: none; }
-  .apple-nav-pills { margin: 0 -10px; padding: 2px 10px 4px; }
-  .apple-nav-pill { padding: 8px 10px; font-size: 10px; }
-  .apple-nav-subbar { padding: 0 10px; }
+  .nav-pills { margin: 0 -10px; padding: 2px 10px 4px; }
+  .nav-pill { padding: 8px 10px; font-size: 10px; }
+  .nav-subbar { padding: 0 10px; }
 
   .emergency-shell { width: 100%; }
   .emergency-header h1 { font-size: clamp(31px, 10vw, 39px); }
@@ -464,7 +464,7 @@ input, textarea, select, button { max-width: 100%; }
 
   .transport-grid button { min-height: 62px; }
   .primary-submit { width: 100%; min-height: 54px; }
-  .field-grid input { font-size: 16px; } /* prevents iOS zoom */
+  .field-grid input { font-size: 16px; } /* prevents mobile auto-zoom */
 
   /* Navigation page metric cards become a 2+1 layout instead of cramped thirds. */
   .navigation-metrics, .route-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
@@ -477,15 +477,15 @@ input, textarea, select, button { max-width: 100%; }
   .live-map-shell .leaflet-control-zoom a { width: 34px; height: 34px; line-height: 34px; }
   .live-map-shell .leaflet-control-attribution { max-width: 72%; font-size: 8px; }
 
-  .apple-footer { flex-direction: column; align-items: flex-start; }
+  .system-footer { flex-direction: column; align-items: flex-start; }
 }
 
 @media (max-width: 420px) {
-  .apple-nav-pill span { display: none; }
-  .apple-nav-pill { width: 38px; justify-content: center; padding: 8px; }
+  .nav-pill span { display: none; }
+  .nav-pill { width: 38px; justify-content: center; padding: 8px; }
   .brand-mark > span:last-child { display: none; }
-  .apple-nav-inner { gap: 5px; }
-  .apple-nav-pills { gap: 2px; }
+  .nav-inner { gap: 5px; }
+  .nav-pills { gap: 2px; }
   .emergency-shell { padding-left: 10px; padding-right: 10px; }
   .severity-grid { padding-left: 14px; padding-right: 14px; }
   .need-grid { padding-left: 14px; padding-right: 14px; }
@@ -516,13 +516,13 @@ html.theme-light .v2-card-hover:hover { border-color: rgba(10,132,255,.20) !impo
 
 /* Safe-area support for phones with a home indicator / notch. */
 @supports (padding: max(0px)) {
-  .apple-nav-inner { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  .nav-inner { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
   .emergency-shell { padding-bottom: max(46px, calc(46px + env(safe-area-inset-bottom))); }
 }
 
 /* Respect reduced-motion while keeping the UI functional. */
 @media (prefers-reduced-motion: reduce) {
-  .apple-nav-pill, .record-button, .sos-core, .theme-toggle, .liquid-card { transition: none !important; }
+  .nav-pill, .record-button, .sos-core, .theme-toggle, .liquid-card { transition: none !important; }
 }
 
 /* =========================================================
@@ -576,7 +576,7 @@ html.theme-light body{background:radial-gradient(circle at 80% 0%,rgba(10,132,25
 body{
   background: #0c0e15 !important;
   color:var(--text);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+  font-family:Inter,ui-sans-serif,system-ui,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
 }
 html.theme-light{--page:#f7f8fd;--surface:rgba(255,255,255,.82);--surface2:rgba(15,23,42,.045);--text:#101828;--muted:#667085;--stroke:rgba(15,23,42,.10);color-scheme:light;}
 html.theme-light body{
@@ -585,9 +585,9 @@ html.theme-light body{
 }
 html.theme-dark{color-scheme:dark;}
 .theme-light .liquid-card,.theme-light .v2-card,.theme-light .glass-panel{background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(247,249,252,.76));border-color:rgba(15,23,42,.09);box-shadow:0 18px 55px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.9);color:#101828;}
-.theme-light .apple-nav{background:rgba(248,250,252,.78);border-color:rgba(15,23,42,.08);}
-.theme-light .apple-nav-pill{color:#667085}.theme-light .apple-nav-pill:hover{color:#101828;background:rgba(15,23,42,.045)}.theme-light .apple-nav-pill.active{color:#101828;background:rgba(15,23,42,.07)}
-.theme-light .apple-footer{color:#98a2b3}.theme-light .subbar-note{color:#98a2b3}.theme-light .network-pill{color:#16713a;background:rgba(48,209,88,.09);border-color:rgba(48,209,88,.20)}
+.theme-light .system-nav{background:rgba(248,250,252,.78);border-color:rgba(15,23,42,.08);}
+.theme-light .nav-pill{color:#667085}.theme-light .nav-pill:hover{color:#101828;background:rgba(15,23,42,.045)}.theme-light .nav-pill.active{color:#101828;background:rgba(15,23,42,.07)}
+.theme-light .system-footer{color:#98a2b3}.theme-light .subbar-note{color:#98a2b3}.theme-light .network-pill{color:#16713a;background:rgba(48,209,88,.09);border-color:rgba(48,209,88,.20)}
 .theme-light .dashboard-shell,.theme-light .emergency-shell,.theme-light .hospital-shell{color:#101828}.theme-light .dashboard-hero h1,.theme-light .dashboard-case-card h2,.theme-light .panel-heading h3,.theme-light .hospital-hero h1,.theme-light .hospital-case strong,.theme-light .hospital-case h3{color:#101828}
 .theme-light .dashboard-hero p,.theme-light .case-meta,.theme-light .case-status,.theme-light .map-footer,.theme-light .recommendation-card>p,.theme-light .recent-row span,.theme-light .hospital-hero p,.theme-light .hospital-case p,.theme-light .inbox-head>span{color:#667085}
 .theme-light .case-metrics>div,.theme-light .recommendation-numbers div,.theme-light .stat-card,.theme-light .comparison-card{background:rgba(15,23,42,.035);border-color:rgba(15,23,42,.08)}
@@ -598,7 +598,7 @@ html.theme-dark{color-scheme:dark;}
 .hospital-shell{max-width:1320px;margin:0 auto;padding:32px 24px calc(76px + env(safe-area-inset-bottom, 0px) + 24px)}.hospital-hero{padding:24px;display:flex;justify-content:space-between;gap:24px;align-items:center}.hospital-hero h1{margin:8px 0;font-size:clamp(28px,4vw,42px);letter-spacing:-.045em}.hospital-hero p{margin:0;max-width:650px;color:var(--muted);font-size:13px;line-height:1.5}.hospital-tools{display:flex;align-items:end;gap:8px;flex-wrap:wrap}.hospital-picker{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.hospital-picker select{min-width:192px;height:40px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--stroke);outline:none}.hospital-metric{min-width:96px;height:40px;padding:6px 12px;border-radius:12px;border:1px solid rgba(48,209,88,.18);background:rgba(48,209,88,.06)}.hospital-metric span{display:block;color:var(--muted);font:800 8px ui-monospace,monospace}.hospital-metric strong{display:block;margin-top:2px;color:var(--green);font-size:16px}.sync-button{height:40px;border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);background:rgba(255,255,255,.08);color:var(--text);border-radius:999px;padding:0 16px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(255,255,255,.1),0 4px 16px rgba(0,0,0,.2);cursor:pointer;transition:all .18s ease;}.sync-button:hover{filter:brightness(1.1);transform:translateY(-1px);}.inbox-head{display:flex;justify-content:space-between;align-items:center;margin:24px 0 16px;font-size:12px}.inbox-head>div{display:flex;align-items:center;gap:8px}.inbox-head b{padding:4px 8px;border-radius:999px;background:rgba(255,59,48,.1);color:#ff6b63}.inbox-head>span{font-size:10px;color:var(--muted)}.hospital-case-list{display:flex;flex-direction:column;gap:16px}.hospital-case{padding:20px 24px}.hospital-case.critical-case{border-color:rgba(255,59,48,.28);box-shadow:0 16px 55px rgba(255,59,48,.06)}.hospital-case-top{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--stroke)}.case-id{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.case-id span{font:900 12px ui-monospace,monospace;color:#ff817a}.case-id em{font-style:normal;padding:4px 8px;border-radius:999px;background:rgba(255,159,10,.09);color:#ffb340;font:800 9px ui-monospace,monospace}.case-id small{color:var(--muted);font-size:10px}.response-state{font:900 9px ui-monospace,monospace;letter-spacing:.05em}.response-state.pending{color:#ffb340}.response-state.accepted{color:var(--green)}.response-state.rejected{color:#ff6b63}.hospital-case-grid{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:16px;padding:16px 0}.hospital-case-grid label{display:block;color:var(--muted);font:800 8px ui-monospace,monospace;letter-spacing:.08em;margin-bottom:6px}.hospital-case-grid strong{display:flex;align-items:center;gap:6px;font-size:13px}.hospital-case-grid p{margin:6px 0 0;color:var(--muted);font-size:10px;line-height:1.45}.hospital-voice{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:16px;background:rgba(10,132,255,.06);border:1px solid rgba(10,132,255,.13);font-size:10px;color:var(--text)}.hospital-voice audio{margin-left:auto;width:min(360px,55%);height:32px}.hospital-case-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;border-top:1px solid var(--stroke);color:var(--muted);font-size:10px}.hospital-case-bottom>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.accept-btn,.reject-btn{min-height:42px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:850;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);cursor:pointer;transition:all .18s ease;}.accept-btn{border:1px solid rgba(255,255,255,.45);background:linear-gradient(135deg,rgba(16,185,129,.92) 0%,rgba(5,150,105,.88) 100%);color:#fff;box-shadow:inset 0 1.5px 1.5px rgba(255,255,255,.85),inset 0 -1.5px 1px rgba(0,0,0,.25),0 10px 24px -4px rgba(16,185,129,.45);}.accept-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}.reject-btn{border:1px solid rgba(255,255,255,.2);background:linear-gradient(135deg,rgba(239,68,68,.18) 0%,rgba(225,29,72,.14) 100%);color:#ff8f88;box-shadow:inset 0 1.5px 1px rgba(255,255,255,.3),0 8px 20px -4px rgba(239,68,68,.2);}.reject-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}.accepted-confirm{display:inline-flex;align-items:center;gap:6px;color:#73e894;font-size:10px;font-weight:800}.hospital-empty{min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);text-align:center}.hospital-empty svg:not(.spin){color:var(--green)}.hospital-empty h3{margin:4px 0 0;color:var(--text)}.hospital-empty p{margin:0;font-size:11px}.modal-backdrop{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.68);backdrop-filter:blur(18px)}.reject-modal{width:min(460px,100%);padding:24px;border-radius:20px;}.reject-modal h3{margin:8px 0 16px;font-size:19px}.reason-list{display:grid;gap:8px}.reason-list button{padding:12px 16px;text-align:left;border-radius:12px;border:1px solid var(--stroke);background:var(--surface2);color:var(--muted);font-size:11px;font-weight:700}.reason-list button.selected{border-color:rgba(255,59,48,.35);background:rgba(255,59,48,.09);color:#ff817a}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.modal-actions>button{min-height:40px;padding:0 16px;border-radius:12px;border:1px solid var(--stroke);background:var(--surface2);color:var(--text);font-weight:800;font-size:11px}.modal-actions .reject-btn{border-color:rgba(255,59,48,.25);color:#ff8f88}
 .role-switcher{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid var(--stroke);border-radius:999px;background:var(--surface2)}.role-switcher button{border:0;background:transparent;color:var(--muted);padding:6px 8px;border-radius:999px;display:flex;align-items:center;gap:4px;font-size:9px;font-weight:800}.role-switcher button:hover{background:rgba(255,255,255,.07);color:var(--text)}
 @media(max-width:980px){.hospital-hero{align-items:flex-start;flex-direction:column}.hospital-tools{width:100%}.hospital-case-grid{grid-template-columns:1fr 1fr}.hospital-case-grid>div:last-child{grid-column:1/-1}.hospital-voice audio{width:50%}}
-@media(max-width:650px){.hospital-shell{padding:28px 16px calc(76px + env(safe-area-inset-bottom, 0px) + 24px)}.hospital-hero{padding:16px}.hospital-tools{align-items:stretch;flex-direction:column}.hospital-picker select{width:100%;min-width:0}.hospital-metric,.sync-button{width:100%;justify-content:center}.hospital-case{padding:16px}.hospital-case-grid{grid-template-columns:1fr;gap:12px}.hospital-case-grid>div:last-child{grid-column:auto}.hospital-case-bottom{align-items:stretch;flex-direction:column}.hospital-case-bottom>div{justify-content:stretch}.accept-btn,.reject-btn{flex:1;justify-content:center}.hospital-voice{align-items:flex-start;flex-wrap:wrap}.hospital-voice audio{width:100%;margin:4px 0 0}.role-switcher span{display:none}.role-switcher button{padding:8px}.apple-nav-actions{gap:8px}}
+@media(max-width:650px){.hospital-shell{padding:28px 16px calc(76px + env(safe-area-inset-bottom, 0px) + 24px)}.hospital-hero{padding:16px}.hospital-tools{align-items:stretch;flex-direction:column}.hospital-picker select{width:100%;min-width:0}.hospital-metric,.sync-button{width:100%;justify-content:center}.hospital-case{padding:16px}.hospital-case-grid{grid-template-columns:1fr;gap:12px}.hospital-case-grid>div:last-child{grid-column:auto}.hospital-case-bottom{align-items:stretch;flex-direction:column}.hospital-case-bottom>div{justify-content:stretch}.accept-btn,.reject-btn{flex:1;justify-content:center}.hospital-voice{align-items:flex-start;flex-wrap:wrap}.hospital-voice audio{width:100%;margin:4px 0 0}.role-switcher span{display:none}.role-switcher button{padding:8px}.nav-actions{gap:8px}}
 /* =========================================================
    EMEFast UX v4 — workspace + theme + responsive polish
    ========================================================= */
@@ -622,8 +622,8 @@ html.theme-light .hospital-shell { background: transparent !important; }
 html.theme-light .dashboard-shell { color: #101828; }
 html.theme-light .dashboard-shell::before,
 html.theme-light .emergency-shell::before { opacity: .65; }
-html.theme-light .apple-nav { color:#101828; }
-html.theme-light .apple-nav-subbar span:first-child { color:#667085; }
+html.theme-light .system-nav { color:#101828; }
+html.theme-light .nav-subbar span:first-child { color:#667085; }
 html.theme-light .brand-icon { color:#fff; }
 
 /* Typography and spacing: reduce the empty admin-page feel. */
@@ -685,24 +685,24 @@ html.theme-light .create-live-map { background:#e9eef4 !important; }
 
 /* Mobile: convert the desktop header into a compact, usable command bar. */
 @media (max-width: 900px) {
-  .apple-nav-inner { flex-wrap: wrap; }
-  .apple-nav-pills { order: 3; width: 100%; flex-basis: 100%; justify-content: flex-start; padding-top: 2px; }
-  .apple-nav-actions { margin-left:auto; }
+  .nav-inner { flex-wrap: wrap; }
+  .nav-pills { order: 3; width: 100%; flex-basis: 100%; justify-content: flex-start; padding-top: 2px; }
+  .nav-actions { margin-left:auto; }
   .role-switcher span { display:inline; }
   .dashboard-hero { align-items:flex-start; }
 }
 @media (max-width: 680px) {
-  .apple-nav-inner { min-height: 58px; padding: 7px 10px; }
+  .nav-inner { min-height: 58px; padding: 7px 10px; }
   .brand-mark { font-size:13px; }
   .brand-icon { width:30px; height:30px; border-radius:10px; }
-  .apple-nav-actions { gap:4px; }
+  .nav-actions { gap:4px; }
   .role-switcher { max-width: 138px; overflow-x:auto; scrollbar-width:none; }
   .role-switcher::-webkit-scrollbar { display:none; }
   .role-switcher button { flex:0 0 auto; padding:6px 8px; }
   .role-switcher span { display:none; }
   .nav-sos span { display:none; }
   .nav-sos { width:38px; padding:0; justify-content:center; }
-  .apple-nav-subbar { min-height:23px; font-size:8px; }
+  .nav-subbar { min-height:23px; font-size:8px; }
   .dashboard-shell { padding:16px 12px 40px; }
   .dashboard-hero { margin-bottom:16px; }
   .dashboard-hero h1 { font-size:35px; }
@@ -713,8 +713,8 @@ html.theme-light .create-live-map { background:#e9eef4 !important; }
 }
 @media (max-width: 430px) {
   .dashboard-stats { grid-template-columns:1fr; }
-  .apple-nav-pills { gap:0; }
-  .apple-nav-pill { padding:8px 9px; font-size:10px; }
+  .nav-pills { gap:0; }
+  .nav-pill { padding:8px 9px; font-size:10px; }
 }
 
 /* =========================================================
@@ -727,8 +727,8 @@ html.theme-light body { background:radial-gradient(900px 420px at 85% -5%,rgba(1
 html.theme-light .app-frame { background:transparent !important; }
 
 /* Prevent the desktop header from becoming a cramped three-pill cluster. */
-.apple-nav-inner { max-width:1380px; }
-.apple-nav-actions { flex-shrink:0; }
+.nav-inner { max-width:1380px; }
+.nav-actions { flex-shrink:0; }
 .role-switcher button { position:relative; min-width:0; }
 .role-switcher button.active::after { display:none !important; content:none !important; }
 html.theme-light .role-switcher { background:rgba(255,255,255,.72); border-color:rgba(15,23,42,.10); }
@@ -756,17 +756,17 @@ html.theme-light .transcript-box textarea { color:#101828; background:rgba(255,2
 
 /* Accessible touch targets. */
 @media (pointer:coarse) {
-  .apple-nav-pill, .role-switcher button, .nav-sos, .theme-toggle { min-height:40px; }
+  .nav-pill, .role-switcher button, .nav-sos, .theme-toggle { min-height:40px; }
   .record-button, .soft-button, .blue-button, .dashboard-primary, .accept-btn, .reject-btn { min-height:46px; }
   .severity, .need-chip { min-height:48px; }
 }
 
 @media (max-width: 760px) {
-  .apple-nav-inner { gap:7px; }
+  .nav-inner { gap:7px; }
   .brand-mark small { display:none; }
-  .apple-nav-pills { order:3; flex-basis:100%; }
-  .apple-nav-pills .apple-nav-pill { flex:0 0 auto; }
-  .apple-nav-actions { margin-left:auto; }
+  .nav-pills { order:3; flex-basis:100%; }
+  .nav-pills .nav-pill { flex:0 0 auto; }
+  .nav-actions { margin-left:auto; }
   .network-pill { display:none; }
   .role-switcher button.active::after { display:none; }
   .dashboard-hero { gap:14px; }
@@ -776,8 +776,8 @@ html.theme-light .transcript-box textarea { color:#101828; background:rgba(255,2
   .dashboard-map-panel .panel-heading { min-height:auto; }
 }
 @media (max-width: 520px) {
-  .apple-nav-inner { padding-left:10px; padding-right:10px; }
-  .apple-nav-actions { gap:4px; }
+  .nav-inner { padding-left:10px; padding-right:10px; }
+  .nav-actions { gap:4px; }
   .role-switcher { max-width:120px; }
   .role-switcher button { padding:6px 7px; }
   .theme-toggle { width:42px; }
@@ -790,14 +790,14 @@ html.theme-light .transcript-box textarea { color:#101828; background:rgba(255,2
 }
 @media (max-width: 380px) {
   .dashboard-stats { grid-template-columns:1fr; }
-  .apple-nav-pill span { display:none; }
-  .apple-nav-pill { padding:8px 11px; }
+  .nav-pill span { display:none; }
+  .nav-pill { padding:8px 11px; }
 }
 
 /* ==========================================================
-   EMEFast Apple-inspired Liquid Glass refinement
+   EMEFast adaptive Translucent Glass refinement
    Glass is reserved for navigation and controls; content stays
-   calm and readable underneath, following Apple's current guidance.
+   calm and readable underneath, following modern design guidance.
    ========================================================== */
 :root {
   --page-bg: #050506;
@@ -816,7 +816,7 @@ html, body { background: var(--page-bg); color: var(--body-text); }
 body { min-height: 100dvh; }
 
 /* Floating functional navigation — the actual glass layer. */
-.apple-nav {
+.system-nav {
   position: sticky;
   top: 10px;
   width: min(1280px, calc(100% - 24px));
@@ -829,11 +829,11 @@ body { min-height: 100dvh; }
   -webkit-backdrop-filter: blur(34px) saturate(165%);
   overflow: hidden;
 }
-.apple-nav::after { content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,.025); }
-.apple-nav-inner { min-height:64px; padding:8px 12px; }
-.apple-nav-subbar { min-height:25px; padding:0 16px 6px; }
-.apple-nav-pill { padding:9px 13px; }
-.apple-nav-pill.active { background: rgba(255,255,255,.13); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 5px 18px rgba(0,0,0,.10); }
+.system-nav::after { content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,.025); }
+.nav-inner { min-height:64px; padding:8px 12px; }
+.nav-subbar { min-height:25px; padding:0 16px 6px; }
+.nav-pill { padding:9px 13px; }
+.nav-pill.active { background: rgba(255,255,255,.13); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 5px 18px rgba(0,0,0,.10); }
 
 /* Content layer: no fake glass everywhere. */
 .emergency-shell, .dashboard-shell, .hospital-shell, .admin-shell, .app-content { color: var(--body-text); }
@@ -854,7 +854,7 @@ body { min-height: 100dvh; }
 .record-button:hover, .secondary-button:hover, .soft-button:hover, .full-button:hover, .need-chip:hover, .severity:hover, .details-toggle:hover { transform: translateY(-1px); }
 .record-button:active, .secondary-button:active, .soft-button:active, .full-button:active, .need-chip:active, .severity:active { transform: scale(.98); }
 
-/* Apple-like concentric rounding for the emergency action. */
+/* Concentric rounding for the emergency action. */
 .sos-panel { border-radius: 34px; }
 .sos-core { box-shadow: 0 16px 42px rgba(255,59,48,.18), inset 0 1px 0 rgba(255,255,255,.30); }
 
@@ -900,17 +900,17 @@ html.theme-light .app-content { background: transparent; }
 html.theme-light .emergency-shell, html.theme-light .dashboard-shell { background: transparent; }
 html.theme-light .ambient { opacity: .07; }
 html.theme-light .ambient-white { background: #007aff; opacity: .04; }
-html.theme-light .apple-nav {
+html.theme-light .system-nav {
   background: rgba(255,255,255,.72);
   border-color: rgba(60,60,67,.13);
   box-shadow: 0 16px 42px rgba(60,60,67,.10), inset 0 1px 0 rgba(255,255,255,.95);
 }
-html.theme-light .apple-nav-pill { color: #636366; }
-html.theme-light .apple-nav-pill:hover { color: #1c1c1e; background: rgba(60,60,67,.055); }
-html.theme-light .apple-nav-pill.active { color: #1c1c1e; background: rgba(60,60,67,.09); box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
+html.theme-light .nav-pill { color: #636366; }
+html.theme-light .nav-pill:hover { color: #1c1c1e; background: rgba(60,60,67,.055); }
+html.theme-light .nav-pill.active { color: #1c1c1e; background: rgba(60,60,67,.09); box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
 html.theme-light .brand-mark { color: #1c1c1e; }
 html.theme-light .brand-mark small { color: #8e8e93; }
-html.theme-light .apple-nav-subbar { color: #8e8e93; }
+html.theme-light .nav-subbar { color: #8e8e93; }
 html.theme-light .subbar-note { color: #aeaeb2; }
 html.theme-light .liquid-card, html.theme-light .glass-panel, html.theme-light .stat-card {
   background: linear-gradient(145deg, rgba(255,255,255,.92), rgba(248,248,250,.74));
@@ -948,7 +948,7 @@ html.theme-light .stat-card span, html.theme-light .case-metrics span, html.them
 html.theme-light .stat-card small, html.theme-light .case-meta, html.theme-light .recent-row span { color: #6e6e73; }
 html.theme-light .case-status { color: #6e6e73; }
 html.theme-light .map-footer { border-color: rgba(60,60,67,.10); color: #6e6e73; }
-html.theme-light .apple-footer { border-color: rgba(60,60,67,.10); color: #8e8e93; }
+html.theme-light .system-footer { border-color: rgba(60,60,67,.10); color: #8e8e93; }
 html.theme-light .live-map-shell { background: #e9edf2; }
 html.theme-light .live-map { background: #e9edf2; }
 html.theme-light .live-map-status { background: rgba(255,255,255,.88); color: #3a3a3c; border-color: rgba(60,60,67,.12); }
@@ -962,12 +962,12 @@ html.theme-light .role-switcher { background: rgba(60,60,67,.06); border-color: 
 html.theme-light .role-switcher button { color: #6e6e73; }
 html.theme-light .role-switcher button.active { color: #1c1c1e; background: rgba(255,255,255,.88); box-shadow: 0 2px 8px rgba(60,60,67,.10); }
 
-/* Responsive: turn the desktop command center into a compact iPhone-like flow. */
+/* Responsive: turn desktop into compact mobile flow. */
 @media (max-width: 900px) {
-  .apple-nav { top: 6px; width: calc(100% - 12px); margin-top: 6px; border-radius: 20px; }
-  .apple-nav-inner { flex-wrap: wrap; }
-  .apple-nav-pills { order: 3; flex-basis: 100%; justify-content: flex-start; padding: 2px 2px 1px; }
-  .apple-nav-actions { margin-left: auto; }
+  .system-nav { top: 6px; width: calc(100% - 12px); margin-top: 6px; border-radius: 20px; }
+  .nav-inner { flex-wrap: wrap; }
+  .nav-pills { order: 3; flex-basis: 100%; justify-content: flex-start; padding: 2px 2px 1px; }
+  .nav-actions { margin-left: auto; }
   .network-pill { display: none; }
   .workspace-grid, .dashboard-grid { grid-template-columns: 1fr; }
   .workspace-side { position: static; }
@@ -991,9 +991,9 @@ html.theme-light .role-switcher button.active { color: #1c1c1e; background: rgba
   .case-metrics { grid-template-columns: repeat(2,1fr); }
   .case-actions { flex-direction: column; align-items: stretch; }
   .dashboard-primary { width: 100%; }
-  .apple-nav-inner { gap: 7px; }
+  .nav-inner { gap: 7px; }
   .brand-mark { font-size: 13px; }
-  .apple-nav-actions { gap: 5px; }
+  .nav-actions { gap: 5px; }
   .role-switcher button span { display:none; }
   .role-switcher { padding: 3px; }
   .role-switcher button { width: 34px; justify-content:center; padding: 8px; }
@@ -1138,17 +1138,17 @@ html.theme-light ::-webkit-scrollbar-thumb { background:#c7c7cc; }
 /* ==========================================================
    V6 — desktop interaction + theme token hardening
    ========================================================== */
-.apple-nav-inner { position:relative; z-index:1; display:flex; align-items:center; }
-.apple-nav-pills, .apple-nav-actions, .apple-nav-pill, .theme-toggle, .role-switcher, .role-switcher button, .nav-sos {
+.nav-inner { position:relative; z-index:1; display:flex; align-items:center; }
+.nav-pills, .nav-actions, .nav-pill, .theme-toggle, .role-switcher, .role-switcher button, .nav-sos {
   position:relative;
   z-index:2;
   pointer-events:auto;
 }
-.apple-nav-pills { min-width:0; }
-.apple-nav-pill { cursor:pointer; user-select:none; -webkit-user-select:none; }
-.apple-nav-actions { flex-shrink:0; }
+.nav-pills { min-width:0; }
+.nav-pill { cursor:pointer; user-select:none; -webkit-user-select:none; }
+.nav-actions { flex-shrink:0; }
 
-/* A real segmented Apple-style theme control: one track, two stable icon
+/* A real segmented adaptive theme control: one track, two stable icon
    targets, and a moving thumb. It does not depend on text or hover state. */
 .theme-toggle {
   appearance:none; -webkit-appearance:none;
@@ -1202,16 +1202,16 @@ html.theme-light .theme-toggle-icon.active { color:#1c1c1e; opacity:1; }
 }
 .need-chip:focus-visible, .quick-tags button:focus-visible, .severity:focus-visible,
 .voice-language button:focus-visible, .transport-grid button:focus-visible,
-.role-switcher button:focus-visible, .theme-toggle:focus-visible, .apple-nav-pill:focus-visible {
+.role-switcher button:focus-visible, .theme-toggle:focus-visible, .nav-pill:focus-visible {
   outline:2px solid rgba(0,122,255,.75); outline-offset:2px;
 }
 
 /* Desktop nav stays compact instead of letting action pills collapse. */
 @media (min-width:901px) {
-  .apple-nav-inner { gap:14px; }
-  .apple-nav-pills { gap:3px; }
-  .apple-nav-pill { min-height:38px; }
-  .apple-nav-actions { gap:7px; }
+  .nav-inner { gap:14px; }
+  .nav-pills { gap:3px; }
+  .nav-pill { min-height:38px; }
+  .nav-actions { gap:7px; }
   .role-switcher { flex:0 0 auto; }
   .role-switcher button { min-height:30px; }
 }
@@ -1255,10 +1255,10 @@ html.theme-light .hospital-app .v2-card h1,html.theme-light .hospital-app .v2-ca
 
 /* Reliable desktop click targets. */
 .role-switcher button { min-height:36px; padding:7px 12px; }
-.apple-nav-pill { min-height:36px; display:inline-flex; align-items:center; }
+.nav-pill { min-height:36px; display:inline-flex; align-items:center; }
 .need-chip,.severity,.quick-tags button,.voice-language button { min-height:40px; }
 .accept-btn,.reject-btn,.sync-button,.primary-action { min-height:44px; }
-@media (pointer:coarse){.role-switcher button,.apple-nav-pill,.theme-toggle{min-height:44px}.need-chip,.severity,.quick-tags button,.voice-language button{min-height:44px}.accept-btn,.reject-btn,.sync-button,.primary-action{min-height:46px}}
+@media (pointer:coarse){.role-switcher button,.nav-pill,.theme-toggle{min-height:44px}.need-chip,.severity,.quick-tags button,.voice-language button{min-height:44px}.accept-btn,.reject-btn,.sync-button,.primary-action{min-height:46px}}
 
 /* Theme control geometry: 58px track, 24px thumb, exact 26px travel. */
 html.theme-light .theme-toggle-thumb { transform:translateX(26px) !important; }
@@ -1372,7 +1372,7 @@ html.theme-light select option { background:#ffffff; color:#1c1c1e; }
 .admin-app .v2-card { background:linear-gradient(145deg, rgba(25,25,29,.78), rgba(14,14,17,.76)); border-color:rgba(255,255,255,.095); box-shadow:0 18px 50px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.035); }
 .admin-app .v2-card-hover { transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease; }
 .admin-app .v2-card-hover:hover { transform:translateY(-2px); border-color:rgba(255,255,255,.16); box-shadow:0 24px 65px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.05); }
-.admin-app .font-mono { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif; }
+.admin-app .font-mono { font-family:BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif; }
 
 html.theme-light .admin-app .v2-card { background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(247,248,251,.82)) !important; border-color:rgba(60,60,67,.11) !important; box-shadow:0 18px 50px rgba(60,60,67,.075),inset 0 1px 0 rgba(255,255,255,.98) !important; }
 html.theme-light .admin-eyebrow { color:#0369a1; }
@@ -1423,13 +1423,13 @@ html.theme-light .sync-button { background:rgba(255,255,255,.82) !important; }
 /* Active workspace is defined by a filled material, never an underline. */
 .role-switcher button.active::after,
 .role-switcher button.active::before,
-.apple-nav-pill.active::after,
-.apple-nav-pill.active::before { content:none !important; display:none !important; }
+.nav-pill.active::after,
+.nav-pill.active::before { content:none !important; display:none !important; }
 
 /* Keep every navigation state legible in dark mode. */
-html.theme-dark .apple-nav-pill { color:#a1a1aa; }
-html.theme-dark .apple-nav-pill:hover { color:#f5f5f7; background:rgba(255,255,255,.075); }
-html.theme-dark .apple-nav-pill.active {
+html.theme-dark .nav-pill { color:#a1a1aa; }
+html.theme-dark .nav-pill:hover { color:#f5f5f7; background:rgba(255,255,255,.075); }
+html.theme-dark .nav-pill.active {
   color:#f5f5f7;
   background:rgba(255,255,255,.12);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.10), 0 3px 14px rgba(0,0,0,.14);
@@ -1444,10 +1444,10 @@ html.theme-dark .role-switcher button.active {
 
 /* Desktop: pills always retain their own width and never get squeezed. */
 @media (min-width:901px) {
-  .apple-nav-inner { flex-wrap:nowrap; }
-  .apple-nav-pills { flex:1 1 auto; min-width:260px; overflow-x:auto; }
-  .apple-nav-actions { flex:0 0 auto; min-width:max-content; }
-  .apple-nav-pill { flex:0 0 auto; white-space:nowrap; }
+  .nav-inner { flex-wrap:nowrap; }
+  .nav-pills { flex:1 1 auto; min-width:260px; overflow-x:auto; }
+  .nav-actions { flex:0 0 auto; min-width:max-content; }
+  .nav-pill { flex:0 0 auto; white-space:nowrap; }
   .role-switcher { flex:0 0 auto; white-space:nowrap; }
   .role-switcher button { flex:0 0 auto; }
 }
@@ -1455,8 +1455,8 @@ html.theme-dark .role-switcher button.active {
 /* Tablet/mobile: three deliberate rows — identity/actions, navigation, status.
    This prevents the nav from collapsing into invisible/squeezed pills. */
 @media (max-width:900px) {
-  .apple-nav { width:calc(100% - 16px); margin-top:8px; border-radius:20px; }
-  .apple-nav-inner {
+  .system-nav { width:calc(100% - 16px); margin-top:8px; border-radius:20px; }
+  .nav-inner {
     display:grid;
     grid-template-columns:auto minmax(0,1fr) auto;
     grid-template-rows:auto auto;
@@ -1466,8 +1466,8 @@ html.theme-dark .role-switcher button.active {
     padding:8px 10px 6px;
   }
   .brand-mark { grid-column:1; grid-row:1; min-width:0; }
-  .apple-nav-actions { grid-column:2 / 4; grid-row:1; justify-content:flex-end; min-width:0; }
-  .apple-nav-pills {
+  .nav-actions { grid-column:2 / 4; grid-row:1; justify-content:flex-end; min-width:0; }
+  .nav-pills {
     grid-column:1 / -1;
     grid-row:2;
     width:100%;
@@ -1480,59 +1480,59 @@ html.theme-dark .role-switcher button.active {
     padding:2px 1px 3px;
     gap:4px;
   }
-  .apple-nav-pills::-webkit-scrollbar { display:none; }
-  .apple-nav-pill { flex:0 0 auto; min-height:38px; }
-  .apple-nav-subbar { padding:0 12px 6px; }
-  .apple-nav-subbar .subbar-note { display:none; }
+  .nav-pills::-webkit-scrollbar { display:none; }
+  .nav-pill { flex:0 0 auto; min-height:38px; }
+  .nav-subbar { padding:0 12px 6px; }
+  .nav-subbar .subbar-note { display:none; }
 }
 
 @media (max-width:640px) {
-  .apple-nav { width:calc(100% - 12px); border-radius:18px; }
-  .apple-nav-inner { padding:7px 8px 5px; gap:5px 6px; }
-  .apple-nav-actions { gap:5px; }
-  .apple-nav-pill { min-height:40px; padding:8px 11px; }
+  .system-nav { width:calc(100% - 12px); border-radius:18px; }
+  .nav-inner { padding:7px 8px 5px; gap:5px 6px; }
+  .nav-actions { gap:5px; }
+  .nav-pill { min-height:40px; padding:8px 11px; }
   .role-switcher { max-width:none; }
   .role-switcher button { min-height:40px; padding:7px 9px; }
   .nav-sos { min-height:40px; padding:0 11px; }
   .theme-toggle { width:48px; height:32px; flex-basis:48px; }
-  .apple-nav-subbar { min-height:22px; font-size:8px; padding:0 10px 5px; }
+  .nav-subbar { min-height:22px; font-size:8px; padding:0 10px 5px; }
 }
 
 @media (max-width:480px) {
-  .apple-nav-inner { grid-template-columns:30px minmax(0,1fr) auto; }
+  .nav-inner { grid-template-columns:30px minmax(0,1fr) auto; }
   .brand-mark { width:30px; }
   .brand-mark > span:last-child { display:none; }
-  .apple-nav-actions { gap:4px; }
+  .nav-actions { gap:4px; }
   .role-switcher button span { display:none; }
   .role-switcher button { width:34px; min-width:34px; padding:8px; justify-content:center; }
   .role-switcher { padding:2px; gap:2px; }
   .nav-sos { width:40px; padding:0; justify-content:center; }
   .theme-toggle { width:46px; flex-basis:46px; }
-  .apple-nav-pill span { display:inline; }
-  .apple-nav-pill { min-width:max-content; }
+  .nav-pill span { display:inline; }
+  .nav-pill { min-width:max-content; }
 }
 
 @media (max-width:380px) {
-  .apple-nav-pill span { display:none; }
-  .apple-nav-pill { width:40px; min-width:40px; justify-content:center; padding:8px; }
+  .nav-pill span { display:none; }
+  .nav-pill { width:40px; min-width:40px; justify-content:center; padding:8px; }
 }
 
 /* =========================================================
    EMEFast V11 — navigation final cleanup
    Single authoritative override for responsive pills.
    ========================================================= */
-.apple-nav { overflow: visible !important; }
-.apple-nav-inner { width: 100%; box-sizing: border-box; }
-.apple-nav-pill,
+.system-nav { overflow: visible !important; }
+.nav-inner { width: 100%; box-sizing: border-box; }
+.nav-pill,
 .role-switcher button,
 .theme-toggle,
 .nav-sos { position: relative; text-decoration: none !important; }
 
 /* Never draw an underline/indicator under an active pill. */
-.apple-nav-pill::before,
-.apple-nav-pill::after,
-.apple-nav-pill.active::before,
-.apple-nav-pill.active::after,
+.nav-pill::before,
+.nav-pill::after,
+.nav-pill.active::before,
+.nav-pill.active::after,
 .role-switcher button::before,
 .role-switcher button::after,
 .role-switcher button.active::before,
@@ -1540,20 +1540,20 @@ html.theme-dark .role-switcher button.active {
 
 /* Desktop: stable three-zone header, no disappearing pills. */
 @media (min-width: 901px) {
-  .apple-nav-inner { display:grid; grid-template-columns:auto minmax(250px,1fr) auto; align-items:center; gap:18px; }
-  .apple-nav-pills { min-width:0; overflow:visible; justify-content:center; }
-  .apple-nav-pill { min-height:38px; padding:0 13px; }
-  .apple-nav-actions { min-width:max-content; }
+  .nav-inner { display:grid; grid-template-columns:auto minmax(250px,1fr) auto; align-items:center; gap:18px; }
+  .nav-pills { min-width:0; overflow:visible; justify-content:center; }
+  .nav-pill { min-height:38px; padding:0 13px; }
+  .nav-actions { min-width:max-content; }
   .role-switcher { min-width:max-content; }
   .role-switcher button { min-height:36px; padding:0 10px; }
 }
 
 /* Tablet/mobile: controls on row 1, navigation on a dedicated row 2. */
 @media (max-width: 900px) {
-  .apple-nav-inner { display:flex; flex-wrap:wrap; align-items:center; }
+  .nav-inner { display:flex; flex-wrap:wrap; align-items:center; }
   .brand-mark { flex:0 0 auto; }
-  .apple-nav-actions { margin-left:auto; flex:0 0 auto; }
-  .apple-nav-pills {
+  .nav-actions { margin-left:auto; flex:0 0 auto; }
+  .nav-pills {
     order:10;
     flex:0 0 100%;
     width:100%;
@@ -1565,17 +1565,17 @@ html.theme-dark .role-switcher button.active {
     scroll-snap-type:x proximity;
     padding:4px 2px 5px;
   }
-  .apple-nav-pill { flex:0 0 auto; min-height:38px; padding:0 12px; scroll-snap-align:start; }
-  .apple-nav-subbar { clear:both; }
+  .nav-pill { flex:0 0 auto; min-height:38px; padding:0 12px; scroll-snap-align:start; }
+  .nav-subbar { clear:both; }
 }
 
 /* Keep primary navigation labels readable on phones. Only workspace role
    labels collapse because three role names cannot fit safely at 360px. */
 @media (max-width: 640px) {
-  .apple-nav-inner { padding:7px 10px !important; }
-  .apple-nav-pills { margin:0 -10px; padding:3px 10px 5px; gap:3px; }
-  .apple-nav-pill { min-height:38px; padding:0 11px; font-size:10px; }
-  .apple-nav-pill span { display:inline !important; }
+  .nav-inner { padding:7px 10px !important; }
+  .nav-pills { margin:0 -10px; padding:3px 10px 5px; gap:3px; }
+  .nav-pill { min-height:38px; padding:0 11px; font-size:10px; }
+  .nav-pill span { display:inline !important; }
   .role-switcher { flex:0 0 auto; max-width:none; overflow:visible; }
   .role-switcher button { min-height:40px; min-width:36px; width:auto; padding:0 8px; }
   .role-switcher button span { display:none !important; }
@@ -1585,12 +1585,12 @@ html.theme-dark .role-switcher button.active {
 }
 
 @media (max-width: 420px) {
-  .apple-nav-inner { gap:5px !important; }
+  .nav-inner { gap:5px !important; }
   .brand-icon { width:30px; height:30px; }
-  .apple-nav-actions { gap:4px; }
-  .apple-nav-pills { gap:2px; }
-  .apple-nav-pill { min-height:36px; padding:0 9px; font-size:9px; }
-  .apple-nav-pill svg { width:13px; height:13px; }
+  .nav-actions { gap:4px; }
+  .nav-pills { gap:2px; }
+  .nav-pill { min-height:36px; padding:0 9px; font-size:9px; }
+  .nav-pill svg { width:13px; height:13px; }
   .role-switcher { padding:2px; }
   .role-switcher button { min-height:36px; width:32px; min-width:32px; padding:0; }
   .theme-toggle { width:46px; height:26px; }
@@ -1600,18 +1600,18 @@ html.theme-dark .role-switcher button.active {
 
 /* Dark-mode visibility: inactive controls are intentionally muted, never
    near-black; selected controls get a clear material fill with no underline. */
-html.theme-dark .apple-nav-pill { color:#a1a1aa !important; }
-html.theme-dark .apple-nav-pill:hover { color:#f5f5f7 !important; background:rgba(255,255,255,.075) !important; }
-html.theme-dark .apple-nav-pill.active { color:#fff !important; background:rgba(255,255,255,.13) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 4px 14px rgba(0,0,0,.12) !important; }
+html.theme-dark .nav-pill { color:#a1a1aa !important; }
+html.theme-dark .nav-pill:hover { color:#f5f5f7 !important; background:rgba(255,255,255,.075) !important; }
+html.theme-dark .nav-pill.active { color:#fff !important; background:rgba(255,255,255,.13) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 4px 14px rgba(0,0,0,.12) !important; }
 html.theme-dark .role-switcher { background:rgba(255,255,255,.045) !important; border-color:rgba(255,255,255,.11) !important; }
 html.theme-dark .role-switcher button { color:#a1a1aa !important; }
 html.theme-dark .role-switcher button:hover { color:#fff !important; background:rgba(255,255,255,.07) !important; }
 html.theme-dark .role-switcher button.active { color:#fff !important; background:rgba(255,255,255,.14) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 3px 12px rgba(0,0,0,.16) !important; }
 
 /* Light mode counterpart. */
-html.theme-light .apple-nav-pill { color:#667085 !important; }
-html.theme-light .apple-nav-pill:hover { color:#101828 !important; background:rgba(15,23,42,.045) !important; }
-html.theme-light .apple-nav-pill.active { color:#101828 !important; background:rgba(60,60,67,.09) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 2px 10px rgba(60,60,67,.08) !important; }
+html.theme-light .nav-pill { color:#667085 !important; }
+html.theme-light .nav-pill:hover { color:#101828 !important; background:rgba(15,23,42,.045) !important; }
+html.theme-light .nav-pill.active { color:#101828 !important; background:rgba(60,60,67,.09) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 2px 10px rgba(60,60,67,.08) !important; }
 html.theme-light .role-switcher button { color:#6e6e73 !important; }
 html.theme-light .role-switcher button:hover { color:#1c1c1e !important; background:rgba(60,60,67,.055) !important; }
 html.theme-light .role-switcher button.active { color:#1c1c1e !important; background:rgba(255,255,255,.92) !important; box-shadow:0 2px 8px rgba(60,60,67,.10) !important; }
@@ -1693,7 +1693,7 @@ html.theme-dark .admin-app .badge-amber { color:#ffd18a !important; background:r
 html.theme-dark .hospital-app .badge-subtle,
 html.theme-dark .admin-app .badge-subtle { color:#c5c7ce !important; background:rgba(255,255,255,.065) !important; border-color:rgba(255,255,255,.11) !important; }
 
-/* Light mode counterpart: visible, calm, Apple-style surfaces/pills. */
+/* Light mode counterpart: visible, calm, adaptive surfaces/pills. */
 html.theme-light .v2-card {
   background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(247,249,252,.84)) !important;
   border-color:rgba(15,23,42,.09) !important;
@@ -1708,10 +1708,10 @@ html.theme-light .badge-subtle { color:#475467 !important; background:rgba(15,23
 html.theme-light .stepper button { background:rgba(15,23,42,.045); color:#1c1c1e; border-color:rgba(15,23,42,.10); }
 
 /* Never allow active role/nav pills to grow a decorative underline. */
-.apple-nav-pill::before,
-.apple-nav-pill::after,
-.apple-nav-pill.active::before,
-.apple-nav-pill.active::after,
+.nav-pill::before,
+.nav-pill::after,
+.nav-pill.active::before,
+.nav-pill.active::after,
 .role-switcher button::before,
 .role-switcher button::after,
 .role-switcher button.active::before,
@@ -1731,10 +1731,10 @@ html.theme-dark ::-webkit-scrollbar-thumb { background:#3a3a40; }
 .role-switcher button.active::after,
 .role-switcher button::before,
 .role-switcher button::after,
-.apple-nav-pill.active::before,
-.apple-nav-pill.active::after,
-.apple-nav-pill::before,
-.apple-nav-pill::after {
+.nav-pill.active::before,
+.nav-pill.active::after,
+.nav-pill::before,
+.nav-pill::after {
   content:none !important;
   display:none !important;
 }
@@ -1752,7 +1752,7 @@ html.theme-dark ::-webkit-scrollbar-thumb { background:#3a3a40; }
 }
 
 @media (max-width:640px) {
-  .apple-nav-actions {
+  .nav-actions {
     display:flex !important;
     align-items:center !important;
     gap:5px !important;
@@ -1789,16 +1789,16 @@ html.theme-dark ::-webkit-scrollbar-thumb { background:#3a3a40; }
 
 /* ==========================================================
    EMEFAST V20 — MASTER UI/UX ARCHITECTURE REDESIGN
-   3 Surface Tiers | Apple Liquid Glass + Matte Content
+   3 Surface Tiers | Adaptive System Glass + Matte Content
    72px Desktop / 80px Mobile Header | Quiet Secondary Dock
    ========================================================== */
 
 /* ==========================================================
-   SURFACE TIER 2: LIQUID GLASS CONTROLS (HEADER & TOOLBAR)
+   SURFACE TIER 2: Translucent Glass CONTROLS (HEADER & TOOLBAR)
    ========================================================== */
 
 /* 1. Header Container */
-.apple-nav {
+.system-nav {
   position: sticky !important;
   top: 0 !important;
   z-index: 1100 !important;
@@ -1812,8 +1812,8 @@ html.theme-dark ::-webkit-scrollbar-thumb { background:#3a3a40; }
 }
 
 
-html.theme-dark .apple-nav,
-:root .apple-nav {
+html.theme-dark .system-nav,
+:root .system-nav {
   background: rgba(14, 14, 18, 0.78) !important;
   border-bottom: 1.2px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow:
@@ -1822,7 +1822,7 @@ html.theme-dark .apple-nav,
     0 8px 32px rgba(0, 0, 0, 0.32) !important;
 }
 
-html.theme-light .apple-nav {
+html.theme-light .system-nav {
   background: rgba(255, 255, 255, 0.82) !important;
   border-bottom: 1.2px solid rgba(0, 0, 0, 0.08) !important;
   box-shadow:
@@ -1832,19 +1832,19 @@ html.theme-light .apple-nav {
 }
 
 /* Header Inner Layout: 72px Desktop Single Row, 80px Mobile Two Tier */
-.apple-nav-inner {
+.nav-inner {
   max-width: 1400px !important;
   margin: 0 auto !important;
   box-sizing: border-box !important;
 }
 
 @media (min-width: 769px) {
-  .apple-nav {
+  .system-nav {
     height: 72px !important;
     min-height: 72px !important;
     max-height: 72px !important;
   }
-  .apple-nav-inner {
+  .nav-inner {
     height: 72px !important;
     display: flex !important;
     flex-direction: row !important;
@@ -1856,12 +1856,12 @@ html.theme-light .apple-nav {
 }
 
 @media (max-width: 768px) {
-  .apple-nav {
+  .system-nav {
     height: auto !important;
     min-height: 78px !important;
     max-height: 84px !important;
   }
-  .apple-nav-inner {
+  .nav-inner {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
@@ -1875,7 +1875,7 @@ html.theme-light .apple-nav {
 }
 
 /* Left: Native EMEFast Wordmark (No Capsule, No Black Box) */
-.apple-nav-brand {
+.nav-brand {
   display: flex !important;
   align-items: center !important;
   flex-shrink: 0 !important;
@@ -1919,7 +1919,7 @@ html.theme-light .apple-nav {
 .liquid-wordmark {
   display: flex !important;
   align-items: baseline !important;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, system-ui, sans-serif !important;
+  font-family: BlinkMacSystemFont, "SF Pro Display", Inter, system-ui, sans-serif !important;
   font-weight: 900 !important;
   font-style: italic !important;
   font-size: 20px !important;
@@ -2117,7 +2117,7 @@ html.theme-light .role-switcher-btn.active .role-icon {
 }
 
 /* Right Controls: Optical Theme Toggle + Compact SOS */
-.apple-nav-actions-group {
+.nav-actions-group {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
@@ -2126,7 +2126,7 @@ html.theme-light .role-switcher-btn.active .role-icon {
 }
 
 @media (min-width: 769px) {
-  .apple-nav-actions-group {
+  .nav-actions-group {
     order: 3 !important;
   }
 }
@@ -2137,7 +2137,7 @@ html.theme-light .role-switcher-btn.active .role-icon {
   justify-content: center !important;
 }
 
-.liquid-glass-toggle {
+.theme-lens-toggle {
   position: relative !important;
   width: 54px !important;
   height: 28px !important;
@@ -2159,14 +2159,14 @@ html.theme-light .role-switcher-btn.active .role-icon {
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
-html.theme-dark .liquid-glass-toggle,
-:root .liquid-glass-toggle {
+html.theme-dark .theme-lens-toggle,
+:root .theme-lens-toggle {
   background: rgba(255, 255, 255, 0.10) !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
-html.theme-light .liquid-glass-toggle {
+html.theme-light .theme-lens-toggle {
   background: rgba(0, 0, 0, 0.06) !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
@@ -2207,7 +2207,7 @@ html.theme-light .liquid-glass-toggle {
   z-index: 1 !important;
 }
 
-.liquid-glass-thumb {
+.translucent-glass-thumb {
   position: absolute !important;
   top: 2px !important;
   left: 2px !important;
@@ -2219,13 +2219,13 @@ html.theme-light .liquid-glass-toggle {
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease !important;
 }
 
-.liquid-glass-toggle.light-mode .liquid-glass-thumb {
+.theme-lens-toggle.light-mode .translucent-glass-thumb {
   transform: translateX(26px) !important;
   background: #ffffff !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 #ffffff !important;
 }
 
-.liquid-glass-toggle.dark-mode .liquid-glass-thumb {
+.theme-lens-toggle.dark-mode .translucent-glass-thumb {
   transform: translateX(0px) !important;
   background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.18) 100%) !important;
   backdrop-filter: blur(10px) !important;
@@ -2245,17 +2245,17 @@ html.theme-light .liquid-glass-toggle {
   transition: all 0.2s ease !important;
 }
 
-.liquid-glass-toggle.dark-mode .moon-icon {
+.theme-lens-toggle.dark-mode .moon-icon {
   color: #ffffff !important;
   opacity: 1 !important;
 }
 
-.liquid-glass-toggle.light-mode .sun-icon {
+.theme-lens-toggle.light-mode .sun-icon {
   color: #0f172a !important;
   opacity: 1 !important;
 }
 
-.liquid-glass-toggle.dark-mode .sun-icon {
+.theme-lens-toggle.dark-mode .sun-icon {
   color: #71717a !important;
   opacity: 0.55 !important;
 }
@@ -2753,7 +2753,7 @@ html.theme-light .dashboard-case-card {
   border-left: 3px solid #FF3B30 !important;
 }
 
-/* Buttons System — iOS 26 Liquid Glass Buttons */
+/* Buttons System — Adaptive System Buttons */
 .dashboard-primary {
   min-height: 46px !important;
   padding: 0 22px !important;
@@ -3103,10 +3103,10 @@ html.theme-light .type-micro-11 {
 }
 
 /* ==========================================================================
-   Section 4: Canonical Liquid Glass Class
+   Section 4: Canonical Translucent Glass Class
    Specular edge transmission + SVG refraction filter progressive enhancement
    ========================================================================== */
-.liquid-glass {
+.translucent-glass {
   background: rgba(20, 20, 25, 0.76) !important;
   border: 1.2px solid rgba(255, 255, 255, 0.16) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28), inset 0 1.5px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(255, 255, 255, 0.08) !important;
@@ -3114,7 +3114,7 @@ html.theme-light .type-micro-11 {
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
-html.theme-light .liquid-glass {
+html.theme-light .translucent-glass {
   background: rgba(255, 255, 255, 0.82) !important;
   border: 1.2px solid rgba(0, 0, 0, 0.08) !important;
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.04) !important;
@@ -3204,8 +3204,8 @@ html.theme-light [class*="text-[#484f58]"] {
 }
 
 /* ==========================================================================
-   VERIFIED LIQUID GLASS MATERIAL
-   Authentic Apple iOS liquid glass optical depth:
+   VERIFIED Translucent Glass MATERIAL
+   Translucent system glass surface depth:
    - Semi-transparent frosted glass (content underneath clearly visible softened)
    - Real GPU backdrop blur & saturation
    - Crisp 1-1.5px white specular highlight line on top edge
@@ -3213,14 +3213,14 @@ html.theme-light [class*="text-[#484f58]"] {
    - Soft, small, neutral drop shadow for lift (zero colored halos)
    ========================================================================== */
 
-.verified-liquid-glass {
+.verified-translucent-glass {
   backdrop-filter: blur(20px) saturate(190%) contrast(105%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(190%) contrast(105%) !important;
   transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
 }
 
-html.theme-dark .verified-liquid-glass,
-:root .verified-liquid-glass {
+html.theme-dark .verified-translucent-glass,
+:root .verified-translucent-glass {
   background: rgba(15, 18, 26, 0.40) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 
@@ -3229,7 +3229,7 @@ html.theme-dark .verified-liquid-glass,
     0 8px 24px rgba(0, 0, 0, 0.20) !important;
 }
 
-html.theme-light .verified-liquid-glass {
+html.theme-light .verified-translucent-glass {
   background: rgba(255, 255, 255, 0.50) !important;
   border: 1px solid rgba(255, 255, 255, 0.55) !important;
   box-shadow: 
@@ -3343,8 +3343,8 @@ html.theme-light .reimagined-brand-wordmark .brand-fast {
   gap: 10px !important;
 }
 
-/* Sleek Liquid Glass Mobile Toggle Switch (Modeled on Reference Design) */
-.liquid-glass-toggle {
+/* Sleek Translucent Glass Mobile Toggle Switch (Modeled on Reference Design) */
+.theme-lens-toggle {
   position: relative !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -3364,7 +3364,7 @@ html.theme-light .reimagined-brand-wordmark .brand-fast {
 }
 
 /* Accessibility touch target expansion (>=44px) */
-.liquid-glass-toggle::after {
+.theme-lens-toggle::after {
   content: '' !important;
   position: absolute !important;
   top: -9px !important;
@@ -3373,15 +3373,15 @@ html.theme-light .reimagined-brand-wordmark .brand-fast {
   right: -4px !important;
 }
 
-.liquid-glass-toggle:focus-visible {
+.theme-lens-toggle:focus-visible {
   outline: 2px solid #ff3b30 !important;
   outline-offset: 3px !important;
 }
 
 /* Dark Mode Track (Knob on Right, "Dark" on Left) */
-html.theme-dark .liquid-glass-toggle,
-:root .liquid-glass-toggle.is-dark,
-.liquid-glass-toggle.is-dark {
+html.theme-dark .theme-lens-toggle,
+:root .theme-lens-toggle.is-dark,
+.theme-lens-toggle.is-dark {
   background: linear-gradient(180deg, #1c2230 0%, #121620 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   box-shadow: 
@@ -3391,9 +3391,9 @@ html.theme-dark .liquid-glass-toggle,
 }
 
 /* Light Mode Track (Knob on Left, "Light" on Right) */
-html.theme-light .liquid-glass-toggle,
-:root .liquid-glass-toggle.is-light,
-.liquid-glass-toggle.is-light {
+html.theme-light .theme-lens-toggle,
+:root .theme-lens-toggle.is-light,
+.theme-lens-toggle.is-light {
   background: linear-gradient(180deg, #bcc6d4 0%, #a8b4c4 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.75) !important;
   box-shadow: 
@@ -3407,7 +3407,7 @@ html.theme-light .liquid-glass-toggle,
   position: absolute !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif !important;
+  font-family: BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif !important;
   font-size: 11px !important;
   font-weight: 500 !important;
   letter-spacing: -0.01em !important;
@@ -3416,20 +3416,20 @@ html.theme-light .liquid-glass-toggle,
   transition: opacity 0.25s ease !important;
 }
 
-.liquid-glass-toggle.is-dark .toggle-track-label {
+.theme-lens-toggle.is-dark .toggle-track-label {
   left: 10px !important;
   right: auto !important;
   color: #94a3b8 !important;
 }
 
-.liquid-glass-toggle.is-light .toggle-track-label {
+.theme-lens-toggle.is-light .toggle-track-label {
   right: 10px !important;
   left: auto !important;
   color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(15, 23, 42, 0.25) !important;
 }
 
-/* Sliding Liquid Glass Lens Knob */
+/* Sliding Translucent Glass Lens Knob */
 .toggle-lens-knob {
   position: absolute !important;
   top: -3px !important;
@@ -3445,7 +3445,7 @@ html.theme-light .liquid-glass-toggle,
 }
 
 /* Dark Mode Knob: Positioned on the Right */
-.liquid-glass-toggle.is-dark .toggle-lens-knob {
+.theme-lens-toggle.is-dark .toggle-lens-knob {
   left: 0 !important;
   transform: translateX(42px) !important;
   background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.12) 100%) !important;
@@ -3461,7 +3461,7 @@ html.theme-light .liquid-glass-toggle,
 }
 
 /* Light Mode Knob: Positioned on the Left */
-.liquid-glass-toggle.is-light .toggle-lens-knob {
+.theme-lens-toggle.is-light .toggle-lens-knob {
   left: 0 !important;
   transform: translateX(-2px) !important;
   background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 55%, rgba(255, 255, 255, 0.85) 100%) !important;
@@ -3489,7 +3489,7 @@ html.theme-light .liquid-glass-toggle,
   pointer-events: none !important;
 }
 
-.liquid-glass-toggle.is-light .lens-refraction-sheen {
+.theme-lens-toggle.is-light .lens-refraction-sheen {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 100%) !important;
 }
 
@@ -3512,15 +3512,15 @@ html.theme-light .liquid-glass-toggle,
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.95)) drop-shadow(0 1px 2px rgba(15, 23, 42, 0.3)) !important;
 }
 
-.liquid-glass-toggle:hover .toggle-lens-knob {
+.theme-lens-toggle:hover .toggle-lens-knob {
   filter: brightness(1.08) !important;
 }
 
-.liquid-glass-toggle:active .toggle-lens-knob {
+.theme-lens-toggle:active .toggle-lens-knob {
   transform: scale(0.96) !important;
 }
 
-/* Pure Liquid Red SOS Button — iOS 26 Liquid Glass */
+/* Pure Liquid Red SOS Button — Adaptive Glass */
 .reimagined-sos-btn.pure-liquid-sos {
   display: inline-flex !important;
   align-items: center !important;
@@ -3598,7 +3598,7 @@ html.theme-light .reimagined-sos-btn.pure-liquid-sos {
   position: relative !important;
 }
 
-/* FLOATING BOTTOM LIQUID GLASS DOCK (Level 3 - Liquid Glass Design Aesthetic) */
+/* FLOATING BOTTOM NAVIGATION DOCK (Level 3 - Translucent Glass Design Aesthetic) */
 .floating-bottom-liquid-dock {
   position: fixed !important;
   bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
@@ -4122,7 +4122,7 @@ html.theme-dark .context-nav-item.active .context-item-label {
 }
 
 /* =========================================================
-   Homepage Status Ticker & Badge Row (Light & Dark Liquid Glass)
+   Homepage Status Ticker & Badge Row (Light & Dark Translucent Glass)
    ========================================================= */
 .status-ticker {
   background: rgba(0, 0, 0, 0.4);

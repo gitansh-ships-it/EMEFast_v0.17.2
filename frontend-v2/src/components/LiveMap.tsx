@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { Point, RouteResult, fetchAuthoritativeRoute } from "@/lib/routing";
 
-export type Point = { lat: number; lng: number };
+export type { Point, RouteResult };
 
 export type RouteInfo = {
   distanceKm: number;
@@ -11,6 +12,8 @@ export type RouteInfo = {
   isRoadRoute?: boolean;
   trafficDelayMin?: number;
   isFailed?: boolean;
+  provider?: string;
+  calculatedAt?: number;
 };
 
 type LiveMapProps = {
@@ -27,29 +30,15 @@ type LiveMapProps = {
 
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 const LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-const OSRM_URL = "https://router.project-osrm.org/route/v1/driving";
 
 // CARTO official open tiles for clean Light & Dark styling
 const CARTO_LIGHT_URL = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const CARTO_DARK_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OSM</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>';
 
 function validPoint(p?: Point | null): boolean {
   return !!p && Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180;
-}
-
-function haversineDistanceKm(p1: Point, p2: Point): number {
-  const R = 6371;
-  const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
-  const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((p1.lat * Math.PI) / 180) *
-      Math.cos((p2.lat * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function isLightMode(): boolean {
@@ -100,33 +89,22 @@ export default function LiveMap({
   const originMarkerRef = useRef<any>(null);
   const destinationMarkerRef = useRef<any>(null);
   const routeRef = useRef<any>(null);
-  const watchRef = useRef<number | null>(null);
   const lastRouteRef = useRef<string>("");
   const lastRouteAtRef = useRef<number>(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [message, setMessage] = useState(trackDeviceGps ? "Acquiring GPS satellite fix…" : "Incident map active");
   const [livePosition, setLivePosition] = useState<Point>(origin);
   const livePositionRef = useRef<Point>(origin);
   const [currentAccuracy, setCurrentAccuracy] = useState<number | null>(gpsAccuracy);
 
-  // Routing State
-  const [routeState, setRouteState] = useState<{
-    distanceKm: number;
-    durationMin: number;
-    isTrafficAware: boolean;
-    isRoadRoute: boolean;
-    isFailed: boolean;
-    trafficDelayMin: number;
-  } | null>(null);
+  // Authoritative Route State
+  const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [isRoutingLoading, setIsRoutingLoading] = useState(false);
   const [routeRetryCount, setRouteRetryCount] = useState(0);
 
   // TomTom Configuration
   const tomtomApiKey = (process.env.NEXT_PUBLIC_TOMTOM_API_KEY || "").trim();
-  const hasValidTomTomKey = Boolean(tomtomApiKey && tomtomApiKey !== "YOUR_TOMTOM_API_KEY_HERE");
-  const [showTraffic, setShowTraffic] = useState(false);
-  const trafficLayerRef = useRef<any>(null);
 
   // Synchronize incoming accuracy prop
   useEffect(() => {
@@ -144,11 +122,10 @@ export default function LiveMap({
     }
   }, [origin.lat, origin.lng]);
 
-  // 1. Initialize Map and Tile Layer
+  // 1. Initialize Leaflet Map and CARTO Tile Layer
   useEffect(() => {
     if (!validPoint(origin)) {
       setStatus("error");
-      setMessage("A valid GPS coordinate is required to display the emergency map.");
       return;
     }
 
@@ -174,14 +151,14 @@ export default function LiveMap({
               setCurrentAccuracy(null);
               onPickPosition?.(point);
               onLivePosition?.(point);
-              setMessage("Pinned location · verify before sending");
             }
           });
         }
 
+        // Compact Zoom Controls
         L.control.zoom({ position: "bottomright" }).addTo(localMap);
 
-        // Center on Location Button
+        // Compact Center on Location Button
         const locateControl = L.control({ position: "bottomright" });
         locateControl.onAdd = () => {
           const button = L.DomUtil.create("button", "emefast-map-locate");
@@ -192,13 +169,13 @@ export default function LiveMap({
           L.DomEvent.disableClickPropagation(button);
           L.DomEvent.on(button, "click", () => {
             const point = livePositionRef.current;
-            if (point && validPoint(point)) localMap?.flyTo([point.lat, point.lng], 16, { duration: 0.7 });
+            if (point && validPoint(point)) localMap?.flyTo([point.lat, point.lng], 16, { duration: 0.6 });
           });
           return button;
         };
         locateControl.addTo(localMap);
 
-        // Select initial theme tile URL
+        // Theme-aware initial tile selection
         const light = isLightMode();
         const initialTileUrl = light ? CARTO_LIGHT_URL : CARTO_DARK_URL;
         const tileLayer = L.tileLayer(initialTileUrl, {
@@ -209,7 +186,7 @@ export default function LiveMap({
         baseTileLayerRef.current = tileLayer;
         leafletMapRef.current = localMap;
 
-        // Force resize recalculation
+        // Force resize calculation
         requestAnimationFrame(() => localMap?.invalidateSize({ animate: false }));
         const resizeObserver =
           typeof ResizeObserver !== "undefined" && mapRef.current
@@ -228,76 +205,49 @@ export default function LiveMap({
 
         const hospitalIcon = L.divIcon({
           className: "emefast-map-marker hospital-marker",
-          html: '<span class="emefast-map-hospital">+</span>',
+          html: '<span class="emefast-map-hospital">🏥</span>',
           iconSize: [32, 32],
           iconAnchor: [16, 16],
         });
 
-        const patientPopupHtml = `
+        const patientMarker = L.marker([origin.lat, origin.lng], { icon: currentIcon }).addTo(localMap);
+        originMarkerRef.current = patientMarker;
+
+        patientMarker.bindPopup(`
           <div style="font-family:monospace;padding:2px 0;">
             <div style="font-size:10px;font-weight:900;color:#ff3b30;letter-spacing:0.5px;">PATIENT LOCATION</div>
-            <div style="font-size:12px;font-weight:bold;margin-top:2px;color:currentColor;">
-              ${currentAccuracy != null ? `GPS CONFIRMED · ±${Math.round(currentAccuracy)} m` : (allowManualPick ? "MANUAL PIN LOCATION" : "LOCATION APPROXIMATE · Accuracy unknown")}
+            <div style="font-size:12px;font-weight:bold;margin-top:2px;">
+              ${currentAccuracy != null ? `GPS CONFIRMED · ±${Math.round(currentAccuracy)} m` : (allowManualPick ? "MANUAL PIN LOCATION" : "LOCATION APPROXIMATE")}
             </div>
-            <div style="font-size:10px;opacity:0.75;margin-top:2px;">
+            <div style="font-size:10px;color:#888;margin-top:2px;">
               ${origin.lat.toFixed(5)}°, ${origin.lng.toFixed(5)}°
             </div>
           </div>
-        `;
+        `);
 
-        originMarkerRef.current = L.marker([origin.lat, origin.lng], { icon: currentIcon })
-          .addTo(localMap)
-          .bindPopup(patientPopupHtml);
+        if (destination && validPoint(destination)) {
+          const hospMarker = L.marker([destination.lat, destination.lng], { icon: hospitalIcon }).addTo(localMap);
+          destinationMarkerRef.current = hospMarker;
 
-        if (validPoint(destination)) {
-          const hospitalPopupHtml = `
+          hospMarker.bindPopup(`
             <div style="font-family:monospace;padding:2px 0;">
-              <div style="font-size:10px;font-weight:900;color:#30d158;letter-spacing:0.5px;">HOSPITAL</div>
-              <div style="font-size:13px;font-weight:bold;margin-top:2px;color:currentColor;">${destinationLabel}</div>
-              <div style="font-size:11px;color:#30d158;margin-top:3px;font-weight:600;">✓ Admin-verified emergency facility</div>
-              <div style="font-size:10px;opacity:0.75;margin-top:2px;">
-                ${destination!.lat.toFixed(5)}°, ${destination!.lng.toFixed(5)}°
+              <div style="font-size:10px;font-weight:900;color:#30d158;letter-spacing:0.5px;">EMERGENCY DESTINATION</div>
+              <div style="font-size:12px;font-weight:bold;margin-top:2px;">${destinationLabel}</div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">
+                ${destination.lat.toFixed(5)}°, ${destination.lng.toFixed(5)}°
               </div>
             </div>
-          `;
-          destinationMarkerRef.current = L.marker([destination!.lat, destination!.lng], { icon: hospitalIcon })
-            .addTo(localMap)
-            .bindPopup(hospitalPopupHtml);
-        }
+          `);
 
-        const points = [origin, ...(validPoint(destination) ? [destination!] : [])];
-        localMap.fitBounds(
-          points.map((p) => [p.lat, p.lng]),
-          { padding: [40, 40], maxZoom: points.length > 1 ? 15 : 16 }
-        );
+          const bounds = L.latLngBounds([[origin.lat, origin.lng], [destination.lat, destination.lng]]);
+          localMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        } else {
+          localMap.setView([origin.lat, origin.lng], 15);
+        }
 
         setStatus("ready");
-        setMessage(trackDeviceGps ? "Live GPS active" : "Incident location mapped");
-
-        // Device GPS tracking
-        if (trackDeviceGps && typeof navigator !== "undefined" && navigator.geolocation) {
-          watchRef.current = navigator.geolocation.watchPosition(
-            (pos) => {
-              const reportedAccuracy = Number(pos.coords.accuracy);
-              const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-              livePositionRef.current = next;
-              setLivePosition(next);
-              setCurrentAccuracy(reportedAccuracy);
-              onLivePosition?.(next);
-              originMarkerRef.current?.setLatLng([next.lat, next.lng]);
-              if (!allowManualPick) localMap.panTo([next.lat, next.lng], { animate: true, duration: 0.6 });
-              const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-              setMessage(`GPS Lock · ±${Math.round(reportedAccuracy)} m · ${timeStr}${reportedAccuracy > 100 ? " (approx)" : ""}`);
-            },
-            () => setMessage("Map active · precise device GPS unavailable; incident location pinned"),
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
-          );
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setStatus("error");
-          setMessage(error instanceof Error ? error.message : "Map could not load");
-        }
+      } catch {
+        if (!cancelled) setStatus("error");
       }
     };
 
@@ -305,30 +255,30 @@ export default function LiveMap({
 
     return () => {
       cancelled = true;
-      if (watchRef.current != null && typeof navigator !== "undefined" && navigator.geolocation) {
-        navigator.geolocation.clearWatch(watchRef.current);
+      if (localMap) {
+        const ro = (localMap as any).__emefastResizeObserver;
+        if (ro) ro.disconnect();
+        localMap.remove();
       }
-      watchRef.current = null;
-      (localMap as any)?.__emefastResizeObserver?.disconnect?.();
-      if (trafficLayerRef.current) {
-        trafficLayerRef.current.remove();
-        trafficLayerRef.current = null;
-      }
-      localMap?.remove();
       leafletMapRef.current = null;
       baseTileLayerRef.current = null;
       originMarkerRef.current = null;
       destinationMarkerRef.current = null;
       routeRef.current = null;
     };
-  }, [origin.lat, origin.lng, destination?.lat, destination?.lng, destinationLabel, onLivePosition, onPickPosition, allowManualPick]);
+  }, [origin.lat, origin.lng, destination?.lat, destination?.lng, destinationLabel, allowManualPick]);
 
-  // 2. Dynamic Dark/Light Theme Switching without map recreation
+  // 2. Dynamic Dark/Light Theme Switching Without Map Recreation
   useEffect(() => {
     const updateTileTheme = (light: boolean) => {
       if (baseTileLayerRef.current) {
         const nextUrl = light ? CARTO_LIGHT_URL : CARTO_DARK_URL;
         baseTileLayerRef.current.setUrl(nextUrl);
+      }
+      // Re-style route line for theme contrast
+      if (routeRef.current) {
+        const strokeColor = light ? "#d70015" : "#ff3b30";
+        routeRef.current.setStyle({ color: strokeColor });
       }
     };
 
@@ -342,8 +292,6 @@ export default function LiveMap({
     };
 
     window.addEventListener("emefast-theme-change", handleThemeChange);
-
-    // MutationObserver to watch class changes on <html>
     const observer = new MutationObserver(() => {
       updateTileTheme(isLightMode());
     });
@@ -355,185 +303,78 @@ export default function LiveMap({
     };
   }, []);
 
-  // 3. True Road Route Calculation with TomTom Traffic & OSRM Fallback
+  // 3. Single Source of Truth Route Calculation
   const calculateRoute = useCallback(async () => {
     const map = leafletMapRef.current;
     if (!map || !validPoint(destination) || !validPoint(livePosition)) return;
 
-    setIsRoutingLoading(true);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 9000);
+    abortControllerRef.current = controller;
 
-    let routeData: {
-      distanceKm: number;
-      durationMin: number;
-      isTrafficAware: boolean;
-      isRoadRoute: boolean;
-      trafficDelayMin: number;
-      latLngs: [number, number][];
-    } | null = null;
+    setIsRoutingLoading(true);
 
-    // TIER 1: TomTom Traffic-Aware Routing
-    if (hasValidTomTomKey) {
-      try {
-        const tomtomUrl = `https://api.tomtom.com/routing/1/calculateRoute/${livePosition.lat},${livePosition.lng}:${destination!.lat},${destination!.lng}/json?key=${tomtomApiKey}&traffic=true`;
-        const resp = await fetch(tomtomUrl, { signal: controller.signal });
-        if (resp.ok) {
-          const json = await resp.json();
-          const route = json?.routes?.[0];
-          const summary = route?.summary;
-          const points = route?.legs?.[0]?.points;
+    try {
+      const result = await fetchAuthoritativeRoute(
+        livePosition,
+        destination!,
+        tomtomApiKey,
+        controller.signal
+      );
 
-          if (summary && Array.isArray(points) && points.length > 0) {
-            const latLngs: [number, number][] = points.map((p: any) => [p.latitude, p.longitude]);
-            const distKm = Number(summary.lengthInMeters || 0) / 1000;
-            const durMin = Math.max(1, Math.round(Number(summary.travelTimeInSeconds || 0) / 60));
-            const delayMin = Math.round(Number(summary.trafficDelayInSeconds || 0) / 60);
+      // Prevent race conditions: ensure this is still the active request
+      if (controller.signal.aborted) return;
 
-            routeData = {
-              distanceKm: distKm,
-              durationMin: durMin,
-              isTrafficAware: true,
-              isRoadRoute: true,
-              trafficDelayMin: delayMin,
-              latLngs,
-            };
-          }
-        }
-      } catch {
-        // Fall through to Tier 2
+      setRouteResult(result);
+      onRouteInfo?.({
+        distanceKm: result.distanceKm,
+        durationMin: result.durationMin,
+        isTrafficAware: result.trafficAvailable,
+        isRoadRoute: result.isRoadRoute,
+        trafficDelayMin: result.trafficDelayMin,
+        isFailed: result.isFailed,
+        provider: result.provider,
+        calculatedAt: result.calculatedAt,
+      });
+
+      const L = (window as any).L;
+      if (L && map && result.geometry?.length) {
+        routeRef.current?.remove();
+        const strokeColor = isLightMode() ? "#d70015" : "#ff3b30";
+        routeRef.current = L.polyline(result.geometry, {
+          color: strokeColor,
+          weight: 5,
+          opacity: 0.95,
+          lineCap: "round",
+          lineJoin: "round",
+        }).addTo(map);
+
+        const bounds = L.latLngBounds(result.geometry);
+        map.fitBounds(bounds, { padding: [55, 55], maxZoom: 16 });
       }
+    } catch {
+      // Aborted or failed
+    } finally {
+      setIsRoutingLoading(false);
     }
+  }, [destination, livePosition, tomtomApiKey, onRouteInfo]);
 
-    // TIER 2: OSRM Driving Road Routing Fallback
-    if (!routeData) {
-      try {
-        const osrmUrl = `${OSRM_URL}/${livePosition.lng},${livePosition.lat};${destination!.lng},${destination!.lat}?overview=full&geometries=geojson`;
-        const resp = await fetch(osrmUrl, { signal: controller.signal });
-        if (resp.ok) {
-          const json = await resp.json();
-          const route = json?.routes?.[0];
-          if (route?.geometry?.coordinates?.length) {
-            const latLngs: [number, number][] = route.geometry.coordinates.map((c: [number, number]) => [c[1], c[0]]);
-            const distKm = Number(route.distance || 0) / 1000;
-            const durMin = Math.max(1, Math.round(Number(route.duration || 0) / 60));
-
-            routeData = {
-              distanceKm: distKm,
-              durationMin: durMin,
-              isTrafficAware: false, // OSRM demo does not supply live traffic
-              isRoadRoute: true,
-              trafficDelayMin: 0,
-              latLngs,
-            };
-          }
-        }
-      } catch {
-        // Fall through to Tier 3
-      }
-    }
-
-    clearTimeout(timeoutId);
-    setIsRoutingLoading(false);
-
-    const L = (window as any).L;
-    if (routeData && L) {
-      // Draw ACTUAL road route polyline
-      routeRef.current?.remove();
-      const strokeColor = isLightMode() ? "#d70015" : "#ff3b30";
-      routeRef.current = L.polyline(routeData.latLngs, {
-        color: strokeColor,
-        weight: 5,
-        opacity: 0.95,
-        lineCap: "round",
-        lineJoin: "round",
-      }).addTo(map);
-
-      map.fitBounds(routeRef.current.getBounds(), { padding: [44, 44], maxZoom: 16 });
-
-      const state = {
-        distanceKm: routeData.distanceKm,
-        durationMin: routeData.durationMin,
-        isTrafficAware: routeData.isTrafficAware,
-        isRoadRoute: true,
-        isFailed: false,
-        trafficDelayMin: routeData.trafficDelayMin,
-      };
-      setRouteState(state);
-      onRouteInfo?.(state);
-    } else {
-      // TIER 3: Routing Unavailable Fallback
-      routeRef.current?.remove();
-      routeRef.current = null;
-
-      const straightLineKm = haversineDistanceKm(livePosition, destination!);
-      const state = {
-        distanceKm: straightLineKm,
-        durationMin: 0,
-        isTrafficAware: false,
-        isRoadRoute: false,
-        isFailed: true,
-        trafficDelayMin: 0,
-      };
-      setRouteState(state);
-      onRouteInfo?.(state);
-      setMessage("Route service unavailable · Showing straight-line distance fallback");
-    }
-  }, [destination, livePosition, hasValidTomTomKey, tomtomApiKey, onRouteInfo]);
-
-  // Trigger route computation when origin, destination, or retry changes
+  // Trigger route computation when coordinates change
   useEffect(() => {
     if (!validPoint(destination) || !validPoint(livePosition)) return;
     const key = `${livePosition.lat.toFixed(4)},${livePosition.lng.toFixed(4)}-${destination!.lat.toFixed(4)},${destination!.lng.toFixed(4)}-${routeRetryCount}`;
     const now = Date.now();
-    if (key === lastRouteRef.current && now - lastRouteAtRef.current < 8000) return;
+    if (key === lastRouteRef.current && now - lastRouteAtRef.current < 6000) return;
     lastRouteRef.current = key;
     lastRouteAtRef.current = now;
 
     calculateRoute();
   }, [livePosition.lat, livePosition.lng, destination?.lat, destination?.lng, routeRetryCount, calculateRoute]);
 
-  // TomTom Live Traffic Flow Overlay
-  useEffect(() => {
-    const map = leafletMapRef.current;
-    if (!map) return;
-    const L = (window as any).L;
-    if (!L) return;
-
-    if (showTraffic && hasValidTomTomKey) {
-      if (!trafficLayerRef.current) {
-        trafficLayerRef.current = L.tileLayer(
-          `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${tomtomApiKey}`,
-          {
-            maxZoom: 19,
-            opacity: 0.8,
-            attribution: '&copy; <a href="https://www.tomtom.com" target="_blank" rel="noopener noreferrer">TomTom</a>',
-          }
-        );
-      }
-      if (!map.hasLayer(trafficLayerRef.current)) {
-        trafficLayerRef.current.addTo(map);
-      }
-    } else {
-      if (trafficLayerRef.current && map.hasLayer(trafficLayerRef.current)) {
-        map.removeLayer(trafficLayerRef.current);
-      }
-    }
-  }, [showTraffic, hasValidTomTomKey, tomtomApiKey]);
-
-  const toggleTraffic = () => {
-    if (!hasValidTomTomKey) {
-      setMessage("Add your TomTom API key to enable live traffic overlay");
-      return;
-    }
-    const next = !showTraffic;
-    setShowTraffic(next);
-    setMessage(next ? "Live traffic overlay enabled (TomTom)" : "Live traffic overlay disabled");
-  };
-
   const refreshGPS = () => {
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
-    setMessage("Refreshing device GPS fix…");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const reportedAccuracy = Number(pos.coords.accuracy);
@@ -544,44 +385,74 @@ export default function LiveMap({
         onLivePosition?.(next);
         originMarkerRef.current?.setLatLng([next.lat, next.lng]);
         if (!allowManualPick) leafletMapRef.current?.panTo([next.lat, next.lng], { animate: true, duration: 0.6 });
-        const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-        setMessage(`GPS Lock · ±${Math.round(reportedAccuracy)} m · ${timeStr}${reportedAccuracy > 100 ? " (approx)" : ""}`);
       },
-      () => setMessage("Precise GPS unavailable · keeping current position"),
+      () => {},
       { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 }
     );
   };
 
   return (
-    <div className="live-map-shell relative w-full h-full">
-      <div ref={mapRef} className="live-map w-full h-full" aria-label="Live emergency route map" />
+    <div className="live-map-shell flex flex-col w-full h-full relative overflow-hidden rounded-2xl border border-white/10 shadow-xl bg-[var(--surface)]">
+      {/* MAP VIEWPORT */}
+      <div className="relative flex-1 w-full min-h-[300px] sm:min-h-[380px]">
+        <div ref={mapRef} className="live-map w-full h-full" aria-label="Live emergency route map" />
 
-      {/* Top Status & GPS HUD */}
-      <div className={`live-map-status ${status === "error" ? "error" : ""}`}>
-        <span className="live-map-status-dot" />
-        <span className="live-map-status-text">{message}</span>
-        {trackDeviceGps && (
-          <button
-            type="button"
-            onClick={refreshGPS}
-            className="live-map-refresh-btn"
-            title="Refresh device GPS"
-            aria-label="Refresh device GPS"
-          >
-            ↻
-          </button>
+        {/* COMPACT ADAPTIVE TOP HUD: GPS STATUS (Left) & TRAFFIC STATUS (Right) */}
+        <div className="absolute top-3 left-3 right-3 z-[250] flex items-center justify-between pointer-events-none gap-2">
+          {/* Top-Left GPS Badge */}
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/15 text-white shadow-lg text-[11px] font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+            <span className="font-semibold tracking-wide">
+              {currentAccuracy != null
+                ? `GPS CONFIRMED · ±${Math.round(currentAccuracy)} m`
+                : (allowManualPick ? "MANUAL PIN" : "LOCATION APPROXIMATE")}
+            </span>
+            {trackDeviceGps && (
+              <button
+                type="button"
+                onClick={refreshGPS}
+                className="ml-1 text-white/60 hover:text-white transition-colors cursor-pointer"
+                title="Refresh GPS"
+                aria-label="Refresh GPS"
+              >
+                ↻
+              </button>
+            )}
+          </div>
+
+          {/* Top-Right Traffic Badge (Honest status only) */}
+          {destination && routeResult && (
+            <div className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/15 text-white shadow-lg text-[10px] font-mono">
+              {routeResult.trafficAvailable ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 animate-pulse" />
+                  <span className="font-bold text-amber-300">
+                    TRAFFIC ACTIVE {routeResult.trafficDelayMin > 0 ? `(+${routeResult.trafficDelayMin}m)` : "(Normal Flow)"}
+                  </span>
+                </>
+              ) : (
+                <span className="text-neutral-400 font-medium">TRAFFIC DATA UNAVAILABLE</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {status === "error" && (
+          <div className="absolute inset-0 z-[300] bg-black/80 flex items-center justify-center p-4 text-center text-xs text-red-300 font-mono">
+            Map initialization failed. Check network connection and location permissions.
+          </div>
         )}
       </div>
 
-      {/* Route & Traffic Overlay Metrics Bar (if destination present) */}
+      {/* STRUCTURED MAP FOOTER (Single source of truth distance & ETA) */}
       {destination && (
-        <div className="absolute bottom-3 left-3 z-[250] max-w-[calc(100%-70px)] sm:max-w-md">
-          {routeState?.isFailed ? (
-            <div className="p-2.5 sm:p-3 rounded-xl bg-red-950/90 border border-red-500/40 text-white backdrop-blur-md shadow-xl flex items-center justify-between gap-3 text-xs font-mono">
+        <div className="live-map-footer border-t border-white/10 bg-black/70 dark:bg-black/80 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-3 text-xs font-mono shrink-0">
+          {routeResult?.isFailed ? (
+            <div className="flex items-center justify-between w-full gap-3">
               <div>
-                <span className="text-red-400 font-bold block">ROUTE UNAVAILABLE</span>
-                <span className="text-[11px] text-neutral-300">
-                  Approx. straight-line distance: {routeState.distanceKm.toFixed(1)} km
+                <span className="text-red-400 font-bold block uppercase tracking-wider text-[11px]">ROUTE UNAVAILABLE</span>
+                <span className="text-neutral-300 text-[11px]">
+                  Approx. straight-line distance: <strong>{routeResult.distanceKm.toFixed(1)} km</strong>
                 </span>
               </div>
               <button
@@ -593,53 +464,31 @@ export default function LiveMap({
                 {isRoutingLoading ? "Retrying…" : "Retry Route"}
               </button>
             </div>
-          ) : routeState ? (
-            <div className="p-2.5 sm:p-3 rounded-xl bg-[#15181c]/90 border border-white/15 text-white backdrop-blur-md shadow-xl flex items-center gap-3 text-xs font-mono">
-              <div className="border-r border-white/15 pr-3">
-                <span className="text-[10px] text-[var(--muted)] uppercase block">Road Distance</span>
-                <strong className="text-sm text-white font-bold">{routeState.distanceKm.toFixed(1)} km</strong>
-              </div>
+          ) : routeResult ? (
+            <>
               <div>
-                <span className="text-[10px] text-[var(--muted)] uppercase block">
-                  {routeState.isTrafficAware ? "Traffic-aware ETA" : "Road ETA"}
+                <span className="text-[10px] uppercase text-neutral-400 tracking-wider block">
+                  {routeResult.isRoadRoute ? "Road Distance" : "Approx. Straight-Line"}
                 </span>
-                <div className="flex items-center gap-1.5">
-                  <strong className="text-sm text-emerald-400 font-bold">{routeState.durationMin} MIN</strong>
-                  <span
-                    className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
-                      routeState.isTrafficAware ? "bg-emerald-500/20 text-emerald-300" : "bg-neutral-700 text-neutral-300"
-                    }`}
-                  >
-                    {routeState.isTrafficAware
-                      ? routeState.trafficDelayMin > 0
-                        ? `+${routeState.trafficDelayMin}m traffic`
-                        : "Normal Flow"
-                      : "Traffic unavailable"}
-                  </span>
+                <strong className="text-sm sm:text-base text-white font-bold">
+                  {routeResult.distanceKm.toFixed(1)} km
+                </strong>
+              </div>
+
+              <div className="text-right">
+                <span className="text-[10px] uppercase text-neutral-400 tracking-wider block">
+                  {routeResult.trafficAvailable ? "Traffic-Aware ETA" : "Driving ETA"}
+                </span>
+                <div className="flex items-center justify-end gap-1.5">
+                  <strong className="text-sm sm:text-base text-emerald-400 font-bold">
+                    {routeResult.durationMin} MIN
+                  </strong>
                 </div>
               </div>
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      {/* Traffic Overlay Toggle Button */}
-      {hasValidTomTomKey && (
-        <button
-          type="button"
-          onClick={toggleTraffic}
-          className={`live-map-traffic-btn ${showTraffic ? "active" : ""}`}
-          title={showTraffic ? "Hide TomTom live traffic flow" : "Show TomTom live traffic flow"}
-          aria-label="Toggle live traffic layer"
-        >
-          <span className={`live-map-traffic-dot ${showTraffic ? "active" : ""}`} />
-          <span>Traffic {showTraffic ? "ON" : "OFF"}</span>
-        </button>
-      )}
-
-      {status === "error" && (
-        <div className="live-map-error">
-          Check network connection and location permissions, then retry.
+            </>
+          ) : (
+            <div className="text-neutral-400 text-xs italic">Calculating authoritative road route…</div>
+          )}
         </div>
       )}
     </div>

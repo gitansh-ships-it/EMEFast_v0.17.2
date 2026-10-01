@@ -56,7 +56,7 @@ export default function ThemeToggle() {
       aria-checked={lightActive}
       aria-label={lightActive ? "Switch to dark mode" : "Switch to light mode"}
       title={lightActive ? "Switch to dark mode" : "Switch to light mode"}
-      className={`liquid-glass-toggle ${lightActive ? "is-light" : "is-dark"}`}
+      className={`theme-lens-toggle ${lightActive ? "is-light" : "is-dark"}`}
       onClick={toggle}
       suppressHydrationWarning
     >
@@ -65,7 +65,7 @@ export default function ThemeToggle() {
         {lightActive ? "Light" : "Dark"}
       </span>
 
-      {/* Sliding Liquid Glass Lens Knob */}
+      {/* Sliding Lens Knob */}
       <span className="toggle-lens-knob" aria-hidden="true">
         <span className="lens-refraction-sheen" />
         {lightActive ? (

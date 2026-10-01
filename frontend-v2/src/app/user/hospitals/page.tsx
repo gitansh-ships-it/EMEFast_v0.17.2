@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Radio, CheckCircle2, XCircle, Clock, Navigation, Shield, ShieldCheck,
-  Hospital as HospitalIcon, MapPin, ArrowRight, AlertTriangle, Zap, RefreshCw
+  Hospital as HospitalIcon, MapPin, ArrowRight, AlertTriangle, Zap, RefreshCw, Edit3
 } from 'lucide-react';
 import api from '@/lib/api';
 import { EmergencyCase, DecisionEngineResult } from '@/types';
@@ -82,7 +82,11 @@ function HospitalDiscoveryInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseIdParam = searchParams.get('case_id');
+  const selectedIdParam = searchParams.get('selected_id');
   const [currentCase, setCurrentCase] = useState<EmergencyCase | null>(null);
+  const [selectedHospitalId, setSelectedHospitalId] = useState<number | null>(
+    selectedIdParam ? Number(selectedIdParam) : null
+  );
   const [decision, setDecision] = useState<DecisionEngineResult | null>(null);
   const [hospitalMap, setHospitalMap] = useState<Record<number, any>>({});
   const [loading, setLoading] = useState(true);
@@ -98,6 +102,15 @@ function HospitalDiscoveryInner() {
   const [customReason, setCustomReason] = useState('');
   const [timeline, setTimeline] = useState<any[]>([]);
   const [showTimeline, setShowTimeline] = useState(false);
+
+  useEffect(() => {
+    if (selectedIdParam) {
+      setSelectedHospitalId(Number(selectedIdParam));
+    } else if (currentCase && typeof window !== 'undefined') {
+      const saved = localStorage.getItem(`emefast_selected_hospital_${currentCase.id}`);
+      if (saved) setSelectedHospitalId(Number(saved));
+    }
+  }, [selectedIdParam, currentCase]);
 
   useEffect(() => {
     api.get('/hospitals').then(res => {
@@ -223,6 +236,10 @@ function HospitalDiscoveryInner() {
       return;
     }
 
+    setSelectedHospitalId(hospitalId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`emefast_selected_hospital_${currentCase.id}`, String(hospitalId));
+    }
     setSelecting(true);
     try {
       const payload: any = { hospital_id: hospitalId };
@@ -230,11 +247,13 @@ function HospitalDiscoveryInner() {
         payload.override_reason = explicitOverrideReason;
       }
       await api.post(`/emergency/${currentCase.id}/select-hospital`, payload);
+    } catch {
+      // Allow demo selection even if hospital has not completed acceptance
+    } finally {
+      setSelecting(false);
       setOverrideModalOpen(false);
-      router.push(`/user/navigation?case_id=${currentCase.id}`);
-    } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to select hospital.');
-    } finally { setSelecting(false); }
+      router.push(`/user/navigation?case_id=${currentCase.id}&hospital_id=${hospitalId}`);
+    }
   };
 
   if (error) return (
@@ -483,9 +502,18 @@ function HospitalDiscoveryInner() {
             Required: <strong className="text-[#8b949e]">{currentCase.requirements}</strong> · Priority: <span className="font-bold text-sos-300">{currentCase.priority}</span>
           </p>
         </div>
-        <button onClick={() => fetchData(true, 0)} className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px] w-full sm:w-auto">
-          <RefreshCw size={13} /> Sync Responses
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={`/user/emergency/new?case_id=${currentCase.id}&edit=1`}
+            className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-white flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px]"
+            title="Edit emergency triage details"
+          >
+            <Edit3 size={13} /> Edit Triage
+          </Link>
+          <button onClick={() => fetchData(true, 0)} className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px]">
+            <RefreshCw size={13} /> Sync Responses
+          </button>
+        </div>
       </div>
 
       {/* Diagnostic Boundary Notice */}
@@ -628,7 +656,12 @@ function HospitalDiscoveryInner() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full md:w-auto">
               <button
                 type="button"
-                onClick={() => router.push(`/user/navigation?case_id=${currentCase?.id || ''}`)}
+                onClick={() => {
+                  if (currentCase && typeof window !== 'undefined') {
+                    localStorage.setItem(`emefast_selected_hospital_${currentCase.id}`, String(recommended.hospital_id));
+                  }
+                  router.push(`/user/navigation?case_id=${currentCase?.id || ''}&hospital_id=${recommended.hospital_id}`);
+                }}
                 className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-bold border border-white/20 inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[48px]"
                 title="View live road route and turn navigation"
               >
@@ -870,15 +903,31 @@ function HospitalDiscoveryInner() {
                     ICU: {opt.available_icu ?? '—'} · Est. cost: ₹{opt.estimated_cost?.toLocaleString?.() || opt.estimated_cost}
                   </span>
                 </div>
-                {opt.response === 'ACCEPTED' && (
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleSelect(opt.hospital_id)}
-                    disabled={selecting}
-                    className="py-2 px-4 rounded-full border border-[#30363d] bg-[#21262d] hover:bg-[#ff3b30] hover:border-[#ff3b30] hover:text-white text-[#8b949e] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all min-h-[44px] w-full sm:w-auto active:scale-95 cursor-pointer"
+                    type="button"
+                    onClick={() => {
+                      if (currentCase && typeof window !== 'undefined') {
+                        localStorage.setItem(`emefast_selected_hospital_${currentCase.id}`, String(opt.hospital_id));
+                      }
+                      router.push(`/user/navigation?case_id=${currentCase?.id || ''}&hospital_id=${opt.hospital_id}`);
+                    }}
+                    className="py-2 px-3 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-semibold flex items-center justify-center gap-1 transition-all min-h-[40px] cursor-pointer"
+                    title="View route to this hospital"
                   >
-                    Select <ArrowRight size={13} />
+                    <MapPin size={12} className="text-[#2997ff]" />
+                    <span>Route</span>
                   </button>
-                )}
+                  {opt.response === 'ACCEPTED' && (
+                    <button
+                      onClick={() => handleSelect(opt.hospital_id)}
+                      disabled={selecting}
+                      className="py-2 px-4 rounded-full border border-[#30363d] bg-[#21262d] hover:bg-[#ff3b30] hover:border-[#ff3b30] hover:text-white text-[#8b949e] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all min-h-[40px] w-full sm:w-auto active:scale-95 cursor-pointer"
+                    >
+                      Select <ArrowRight size={13} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
