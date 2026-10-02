@@ -54,7 +54,34 @@ export async function fetchAuthoritativeRoute(
     return cached.result;
   }
 
-  // TIER 1: Secure Backend Proxy Route (TomTom traffic-aware, API key hidden on server)
+  // TIER 1: Secure Server Proxy Route (TomTom traffic-aware, API key hidden on server)
+  try {
+    const localRes = await fetch(
+      `/api/routing/route?origin_lat=${origin.lat}&origin_lng=${origin.lng}&dest_lat=${destination.lat}&dest_lng=${destination.lng}`,
+      { signal }
+    );
+    if (localRes.ok) {
+      const d = await localRes.json();
+      if (d.geometry?.length) {
+        const result: RouteResult = {
+          provider: d.provider || "tomtom",
+          distanceKm: Number(d.distanceKm || 0),
+          durationMin: Number(d.durationMin || 1),
+          trafficDelayMin: Number(d.trafficDelayMin || 0),
+          trafficAvailable: Boolean(d.trafficAvailable),
+          trafficStatus: d.trafficStatus || (d.trafficDelayMin > 0 ? "MODERATE" : "NORMAL"),
+          isRoadRoute: Boolean(d.isRoadRoute),
+          isFailed: Boolean(d.isFailed),
+          geometry: d.geometry,
+          calculatedAt: Date.now(),
+        };
+        routeCache.set(cacheKey, { result, timestamp: Date.now() });
+        return result;
+      }
+    }
+  } catch {}
+
+  // Fallback to FastAPI backend proxy if available
   try {
     const res = await api.get("/routing/route", {
       params: {
