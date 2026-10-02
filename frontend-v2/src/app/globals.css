@@ -299,33 +299,38 @@ html.theme-light .toast-floating {
 .live-map { width: 100%; height: 100%; background: #15181c; }
 .live-map-shell .leaflet-container { font-family: inherit; background: #15181c; }
 
-/* Dark mode tile filter for clean night styling without third-party watermarks */
-html:not(.theme-light) .live-map-shell .leaflet-tile-pane {
-  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(110%);
-}
-html.theme-light .live-map-shell .leaflet-tile-pane {
-  filter: none;
+/* Professional emergency operational map background */
+.live-map-shell .leaflet-tile-pane {
+  filter: none !important;
 }
 
 .live-map-shell .leaflet-control-zoom a { background: rgba(20,22,25,.9); color: #fff; border-color: rgba(255,255,255,.12); }
 .live-map-shell .leaflet-control-attribution { background: rgba(8,9,10,.72); color: #8b949e; font-size: 9px; }
 .live-map-shell .leaflet-control-attribution a { color: #b9c2cc; }
 .emefast-map-marker { background: transparent; border: 0; }
-.emefast-map-dot { position: absolute; left: 9px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: #ff3b30; border: 2px solid #fff; box-shadow: 0 0 0 3px rgba(255,59,48,.22); }
-.emefast-map-pulse { position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: rgba(255,59,48,.2); animation: emefast-map-pulse 1.8s ease-out infinite; }
-.emefast-map-hospital { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: #111315; color: #ff3b30; border: 2px solid #fff; box-shadow: 0 5px 18px rgba(0,0,0,.35); font-size: 20px; font-weight: 800; }
-.live-map-status { position: absolute; top: 14px; left: 14px; z-index: 500; display: flex; align-items: center; gap: 8px; padding: 8px 11px; border-radius: 999px; background: #141418 !important; border: 1px solid rgba(255,255,255,.18) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; color: #f8fafc !important; font-size: 11px; font-weight: 600; box-shadow: 0 8px 25px rgba(0,0,0,.35); }
-.live-map-status.error { color: #fecaca !important; }
-.live-map-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #30d158; box-shadow: 0 0 0 3px rgba(48,209,88,.2); }
-.live-map-status.error .live-map-status-dot { background: #d7261e; box-shadow: 0 0 0 3px rgba(215,38,30,.2); }
-.live-map-error { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 500; padding: 10px 12px; border-radius: 12px; background: #240a0a !important; border: 1px solid rgba(239,68,68,.4) !important; color: #fecaca !important; font-size: 11px; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-.live-map-traffic-btn { position: absolute; top: 14px; right: 14px; z-index: 500; display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; background: #141418 !important; border: 1px solid rgba(255,255,255,.18) !important; color: #94a3b8 !important; font-size: 11px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,.35); transition: all 0.2s ease; user-select: none; }
-.live-map-traffic-btn:hover { background: #1e2025 !important; border-color: rgba(255,255,255,.3) !important; color: #f8fafc !important; }
-.live-map-traffic-btn.active { background: rgba(255,59,48,.16) !important; border-color: rgba(255,59,48,.45) !important; color: #ff6961 !important; }
-.live-map-traffic-dot { width: 7px; height: 7px; border-radius: 50%; background: #64748b; transition: all 0.2s ease; }
-.live-map-traffic-dot.active { background: #ff3b30; box-shadow: 0 0 0 3px rgba(255,59,48,.3); }
-@keyframes emefast-map-pulse { 0% { transform: scale(.55); opacity: .85; } 75%,100% { transform: scale(1.5); opacity: 0; } }
-@media (max-width: 640px) { .live-map-shell, .live-map { min-height: 340px; height: 340px; } .live-map-status { max-width: calc(100% - 28px); } .live-map-traffic-btn { top: 50px; right: 10px; font-size: 10px; padding: 5px 10px; } }
+.emefast-patient-ring { position: absolute; left: 2px; top: 2px; width: 24px; height: 24px; border-radius: 50%; background: rgba(56,189,248,0.25); animation: emefast-patient-pulse 2s ease-out infinite; }
+.emefast-patient-core { position: absolute; left: 8px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: #0284c7; border: 2.5px solid #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.45); }
+@keyframes emefast-patient-pulse { 0% { transform: scale(0.6); opacity: 0.9; } 70%, 100% { transform: scale(1.6); opacity: 0; } }
+
+.emefast-hosp-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px 10px 2px 10px;
+  background: #dc2626;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transform: rotate(45deg);
+}
+.emefast-hosp-symbol {
+  transform: rotate(-45deg);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+}
 
 /* ---------- EMEFast adaptive theme layer ---------- */
 html.theme-dark { color-scheme: dark; }

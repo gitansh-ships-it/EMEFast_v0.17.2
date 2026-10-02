@@ -11,6 +11,7 @@ export type RouteInfo = {
   isTrafficAware?: boolean;
   isRoadRoute?: boolean;
   trafficDelayMin?: number;
+  trafficStatus?: string;
   isFailed?: boolean;
   provider?: string;
   calculatedAt?: number;
@@ -31,10 +32,21 @@ type LiveMapProps = {
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 const LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
-// Map tiles: Standard OSM tiles with CSS dark inversion layer to avoid third-party watermarks
-const OSM_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const OSM_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>';
+// Clean CartoDB Basemap styles (subtle roads, muted labels, no saturated green or CSS invert)
+const CARTO_DARK = "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const CARTO_LIGHT = "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+const MAP_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>';
+
+function getTrafficTileUrl(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://" + host + ":8000/api/routing/traffic-tile/{z}/{x}/{y}.png";
+    }
+  }
+  return "https://emefast-v17.onrender.com/api/routing/traffic-tile/{z}/{x}/{y}.png";
+}
 
 function validPoint(p?: Point | null): boolean {
   return !!p && Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180;
@@ -85,8 +97,10 @@ export default function LiveMap({
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
   const baseTileLayerRef = useRef<any>(null);
+  const trafficTileLayerRef = useRef<any>(null);
   const originMarkerRef = useRef<any>(null);
   const destinationMarkerRef = useRef<any>(null);
+  const routeUnderlineRef = useRef<any>(null);
   const routeRef = useRef<any>(null);
   const lastRouteRef = useRef<string>("");
   const lastRouteAtRef = useRef<number>(0);
@@ -101,9 +115,6 @@ export default function LiveMap({
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [isRoutingLoading, setIsRoutingLoading] = useState(false);
   const [routeRetryCount, setRouteRetryCount] = useState(0);
-
-  // TomTom Configuration
-  const tomtomApiKey = (process.env.NEXT_PUBLIC_TOMTOM_API_KEY || "").trim();
 
   // Synchronize incoming accuracy prop
   useEffect(() => {
@@ -121,7 +132,7 @@ export default function LiveMap({
     }
   }, [origin.lat, origin.lng]);
 
-  // 1. Initialize Leaflet Map and CARTO Tile Layer
+  // 1. Initialize Leaflet Map, Clean Basemap Layer, and Traffic Layer
   useEffect(() => {
     if (!validPoint(origin)) {
       setStatus("error");
@@ -174,11 +185,25 @@ export default function LiveMap({
         };
         locateControl.addTo(localMap);
 
-        const tileLayer = L.tileLayer(OSM_TILE_URL, {
+        // 1. BASE TILE LAYER: Genuine CartoDB dark or light basemap (No CSS invert filter)
+        const light = isLightMode();
+        const baseTileUrl = light ? CARTO_LIGHT : CARTO_DARK;
+        const tileLayer = L.tileLayer(baseTileUrl, {
           maxZoom: 19,
-          attribution: OSM_ATTRIBUTION,
+          attribution: MAP_ATTRIBUTION,
+          subdomains: "abcd",
         }).addTo(localMap);
         baseTileLayerRef.current = tileLayer;
+
+        // 2. LIVE TRAFFIC LAYER: Server-side secure TomTom flow tiles
+        const trafficTileUrl = getTrafficTileUrl();
+        const trafficLayer = L.tileLayer(trafficTileUrl, {
+          maxZoom: 19,
+          opacity: 0.85,
+          zIndex: 10,
+        }).addTo(localMap);
+        trafficTileLayerRef.current = trafficLayer;
+
         leafletMapRef.current = localMap;
 
         // Force resize calculation
@@ -190,45 +215,47 @@ export default function LiveMap({
         resizeObserver?.observe(mapRef.current);
         (localMap as any).__emefastResizeObserver = resizeObserver;
 
-        // Markers
+        // 3. DISTINCT PROFESSIONAL MARKERS
+        // Patient Marker: Clean blue radar pulse with high-contrast white ring
         const currentIcon = L.divIcon({
           className: "emefast-map-marker patient-marker",
-          html: '<span class="emefast-map-pulse"></span><span class="emefast-map-dot"></span>',
+          html: '<span class="emefast-patient-ring"></span><span class="emefast-patient-core"></span>',
           iconSize: [28, 28],
           iconAnchor: [14, 14],
         });
 
+        // Hospital Destination Marker: Professional medical cross badge with contrast shadow
         const hospitalIcon = L.divIcon({
           className: "emefast-map-marker hospital-marker",
-          html: '<span class="emefast-map-hospital">🏥</span>',
-          iconSize: [32, 32],
-          iconAnchor: [16, 16],
+          html: '<div class="emefast-hosp-pin"><span class="emefast-hosp-symbol">✚</span></div>',
+          iconSize: [36, 42],
+          iconAnchor: [18, 40],
         });
 
-        const patientMarker = L.marker([origin.lat, origin.lng], { icon: currentIcon }).addTo(localMap);
+        const patientMarker = L.marker([origin.lat, origin.lng], { icon: currentIcon, zIndexOffset: 1000 }).addTo(localMap);
         originMarkerRef.current = patientMarker;
 
         patientMarker.bindPopup(`
-          <div style="font-family:monospace;padding:2px 0;">
-            <div style="font-size:10px;font-weight:900;color:#ff3b30;letter-spacing:0.5px;">PATIENT LOCATION</div>
-            <div style="font-size:12px;font-weight:bold;margin-top:2px;">
+          <div style="font-family:monospace;padding:3px 1px;font-size:11px;color:#f1f5f9;">
+            <div style="font-weight:800;color:#38bdf8;letter-spacing:0.5px;font-size:10px;">PATIENT INCIDENT ORIGIN</div>
+            <div style="font-weight:bold;margin-top:2px;">
               ${currentAccuracy != null ? `GPS CONFIRMED · ±${Math.round(currentAccuracy)} m` : (allowManualPick ? "MANUAL PIN LOCATION" : "LOCATION APPROXIMATE")}
             </div>
-            <div style="font-size:10px;color:#888;margin-top:2px;">
+            <div style="font-size:10px;color:#94a3b8;margin-top:2px;">
               ${origin.lat.toFixed(5)}°, ${origin.lng.toFixed(5)}°
             </div>
           </div>
         `);
 
         if (destination && validPoint(destination)) {
-          const hospMarker = L.marker([destination.lat, destination.lng], { icon: hospitalIcon }).addTo(localMap);
+          const hospMarker = L.marker([destination.lat, destination.lng], { icon: hospitalIcon, zIndexOffset: 1100 }).addTo(localMap);
           destinationMarkerRef.current = hospMarker;
 
           hospMarker.bindPopup(`
-            <div style="font-family:monospace;padding:2px 0;">
-              <div style="font-size:10px;font-weight:900;color:#30d158;letter-spacing:0.5px;">EMERGENCY DESTINATION</div>
-              <div style="font-size:12px;font-weight:bold;margin-top:2px;">${destinationLabel}</div>
-              <div style="font-size:10px;color:#888;margin-top:2px;">
+            <div style="font-family:monospace;padding:3px 1px;font-size:11px;color:#f1f5f9;">
+              <div style="font-weight:800;color:#ef4444;letter-spacing:0.5px;font-size:10px;">EMERGENCY DESTINATION FACILITY</div>
+              <div style="font-weight:bold;margin-top:2px;">${destinationLabel}</div>
+              <div style="font-size:10px;color:#94a3b8;margin-top:2px;">
                 ${destination.lat.toFixed(5)}°, ${destination.lng.toFixed(5)}°
               </div>
             </div>
@@ -257,8 +284,10 @@ export default function LiveMap({
       }
       leafletMapRef.current = null;
       baseTileLayerRef.current = null;
+      trafficTileLayerRef.current = null;
       originMarkerRef.current = null;
       destinationMarkerRef.current = null;
+      routeUnderlineRef.current = null;
       routeRef.current = null;
     };
   }, [origin.lat, origin.lng, destination?.lat, destination?.lng, destinationLabel, allowManualPick]);
@@ -266,9 +295,11 @@ export default function LiveMap({
   // 2. Dynamic Dark/Light Theme Switching Without Map Recreation
   useEffect(() => {
     const updateTileTheme = (light: boolean) => {
-      // Re-style route line for theme contrast
+      if (baseTileLayerRef.current) {
+        baseTileLayerRef.current.setUrl(light ? CARTO_LIGHT : CARTO_DARK);
+      }
       if (routeRef.current) {
-        const strokeColor = light ? "#d70015" : "#ff3b30";
+        const strokeColor = light ? "#dc2626" : "#ef4444";
         routeRef.current.setStyle({ color: strokeColor });
       }
     };
@@ -311,7 +342,6 @@ export default function LiveMap({
       const result = await fetchAuthoritativeRoute(
         livePosition,
         destination!,
-        tomtomApiKey,
         controller.signal
       );
 
@@ -325,6 +355,7 @@ export default function LiveMap({
         isTrafficAware: result.trafficAvailable,
         isRoadRoute: result.isRoadRoute,
         trafficDelayMin: result.trafficDelayMin,
+        trafficStatus: result.trafficStatus,
         isFailed: result.isFailed,
         provider: result.provider,
         calculatedAt: result.calculatedAt,
@@ -333,16 +364,33 @@ export default function LiveMap({
       const L = (window as any).L;
       const activeMap = leafletMapRef.current;
       if (L && activeMap && result.geometry?.length) {
+        // Clear previous lines
+        if (routeUnderlineRef.current) {
+          try { routeUnderlineRef.current.remove(); } catch {}
+        }
         if (routeRef.current) {
           try { routeRef.current.remove(); } catch {}
         }
-        const strokeColor = isLightMode() ? "#d70015" : "#ff3b30";
+
+        // Layer 1: Subtle dark outline underneath for contrast against traffic and map tiles
+        routeUnderlineRef.current = L.polyline(result.geometry, {
+          color: "#09090b",
+          weight: 7,
+          opacity: 0.9,
+          lineCap: "round",
+          lineJoin: "round",
+          zIndexOffset: 500,
+        }).addTo(activeMap);
+
+        // Layer 2: Clean, professional emergency red (5px width, rounded joins, zero neon glow)
+        const strokeColor = isLightMode() ? "#dc2626" : "#ef4444";
         routeRef.current = L.polyline(result.geometry, {
           color: strokeColor,
           weight: 5,
-          opacity: 0.95,
+          opacity: 1.0,
           lineCap: "round",
           lineJoin: "round",
+          zIndexOffset: 600,
         }).addTo(activeMap);
 
         const bounds = L.latLngBounds(result.geometry);
@@ -353,7 +401,7 @@ export default function LiveMap({
     } finally {
       setIsRoutingLoading(false);
     }
-  }, [destination, livePosition, tomtomApiKey, onRouteInfo]);
+  }, [destination, livePosition, onRouteInfo]);
 
   // Trigger route computation when coordinates change or when map finishes initializing
   useEffect(() => {
@@ -387,26 +435,26 @@ export default function LiveMap({
   };
 
   return (
-    <div className="live-map-shell flex flex-col w-full h-full relative overflow-hidden rounded-2xl border border-white/10 shadow-xl bg-[var(--surface)]">
+    <div className="live-map-shell flex flex-col w-full h-full relative overflow-hidden rounded-2xl border border-white/10 shadow-xl bg-[#090a0f]">
       {/* MAP VIEWPORT */}
       <div className="relative flex-1 w-full min-h-[300px] sm:min-h-[380px]">
         <div ref={mapRef} className="live-map w-full h-full" aria-label="Live emergency route map" />
 
-        {/* COMPACT ADAPTIVE TOP HUD: GPS STATUS (Left) & TRAFFIC STATUS (Right) */}
-        <div className="absolute top-3 left-3 right-3 z-[250] flex items-center justify-between pointer-events-none gap-2">
-          {/* Top-Left GPS Badge */}
-          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/15 text-white shadow-lg text-[11px] font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+        {/* COMPACT TOP HUD: LOCATION (Left) & TRAFFIC STATUS (Right) */}
+        <div className="absolute top-2.5 left-2.5 right-2.5 z-[250] flex items-center justify-between pointer-events-none gap-2">
+          {/* Top-Left GPS Badge: Compact, subtle pill */}
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#12131a]/85 backdrop-blur-md border border-white/15 text-white shadow-md text-[10px] font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
             <span className="font-semibold tracking-wide">
               {currentAccuracy != null
-                ? `GPS CONFIRMED · ±${Math.round(currentAccuracy)} m`
+                ? `GPS CONFIRMED · ±${Math.round(currentAccuracy)}m`
                 : (allowManualPick ? "MANUAL PIN" : "LOCATION APPROXIMATE")}
             </span>
             {trackDeviceGps && (
               <button
                 type="button"
                 onClick={refreshGPS}
-                className="ml-1 text-white/60 hover:text-white transition-colors cursor-pointer"
+                className="ml-0.5 text-white/60 hover:text-white transition-colors cursor-pointer"
                 title="Refresh GPS"
                 aria-label="Refresh GPS"
               >
@@ -415,21 +463,46 @@ export default function LiveMap({
             )}
           </div>
 
-          {/* Top-Right Traffic Badge (Honest status only) */}
-          {destination && routeResult && (
-            <div className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/15 text-white shadow-lg text-[10px] font-mono">
-              {routeResult.trafficAvailable ? (
-                <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 animate-pulse" />
-                  <span className="font-bold text-amber-300">
-                    TRAFFIC ACTIVE {routeResult.trafficDelayMin > 0 ? `(+${routeResult.trafficDelayMin}m)` : "(Normal Flow)"}
-                  </span>
-                </>
-              ) : (
-                <span className="text-neutral-400 font-medium">TRAFFIC DATA UNAVAILABLE</span>
-              )}
-            </div>
-          )}
+          {/* Top-Right Traffic Badge: Honest live traffic status */}
+          <div className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#12131a]/85 backdrop-blur-md border border-white/15 text-white shadow-md text-[10px] font-mono">
+            {routeResult?.trafficAvailable ? (
+              <>
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                  routeResult.trafficStatus === "HEAVY" ? "bg-red-500 animate-pulse" :
+                  routeResult.trafficStatus === "MODERATE" ? "bg-amber-400 animate-pulse" :
+                  "bg-emerald-400"
+                }`} />
+                <span className="font-bold">
+                  {routeResult.trafficStatus === "HEAVY" ? (
+                    <span className="text-red-400">LIVE TRAFFIC · HEAVY {routeResult.trafficDelayMin > 0 ? `(+${routeResult.trafficDelayMin}m)` : ""}</span>
+                  ) : routeResult.trafficStatus === "MODERATE" ? (
+                    <span className="text-amber-300">LIVE TRAFFIC · MODERATE {routeResult.trafficDelayMin > 0 ? `(+${routeResult.trafficDelayMin}m)` : ""}</span>
+                  ) : (
+                    <span className="text-emerald-400">TRAFFIC · NORMAL</span>
+                  )}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-neutral-500 shrink-0" />
+                <span className="text-neutral-400 font-medium">LIVE TRAFFIC UNAVAILABLE</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* COMPACT MAP TRAFFIC LEGEND (Bottom-Left) */}
+        <div className="absolute bottom-2.5 left-2.5 z-[250] pointer-events-auto bg-[#12131a]/90 backdrop-blur-md border border-white/10 rounded-lg px-2.5 py-1.5 text-[9px] font-mono text-neutral-300 shadow-md hidden sm:flex items-center gap-2.5">
+          <span className="font-bold uppercase tracking-wider text-neutral-400">Traffic:</span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#30d158]" /> Normal
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#ffd60a]" /> Moderate
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#ff453a]" /> Heavy
+          </span>
         </div>
 
         {status === "error" && (
@@ -441,7 +514,7 @@ export default function LiveMap({
 
       {/* STRUCTURED MAP FOOTER (Single source of truth distance & ETA) */}
       {destination && (
-        <div className="live-map-footer border-t border-white/10 bg-black/70 dark:bg-black/80 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-3 text-xs font-mono shrink-0">
+        <div className="live-map-footer border-t border-white/10 bg-[#0d0e14] px-4 py-3 flex items-center justify-between gap-3 text-xs font-mono shrink-0">
           {routeResult?.isFailed ? (
             <div className="flex items-center justify-between w-full gap-3">
               <div>
