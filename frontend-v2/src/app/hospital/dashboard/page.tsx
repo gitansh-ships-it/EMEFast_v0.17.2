@@ -760,19 +760,7 @@ export default function HospitalDashboard() {
             </div>
           ) : (
             [...incomingCases]
-              .sort((a, b) => {
-                const rank = (p?: string) => {
-                  switch (p?.toUpperCase()) {
-                    case "CRITICAL": return 4;
-                    case "UNASSESSED": return 3; // Safety triage: UNASSESSED never ranks below HIGH
-                    case "HIGH": return 3;
-                    case "MEDIUM": return 2;
-                    case "LOW": return 1;
-                    default: return 3;
-                  }
-                };
-                return rank(b.priority) - rank(a.priority) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-              })
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
               .map((c) => {
               const myResponse = c.responses?.find((r) => r.hospital_id === hospitalId);
               const isPending = myResponse?.response === "PENDING" || !myResponse;
@@ -1009,19 +997,7 @@ export default function HospitalDashboard() {
             </div>
           ) : (
             [...activeCases]
-              .sort((a, b) => {
-                const rank = (p?: string) => {
-                  switch (p?.toUpperCase()) {
-                    case "CRITICAL": return 4;
-                    case "UNASSESSED": return 3; // Safety triage: UNASSESSED never ranks below HIGH
-                    case "HIGH": return 3;
-                    case "MEDIUM": return 2;
-                    case "LOW": return 1;
-                    default: return 3;
-                  }
-                };
-                return rank(b.priority) - rank(a.priority) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-              })
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
               .map((c) => {
               const myResponse = c.responses?.find((r) => r.hospital_id === hospitalId);
               const isLockedDestination =

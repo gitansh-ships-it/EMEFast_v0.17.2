@@ -661,8 +661,12 @@ export default function CreateEmergencyPage() {
       });
 
       const caseId = res.data.id;
+      const caseCode = res.data.case_code;
       if (typeof window !== "undefined") {
         localStorage.setItem("emefast_current_case_id", String(caseId));
+        if (caseCode) {
+          localStorage.setItem("emefast_current_case_code", String(caseCode));
+        }
       }
 
       // Attach voice note if recorded
@@ -681,7 +685,7 @@ export default function CreateEmergencyPage() {
         }
       }
 
-      setSuccess("Emergency broadcast active. Connecting to verified hospital network…");
+      setSuccess(`Emergency broadcast active (ID: ${caseCode || `EME-${caseId}`}). Connecting to verified hospital network…`);
       setTimeout(() => {
         router.push(`/user/hospitals?case_id=${caseId}`);
       }, 500);

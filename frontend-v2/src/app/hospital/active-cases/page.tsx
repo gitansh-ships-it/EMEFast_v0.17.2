@@ -149,7 +149,9 @@ export default function ActiveCasesPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {cases.map(c => (
+          {[...cases]
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .map(c => (
             <Link href={`/hospital/emergency/${c.id}`} key={c.id} className="v2-card v2-card-hover p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start gap-4">
                 <div className="min-w-[68px] px-2 h-10 rounded-lg bg-sos-400/10 border border-sos-400/25 text-sos-300 font-mono font-bold text-[11px] flex items-center justify-center shrink-0">

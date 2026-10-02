@@ -168,7 +168,12 @@ function HospitalDiscoveryInner() {
 
       if (caseData) {
         setCurrentCase(caseData);
-        if (typeof window !== 'undefined') localStorage.setItem('emefast_current_case_id', String(caseData.id));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('emefast_current_case_id', String(caseData.id));
+          if (caseData.case_code) {
+            localStorage.setItem('emefast_current_case_code', String(caseData.case_code));
+          }
+        }
         try {
           const recRes = await api.get(`/emergency/${caseData.id}/recommendation`);
           setDecision(recRes.data);

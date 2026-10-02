@@ -59,8 +59,18 @@ export default function UserDashboard() {
     }, 8000);
 
     try {
+      let localCaseId: string | null = null;
+      if (typeof window !== 'undefined') {
+        localCaseId = localStorage.getItem('emefast_current_case_id');
+      }
+
+      const activePromise = localCaseId
+        ? api.get(`/emergency/${localCaseId}`, { signal: controller.signal })
+            .catch(() => api.get('/emergency/active/current', { signal: controller.signal }))
+        : api.get('/emergency/active/current', { signal: controller.signal });
+
       const [activeRes, historyRes] = await Promise.all([
-        api.get('/emergency/active/current', { signal: controller.signal }),
+        activePromise,
         api.get('/emergency/history/all', { signal: controller.signal }),
       ]);
       clearTimeout(timeoutId);
@@ -69,6 +79,12 @@ export default function UserDashboard() {
       setRetryAttempt(0);
       const active = activeRes.data as EmergencyCase | null;
       setActiveCase(active);
+      if (active?.id && typeof window !== 'undefined') {
+        localStorage.setItem('emefast_current_case_id', String(active.id));
+        if (active.case_code) {
+          localStorage.setItem('emefast_current_case_code', String(active.case_code));
+        }
+      }
       setRecentCases((historyRes.data || []).slice(0, 6));
       if (active) {
         try {

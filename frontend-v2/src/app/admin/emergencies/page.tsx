@@ -58,7 +58,9 @@ export default function AdminEmergenciesPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {cases.map(c => (
+          {[...cases]
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .map(c => (
             <Link href={`/admin/emergencies/${c.id}`} key={c.id} className={`v2-card v2-card-hover p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
               c.status === 'BROADCASTING' ? 'border-l-2 border-sos-400' : ''
             }`}>
