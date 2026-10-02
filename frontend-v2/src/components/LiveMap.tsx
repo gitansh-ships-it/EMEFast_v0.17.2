@@ -32,11 +32,10 @@ type LiveMapProps = {
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 const LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
-// Clean CartoDB Basemap styles (subtle roads, muted labels, no saturated green or CSS invert)
-const CARTO_DARK = "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const CARTO_LIGHT = "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const MAP_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>';
+// Professional dark and light basemaps (TomTom night / main, zero watermarks, zero API key in client)
+const BASE_TILE_DARK = "/api/routing/base-tile/dark/{z}/{x}/{y}.png";
+const BASE_TILE_LIGHT = "/api/routing/base-tile/light/{z}/{x}/{y}.png";
+const MAP_ATTRIBUTION = '&copy; <a href="https://www.tomtom.com" target="_blank" rel="noopener noreferrer">TomTom</a>';
 
 function getTrafficTileUrl(): string {
   return "/api/routing/traffic-tile/{z}/{x}/{y}.png";
@@ -179,13 +178,12 @@ export default function LiveMap({
         };
         locateControl.addTo(localMap);
 
-        // 1. BASE TILE LAYER: Genuine CartoDB dark or light basemap (No CSS invert filter)
+        // 1. BASE TILE LAYER: Genuine night/main basemap without watermarks or CSS invert
         const light = isLightMode();
-        const baseTileUrl = light ? CARTO_LIGHT : CARTO_DARK;
+        const baseTileUrl = light ? BASE_TILE_LIGHT : BASE_TILE_DARK;
         const tileLayer = L.tileLayer(baseTileUrl, {
           maxZoom: 19,
           attribution: MAP_ATTRIBUTION,
-          subdomains: "abcd",
         }).addTo(localMap);
         baseTileLayerRef.current = tileLayer;
 
@@ -309,7 +307,7 @@ export default function LiveMap({
   useEffect(() => {
     const updateTileTheme = (light: boolean) => {
       if (baseTileLayerRef.current) {
-        baseTileLayerRef.current.setUrl(light ? CARTO_LIGHT : CARTO_DARK);
+        baseTileLayerRef.current.setUrl(light ? BASE_TILE_LIGHT : BASE_TILE_DARK);
       }
       if (routeRef.current) {
         const strokeColor = light ? "#dc2626" : "#ef4444";
