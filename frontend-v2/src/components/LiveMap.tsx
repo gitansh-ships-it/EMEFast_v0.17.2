@@ -39,13 +39,7 @@ const MAP_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>';
 
 function getTrafficTileUrl(): string {
-  if (typeof window !== "undefined") {
-    const host = window.location.hostname;
-    if (host === "localhost" || host === "127.0.0.1") {
-      return "http://" + host + ":8000/api/routing/traffic-tile/{z}/{x}/{y}.png";
-    }
-  }
-  return "https://emefast-v17.onrender.com/api/routing/traffic-tile/{z}/{x}/{y}.png";
+  return "/api/routing/traffic-tile/{z}/{x}/{y}.png";
 }
 
 function validPoint(p?: Point | null): boolean {
