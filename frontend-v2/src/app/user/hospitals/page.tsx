@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Radio, CheckCircle2, XCircle, Clock, Navigation, Shield, ShieldCheck,
-  Hospital as HospitalIcon, MapPin, ArrowRight, AlertTriangle, Zap, RefreshCw, Edit3, Mic
+  Hospital as HospitalIcon, MapPin, ArrowRight, AlertTriangle, Zap, RefreshCw, Edit3, Mic, Phone
 } from 'lucide-react';
 import api from '@/lib/api';
 import { EmergencyCase, DecisionEngineResult } from '@/types';
@@ -399,18 +399,20 @@ function HospitalDiscoveryInner() {
           <p className="text-xs text-neutral-300 max-w-lg mx-auto">
             Emergency broadcast found no participating verified facilities within the 25 km operating radius. Contact statutory emergency services immediately:
           </p>
-          <div className="flex items-center justify-center gap-4 pt-2">
+          <div className="flex items-center justify-center gap-3 pt-2">
             <a
               href="tel:108"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#ff3b30] hover:bg-[#ff453a] text-white text-sm font-bold shadow-lg transition-transform active:scale-95"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#d7261e] hover:bg-[#b81d16] text-white text-xs font-semibold tracking-wide uppercase shadow-sm transition-all active:scale-[0.98] border border-[#ff453a]/30"
             >
-              📞 Call 108
+              <Phone size={14} className="shrink-0" />
+              <span>Call 108</span>
             </a>
             <a
               href="tel:112"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white text-sm font-bold shadow-lg transition-transform active:scale-95"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-semibold tracking-wide uppercase transition-all active:scale-[0.98]"
             >
-              📞 Call 112
+              <Phone size={14} className="shrink-0 text-white/80" />
+              <span>Call 112</span>
             </a>
           </div>
         </aside>
@@ -753,7 +755,7 @@ function HospitalDiscoveryInner() {
           <p className="text-xs text-neutral-200 leading-relaxed max-w-2xl escalation-desc">
             None of the {totalContacted} contacted emergency facilities have confirmed admission yet. Escalate to central ambulance dispatch (108 / 112) or manually select any facility to override.
           </p>
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          <div className="flex flex-wrap items-center gap-2.5 pt-1">
             <button
               onClick={() => {
                 const firstAvailable = optionsToRender[0];
@@ -762,21 +764,23 @@ function HospitalDiscoveryInner() {
                   setOverrideModalOpen(true);
                 }
               }}
-              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-md transition-all cursor-pointer min-h-[44px]"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-semibold text-xs transition-colors cursor-pointer border border-amber-400 shadow-sm min-h-[38px]"
             >
               Select Hospital Manually (Override)
             </button>
             <a
               href="tel:108"
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#ff3b30] hover:bg-[#ff453a] text-white text-xs font-bold transition-all min-h-[44px]"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#d7261e] hover:bg-[#b81d16] text-white text-xs font-semibold tracking-wide transition-colors border border-[#ff453a]/30 shadow-sm min-h-[38px]"
             >
-              📞 Call 108
+              <Phone size={13} className="shrink-0" />
+              <span>Call 108</span>
             </a>
             <a
               href="tel:112"
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white text-xs font-bold transition-all min-h-[44px]"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-semibold tracking-wide transition-colors min-h-[38px]"
             >
-              📞 Call 112
+              <Phone size={13} className="shrink-0 text-white/80" />
+              <span>Call 112</span>
             </a>
           </div>
         </aside>
