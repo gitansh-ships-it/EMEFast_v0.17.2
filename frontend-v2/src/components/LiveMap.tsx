@@ -195,12 +195,31 @@ export default function LiveMap({
         }).addTo(localMap);
         baseTileLayerRef.current = tileLayer;
 
+        // Dedicated Map Panes to guarantee strict rendering hierarchy:
+        // BASEMAP (zIndex 200 default tilePane)
+        // ↓
+        // TRAFFIC FLOW (trafficPane, zIndex 350)
+        // ↓
+        // ROUTE OUTLINE (routeOutlinePane, zIndex 450)
+        // ↓
+        // ROUTE (routePane, zIndex 460)
+        // ↓
+        // MARKERS (zIndex 600 default markerPane)
+        localMap.createPane("trafficPane");
+        localMap.getPane("trafficPane").style.zIndex = "350";
+
+        localMap.createPane("routeOutlinePane");
+        localMap.getPane("routeOutlinePane").style.zIndex = "450";
+
+        localMap.createPane("routePane");
+        localMap.getPane("routePane").style.zIndex = "460";
+
         // 2. LIVE TRAFFIC LAYER: Server-side secure TomTom flow tiles
         const trafficTileUrl = getTrafficTileUrl();
         const trafficLayer = L.tileLayer(trafficTileUrl, {
+          pane: "trafficPane",
           maxZoom: 19,
           opacity: 0.85,
-          zIndex: 10,
         }).addTo(localMap);
         trafficTileLayerRef.current = trafficLayer;
 
@@ -374,23 +393,23 @@ export default function LiveMap({
 
         // Layer 1: Subtle dark outline underneath for contrast against traffic and map tiles
         routeUnderlineRef.current = L.polyline(result.geometry, {
+          pane: "routeOutlinePane",
           color: "#09090b",
           weight: 7,
           opacity: 0.9,
           lineCap: "round",
           lineJoin: "round",
-          zIndexOffset: 500,
         }).addTo(activeMap);
 
         // Layer 2: Clean, professional emergency red (5px width, rounded joins, zero neon glow)
         const strokeColor = isLightMode() ? "#dc2626" : "#ef4444";
         routeRef.current = L.polyline(result.geometry, {
+          pane: "routePane",
           color: strokeColor,
           weight: 5,
           opacity: 1.0,
           lineCap: "round",
           lineJoin: "round",
-          zIndexOffset: 600,
         }).addTo(activeMap);
 
         const bounds = L.latLngBounds(result.geometry);
