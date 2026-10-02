@@ -3859,16 +3859,16 @@ html.theme-dark .inactive-step-label * {
   padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px) + 24px) !important;
 }
 
-/* Ensure proper breathing room below the sticky header across all workspaces */
+/* Ensure clean, compact breathing room below the sticky header across all workspaces */
 .app-content {
-  padding-top: max(16px, env(safe-area-inset-top, 0px));
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
 }
 
 @media (max-width: 650px) {
   .hospital-discovery,
   .dashboard-page,
   .app-content {
-    padding-top: max(22px, env(safe-area-inset-top, 0px)) !important;
+    padding-top: max(8px, env(safe-area-inset-top, 0px)) !important;
   }
 }
 
@@ -4187,5 +4187,267 @@ html[data-theme="light"] .status-ticker .status-pill-gps {
   border-color: rgba(48, 209, 88, 0.25) !important;
   color: #15803d !important;
 }
+
+/* =========================================================
+   LIGHT MODE CONTRAST & POLISH FOR HOSPITAL DISCOVERY
+   Ensures sharp dark typography, readable banners, and high contrast.
+   ========================================================= */
+html.theme-light .hospital-discovery,
+html[data-theme="light"] .hospital-discovery {
+  color: #0f172a;
+}
+
+/* Patient / Case Titles */
+html.theme-light .case-patient-heading,
+html[data-theme="light"] .case-patient-heading,
+html.theme-light .case-patient-heading > span,
+html[data-theme="light"] .case-patient-heading > span {
+  color: #0f172a !important;
+}
+
+html.theme-light .case-patient-sub,
+html[data-theme="light"] .case-patient-sub {
+  color: #475467 !important;
+}
+
+html.theme-light .case-patient-sub strong,
+html[data-theme="light"] .case-patient-sub strong {
+  color: #1e293b !important;
+}
+
+/* Yellow Emergency Services Notice */
+html.theme-light .hospital-notice-amber,
+html[data-theme="light"] .hospital-notice-amber {
+  background: #fef3c7 !important;
+  border-color: #fcd34d !important;
+  color: #92400e !important;
+  font-weight: 600 !important;
+}
+
+/* Blue Diagnostic Boundary Notice */
+html.theme-light .hospital-notice-blue,
+html[data-theme="light"] .hospital-notice-blue {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1e40af !important;
+}
+
+html.theme-light .hospital-notice-blue span:last-child,
+html[data-theme="light"] .hospital-notice-blue span:last-child {
+  color: #2563eb !important;
+}
+
+/* Secondary Actions (Edit Triage, Sync Responses) */
+html.theme-light .hospital-action-btn,
+html[data-theme="light"] .hospital-action-btn {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+html.theme-light .hospital-action-btn:hover,
+html[data-theme="light"] .hospital-action-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+/* Recommended Hero Card */
+html.theme-light .hospital-hero-card h2,
+html[data-theme="light"] .hospital-hero-card h2 {
+  color: #0f172a !important;
+}
+
+html.theme-light .hospital-metrics-header,
+html[data-theme="light"] .hospital-metrics-header {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.theme-light .hospital-metrics-header .metric-label,
+html[data-theme="light"] .hospital-metrics-header .metric-label {
+  color: #64748b !important;
+}
+
+html.theme-light .hospital-metrics-header .metric-value,
+html[data-theme="light"] .hospital-metrics-header .metric-value {
+  color: #0f172a !important;
+}
+
+html.theme-light .hospital-metrics-header .metric-divider,
+html[data-theme="light"] .hospital-metrics-header .metric-divider {
+  border-left-color: #cbd5e1 !important;
+}
+
+html.theme-light .hero-badge-emerald,
+html[data-theme="light"] .hero-badge-emerald {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #065f46 !important;
+}
+
+html.theme-light .hero-traffic-tag,
+html[data-theme="light"] .hero-traffic-tag {
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #047857 !important;
+}
+
+/* Hospital Cards in List */
+html.theme-light .hospital-list-card,
+html[data-theme="light"] .hospital-list-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+}
+
+html.theme-light .hospital-list-card.is-recommended,
+html[data-theme="light"] .hospital-list-card.is-recommended {
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.08) !important;
+}
+
+html.theme-light .hospital-name-title,
+html[data-theme="light"] .hospital-name-title {
+  color: #0f172a !important;
+}
+
+html.theme-light .hospital-icon-box,
+html[data-theme="light"] .hospital-icon-box {
+  background: #f1f5f9 !important;
+  color: #475467 !important;
+}
+
+html.theme-light .hospital-meta-line,
+html[data-theme="light"] .hospital-meta-line {
+  color: #64748b !important;
+}
+
+html.theme-light .hospital-distance-val,
+html[data-theme="light"] .hospital-distance-val {
+  color: #0f172a !important;
+}
+
+html.theme-light .hospital-capabilities-line,
+html[data-theme="light"] .hospital-capabilities-line {
+  color: #64748b !important;
+}
+
+html.theme-light .hospital-caps-val,
+html[data-theme="light"] .hospital-caps-val {
+  color: #334155 !important;
+  font-weight: 500 !important;
+}
+
+html.theme-light .hospital-whynot-box,
+html[data-theme="light"] .hospital-whynot-box {
+  border-left-color: #cbd5e1 !important;
+}
+
+html.theme-light .hospital-whynot-box span,
+html[data-theme="light"] .hospital-whynot-box span {
+  color: #64748b !important;
+}
+
+html.theme-light .whynot-item,
+html[data-theme="light"] .whynot-item {
+  color: #475467 !important;
+}
+
+html.theme-light .hospital-cost-line,
+html[data-theme="light"] .hospital-cost-line {
+  color: #64748b !important;
+}
+
+/* Route Button on Hospital Card */
+html.theme-light .hospital-route-btn,
+html[data-theme="light"] .hospital-route-btn {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
+
+html.theme-light .hospital-route-btn:hover,
+html[data-theme="light"] .hospital-route-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+}
+
+/* Select Hospital Button */
+html.theme-light .hospital-select-btn,
+html[data-theme="light"] .hospital-select-btn {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+html.theme-light .hospital-select-btn:hover,
+html[data-theme="light"] .hospital-select-btn:hover {
+  background: #ff3b30 !important;
+  border-color: #ff3b30 !important;
+  color: #ffffff !important;
+}
+
+/* Status Badges */
+html.theme-light .hospital-status-badge.pending,
+html[data-theme="light"] .hospital-status-badge.pending {
+  background: #fef3c7 !important;
+  border-color: #fde68a !important;
+  color: #b45309 !important;
+}
+
+html.theme-light .hospital-status-badge.accepted,
+html[data-theme="light"] .hospital-status-badge.accepted {
+  background: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #047857 !important;
+}
+
+html.theme-light .hospital-status-badge.rejected,
+html[data-theme="light"] .hospital-status-badge.rejected {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+  color: #b91c1c !important;
+}
+
+/* Escalation Workflow Banner */
+html.theme-light .escalation-alert,
+html[data-theme="light"] .escalation-alert {
+  background: #fffbeb !important;
+  border-color: #f59e0b !important;
+  color: #78350f !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12) !important;
+}
+
+html.theme-light .escalation-title,
+html[data-theme="light"] .escalation-title {
+  color: #b45309 !important;
+}
+
+html.theme-light .escalation-desc,
+html[data-theme="light"] .escalation-desc {
+  color: #92400e !important;
+}
+
+/* Recommendation waiting hero panel in Light Mode */
+html.theme-light .hospital-discovery .glass-panel:has(.animate-spin),
+html[data-theme="light"] .hospital-discovery .glass-panel:has(.animate-spin) {
+  background: #fffbeb !important;
+  border-color: #fde68a !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.08) !important;
+}
+
+html.theme-light .hospital-discovery .glass-panel:has(.animate-spin) > div,
+html[data-theme="light"] .hospital-discovery .glass-panel:has(.animate-spin) > div {
+  color: #b45309 !important;
+  font-weight: 700 !important;
+}
+
+html.theme-light .hospital-discovery .glass-panel:has(.animate-spin) p,
+html[data-theme="light"] .hospital-discovery .glass-panel:has(.animate-spin) p {
+  color: #78350f !important;
+}
+
 
 

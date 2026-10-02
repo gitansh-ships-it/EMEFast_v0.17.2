@@ -381,7 +381,7 @@ function HospitalDiscoveryInner() {
   const totalContacted = currentCase.hospitals_contacted ?? (currentCase.responses?.length || 0);
 
   return (
-    <div className="hospital-discovery max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
+    <div className="hospital-discovery max-w-5xl mx-auto px-4 sm:px-6 py-2 sm:py-4 space-y-4 sm:space-y-5 pt-1 sm:pt-2 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))]">
       {/* Zero hospitals in range alert */}
       {totalContacted === 0 && (
         <aside role="alert" className="w-full bg-red-950/40 border-2 border-[#ff3b30] text-white p-6 rounded-2xl text-center space-y-3 shadow-xl">
@@ -466,7 +466,7 @@ function HospitalDiscoveryInner() {
       )}
 
       {/* Prominent Decision-Support Boundary Notice */}
-      <aside aria-label="Emergency Services Notice" className="w-full bg-amber-500/15 border border-amber-500/30 text-amber-200 p-2.5 rounded-2xl text-center text-xs font-medium">
+      <aside aria-label="Emergency Services Notice" className="w-full bg-amber-500/15 border border-amber-500/30 text-amber-200 p-2.5 rounded-2xl text-center text-xs font-medium hospital-notice-amber">
         <span>Decision-support only. EMEFast does not dispatch ambulances. 108 / 112 remain the official emergency numbers.</span>
       </aside>
 
@@ -475,13 +475,13 @@ function HospitalDiscoveryInner() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap text-xs">
             <span className="badge-red px-2 py-0.5 rounded font-mono font-bold">{currentCase.case_code}</span>
-            <span className="text-[#6e7681] font-mono">· {currentCase.transport_mode}</span>
+            <span className="text-[#6e7681] dark:text-[#8b949e] font-mono">· {currentCase.transport_mode}</span>
             <span className="text-ok-400 font-mono flex items-center gap-1 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-ok-400 animate-pulse-dot inline-block" />
               Request Active
             </span>
           </div>
-          <h1 className="text-base sm:text-lg font-bold text-white">
+          <h1 className="text-base sm:text-lg font-bold text-white case-patient-heading">
             {(() => {
               const pName = currentCase.patient_name || "Unknown Patient";
               let cond = currentCase.condition || "";
@@ -493,24 +493,24 @@ function HospitalDiscoveryInner() {
               }
               return (
                 <>
-                  {pName} — <span className="text-sos-300">{cond || "Emergency"}</span>
+                  <span>{pName}</span> — <span className="text-sos-300">{cond || "Emergency"}</span>
                 </>
               );
             })()}
           </h1>
-          <p className="text-xs text-[#6e7681]">
-            Required: <strong className="text-[#8b949e]">{currentCase.requirements}</strong> · Priority: <span className="font-bold text-sos-300">{currentCase.priority}</span>
+          <p className="text-xs text-[#6e7681] dark:text-[#8b949e] case-patient-sub">
+            Required: <strong className="text-[#8b949e] dark:text-[#cbd5e1]">{currentCase.requirements}</strong> · Priority: <span className="font-bold text-sos-300">{currentCase.priority}</span>
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             href={`/user/emergency/new?case_id=${currentCase.id}&edit=1`}
-            className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-white flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px]"
+            className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-white flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px] hospital-action-btn"
             title="Edit emergency triage details"
           >
             <Edit3 size={13} /> Edit Triage
           </Link>
-          <button onClick={() => fetchData(true, 0)} className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px]">
+          <button onClick={() => fetchData(true, 0)} className="p-2 sm:px-3 sm:py-2 rounded border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px] hospital-action-btn">
             <RefreshCw size={13} /> Sync Responses
           </button>
         </div>
@@ -546,20 +546,20 @@ function HospitalDiscoveryInner() {
       )}
 
       {/* Diagnostic Boundary Notice */}
-      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 hospital-notice-blue">
         <span>Emergency coordination and hospital matching. Not a medical diagnosis system.</span>
         <span className="text-[10px] text-blue-300 font-mono">Admin-verified: Confirmed in administrative registry</span>
       </div>
 
       {/* Recommended Hero */}
       {(currentCase.status === 'HOSPITAL_ACCEPTED' || currentCase.status === 'HOSPITAL_SELECTED') && recommended ? (
-        <div className="v2-card p-4 sm:p-5 space-y-4 border border-sos-400/40">
+        <div className="v2-card p-4 sm:p-5 space-y-4 border border-sos-400/40 hospital-hero-card">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#d7261e] text-white text-xs font-semibold">
                 <Zap size={12} className="fill-white" /> Recommended Best Overall Option
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hero-badge-emerald">
                 MATCH CONFIDENCE: {recommended.confidence || 'HIGH'}
               </span>
               {Boolean(recommended.is_stale) && (
@@ -571,17 +571,17 @@ function HospitalDiscoveryInner() {
           </div>
 
           {/* Metrics Header with Road Distance, ETA, and Resource Freshness */}
-          <div className="p-3.5 sm:p-4 rounded-xl bg-[#21262d] border border-[#30363d] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#21262d] border border-[#30363d] flex flex-wrap items-center justify-between gap-3 text-xs font-mono hospital-metrics-header">
             <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
               <div>
-                <span className="text-[10px] text-[#8b949e] uppercase block">Road Distance</span>
-                <strong className="text-sm sm:text-base text-white font-bold">{recommended.distance_km} km</strong>
+                <span className="text-[10px] text-[#8b949e] uppercase block metric-label">Road Distance</span>
+                <strong className="text-sm sm:text-base text-white font-bold metric-value">{recommended.distance_km} km</strong>
               </div>
-              <div className="border-l border-white/10 pl-3 sm:pl-4">
-                <span className="text-[10px] text-[#8b949e] uppercase block">Travel ETA</span>
+              <div className="border-l border-white/10 pl-3 sm:pl-4 metric-divider">
+                <span className="text-[10px] text-[#8b949e] uppercase block metric-label">Travel ETA</span>
                 <div className="flex items-center gap-1.5">
                   <strong className="text-sm sm:text-base text-emerald-400 font-bold">{recommended.eta} min</strong>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold hero-traffic-tag">
                     Traffic-aware
                   </span>
                 </div>
@@ -740,12 +740,12 @@ function HospitalDiscoveryInner() {
 
       {/* No Hospital Accepted Escalation Flow */}
       {acceptedCount === 0 && totalContacted > 0 && (
-        <aside role="alert" className="w-full bg-amber-950/40 border-2 border-amber-500/50 text-white p-5 rounded-2xl space-y-3 shadow-xl">
-          <div className="flex items-center gap-2.5 text-amber-400 font-bold text-base">
+        <aside role="alert" className="w-full bg-amber-950/40 border-2 border-amber-500/50 text-white p-5 rounded-2xl space-y-3 shadow-xl escalation-alert">
+          <div className="flex items-center gap-2.5 text-amber-400 font-bold text-base escalation-title">
             <AlertTriangle size={22} className="shrink-0" />
             <span>NO HOSPITAL ACCEPTED YET — ESCALATION WORKFLOW</span>
           </div>
-          <p className="text-xs text-neutral-200 leading-relaxed max-w-2xl">
+          <p className="text-xs text-neutral-200 leading-relaxed max-w-2xl escalation-desc">
             None of the {totalContacted} contacted emergency facilities have confirmed admission yet. Escalate to central ambulance dispatch (108 / 112) or manually select any facility to override.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -817,8 +817,8 @@ function HospitalDiscoveryInner() {
           {optionsToRender.map(opt => (
             <div
               key={opt.hospital_id}
-              className={`v2-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs transition-all ${
-                opt.is_recommended ? 'border-sos-400/40' :
+              className={`v2-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs transition-all hospital-list-card ${
+                opt.is_recommended ? 'border-sos-400/40 is-recommended' :
                 opt.response === 'ACCEPTED' ? 'border-ok-400/20' :
                 opt.response === 'REJECTED' ? 'opacity-60' : ''
               }`}
@@ -827,13 +827,13 @@ function HospitalDiscoveryInner() {
                 <div className={`p-2 rounded-lg mt-0.5 shrink-0 ${
                   opt.response === 'ACCEPTED' ? 'bg-ok-400/10 text-ok-400' :
                   opt.response === 'REJECTED' ? 'bg-sos-400/10 text-sos-300' :
-                  'bg-[#21262d] text-[#6e7681]'
+                  'bg-[#21262d] text-[#6e7681] dark:bg-[#21262d] hospital-icon-box'
                 }`}>
                   <HospitalIcon size={16} />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-bold text-white text-sm">{opt.hospital_name}</h4>
+                    <h4 className="font-bold text-white text-sm hospital-name-title">{opt.hospital_name}</h4>
                     <span className="match-badge bg-[rgba(48,209,88,0.12)] text-[#30d158] border border-[rgba(48,209,88,0.3)] inline-flex items-center gap-1 font-semibold text-[10px]">
                       <ShieldCheck size={10} /> Admin-verified
                     </span>
@@ -878,12 +878,12 @@ function HospitalDiscoveryInner() {
                     })()}
                   </div>
 
-                  <p className="text-[#8b949e] text-xs font-mono">
-                    {opt.hospital_address} · <span className="text-white font-bold">{opt.distance_km} km</span> (Road distance) · <span className="text-emerald-400 font-bold">{opt.eta} min ETA</span>
+                  <p className="text-[#8b949e] text-xs font-mono hospital-meta-line">
+                    {opt.hospital_address} · <span className="text-white font-bold hospital-distance-val">{opt.distance_km} km</span> (Road distance) · <span className="text-emerald-400 font-bold">{opt.eta} min ETA</span>
                   </p>
                   
                   {opt.hospital_capabilities && (
-                    <p className="font-mono text-[#8b949e] text-xs">Specialties: <span className="text-neutral-300">{opt.hospital_capabilities}</span></p>
+                    <p className="font-mono text-[#8b949e] text-xs hospital-capabilities-line">Specialties: <span className="text-neutral-300 hospital-caps-val">{opt.hospital_capabilities}</span></p>
                   )}
 
                   {/* Primary Exclusion Factor */}
@@ -895,10 +895,10 @@ function HospitalDiscoveryInner() {
 
                   {/* WHY NOT Factors for non-recommended or rejected */}
                   {!opt.is_recommended && opt.why_not && opt.why_not.length > 0 && (
-                    <div className="text-[11px] text-neutral-400 pl-3 border-l-2 border-neutral-700/60 space-y-0.5 pt-0.5">
+                    <div className="text-[11px] text-neutral-400 pl-3 border-l-2 border-neutral-700/60 space-y-0.5 pt-0.5 hospital-whynot-box">
                       <span className="text-[10px] font-mono text-neutral-500 block uppercase">Why not selected:</span>
                       {opt.why_not.map((reason, ridx) => (
-                        <div key={ridx} className="flex items-center gap-1.5 text-neutral-300">
+                        <div key={ridx} className="flex items-center gap-1.5 text-neutral-300 whynot-item">
                           <span className="text-neutral-500">·</span> {reason}
                         </div>
                       ))}
@@ -911,24 +911,24 @@ function HospitalDiscoveryInner() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-white/5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-white/5 hospital-card-right">
                 <div className="text-left sm:text-right">
                   <div className="font-mono text-xs font-bold">
                     {opt.response === 'ACCEPTED' ? (
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1.5 hospital-status-badge accepted">
                         <CheckCircle2 size={13} /> ACCEPTED · ETA {opt.eta} min
                       </span>
                     ) : opt.response === 'REJECTED' ? (
-                      <span className="px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 border border-red-500/30 inline-flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 border border-red-500/30 inline-flex items-center gap-1.5 hospital-status-badge rejected">
                         <XCircle size={13} /> NOT SELECTED
                       </span>
                     ) : (
-                      <span className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 inline-flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 inline-flex items-center gap-1.5 hospital-status-badge pending">
                         <Clock size={13} className="animate-spin" /> WAITING FOR RESPONSE
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-[#8b949e] font-mono block mt-1">
+                  <span className="text-[10px] text-[#8b949e] font-mono block mt-1 hospital-cost-line">
                     ICU: {opt.available_icu ?? '—'} · Est. cost: ₹{opt.estimated_cost?.toLocaleString?.() || opt.estimated_cost}
                   </span>
                 </div>
@@ -941,7 +941,7 @@ function HospitalDiscoveryInner() {
                       }
                       router.push(`/user/navigation?case_id=${currentCase?.id || ''}&hospital_id=${opt.hospital_id}`);
                     }}
-                    className="py-2 px-3 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-semibold flex items-center justify-center gap-1 transition-all min-h-[40px] cursor-pointer"
+                    className="py-2 px-3 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-semibold flex items-center justify-center gap-1 transition-all min-h-[40px] cursor-pointer hospital-route-btn"
                     title="View route to this hospital"
                   >
                     <MapPin size={12} className="text-[#2997ff]" />
@@ -951,7 +951,7 @@ function HospitalDiscoveryInner() {
                     <button
                       onClick={() => handleSelect(opt.hospital_id)}
                       disabled={selecting}
-                      className="py-2 px-4 rounded-full border border-[#30363d] bg-[#21262d] hover:bg-[#ff3b30] hover:border-[#ff3b30] hover:text-white text-[#8b949e] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all min-h-[40px] w-full sm:w-auto active:scale-95 cursor-pointer"
+                      className="py-2 px-4 rounded-full border border-[#30363d] bg-[#21262d] hover:bg-[#ff3b30] hover:border-[#ff3b30] hover:text-white text-[#8b949e] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all min-h-[40px] w-full sm:w-auto active:scale-95 cursor-pointer hospital-select-btn"
                     >
                       Select <ArrowRight size={13} />
                     </button>
