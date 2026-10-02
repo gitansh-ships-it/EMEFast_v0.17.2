@@ -2964,6 +2964,15 @@ html.theme-light .soft-button {
   z-index: 600 !important;
 }
 
+/* Ensure Leaflet vector SVGs and tiles are never collapsed by responsive max-width: 100% rules */
+.leaflet-pane svg {
+  max-width: none !important;
+}
+
+.leaflet-pane img {
+  max-width: none !important;
+}
+
 .leaflet-top,
 .leaflet-bottom {
   z-index: 200 !important;
